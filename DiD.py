@@ -7,4 +7,4 @@ import matplotlib.pyplot as plt
 import csv
 import row
 
-data = pd.read_csv('filtered_NO1_NO5_households_with_date_hour.csv')
+data = pd.read_csv('Forbruk_NO1_NO5.csv')
