@@ -66,6 +66,6 @@ def Difference_in_Difference(dataset, price_area):
     return DiD
 
 
-print('Prosent endring i NO1:',Difference_in_Difference(data,'NO1'), '\n', '\n')
+print('Prosent endring i NO1:',(f"{Difference_in_Difference(data,'NO1'):.3f}"), '\n', '\n')
 
-print('Prosent endring i NO5:',Difference_in_Difference(data,'NO5'), '\n', '\n')
+print('Prosent endring i NO5:',(f"{Difference_in_Difference(data,'NO5'):.3f}"), '\n', '\n')
