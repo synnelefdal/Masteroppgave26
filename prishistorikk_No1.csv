@@ -1,4 +1,4 @@
-Dato,Time,Gjennomsnitt Pris (øre/kWh),Område slicer
+Date,Hour,Pris,Område
 2024-10-01,1,3.883,NO1
 2024-10-01,2,0.094,NO1
 2024-10-01,3,0.059,NO1
