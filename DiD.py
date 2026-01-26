@@ -6,7 +6,7 @@ import math
 import matplotlib.pyplot as plt
 import csv
 import row
-from sympy.benchmarks.bench_discrete_log import data_set_1
+#from sympy.benchmarks.bench_discrete_log import data_set_1
 
 data = pd.read_csv('Forbruk_NO1_NO5.csv')
 
