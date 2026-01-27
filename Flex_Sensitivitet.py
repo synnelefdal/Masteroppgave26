@@ -42,15 +42,15 @@ def flex_sensitivitet(data, price_area, temp, price_data):
                                         (data_demand['Date'] <= end_date2)].copy()
 
     for index, rad in data_demand_filtered1.iterrows():
-        data_demand_filtered1.loc[index, 'kWh/Metering_point'] = rad['quantity_kwh'] / rad['metering_point_count']
+        data_demand_filtered1.loc[index, 'demand'] = rad['quantity_kwh'] / rad['metering_point_count']
 
     for index, rad in data_demand_filtered2.iterrows():
-        data_demand_filtered2.loc[index, 'kWh/Metering_point'] = rad['quantity_kwh'] / rad['metering_point_count']
+        data_demand_filtered2.loc[index, 'demand'] = rad['quantity_kwh'] / rad['metering_point_count']
 
-    total_hour1 = data_demand_filtered1.groupby(['Date', 'Hour'])['kWh/Metering_point'].sum().reset_index()
-    total_hour2 = data_demand_filtered2.groupby(['Date', 'Hour'])['kWh/Metering_point'].sum().reset_index()
+    total_hour1 = data_demand_filtered1.groupby(['Date', 'Hour'])['demand'].sum().reset_index()
+    total_hour2 = data_demand_filtered2.groupby(['Date', 'Hour'])['demand'].sum().reset_index()
 
-    print(total_hour1)
+    #print(total_hour1)
 
     # ----------------------- Pris -------------------- #
     #price_area = data_households[data_households['ID'].isin(liste_husstander)].iloc[0]['Price_area']
@@ -61,13 +61,14 @@ def flex_sensitivitet(data, price_area, temp, price_data):
     price_filtered1 = price_data[(price_data['Date'] >= start_date1) & (price_data['Date'] <= end_date1)]    #gjør det bare for første året nå????
     price_filtered1 = price_filtered1.copy()
     price_filtered1['Pris'] = price_filtered1['Pris'].apply(lambda x: x if x > 0 else 0.01)
-
+    #print('her e pris',price_filtered1)
     #må gjør det for det andre året også:)
 
     price_filtered2 = price_data[(price_data['Date'] >= start_date2) & (price_data['Date'] <= end_date2)]  # gjør det bare for første året nå????
     price_filtered2 = price_filtered2.copy()
     price_filtered2['Pris'] = price_filtered2['Pris'].apply(lambda x: x if x > 0 else 0.01)
-
+    #print('her e pris', price_filtered2)
+    #print(price_filtered2['Pris'])
     # ------------ Temperatur --------------------- #
     temp['Date'] = pd.to_datetime(temp['Date'])
     temp['Hour'] = temp['Hour'].astype(float)
@@ -75,26 +76,37 @@ def flex_sensitivitet(data, price_area, temp, price_data):
     temp['Temperatur24'] = temp['Lufttemperatur'].rolling(window=24, min_periods=1).mean()
     temp['Temperatur72'] = temp['Lufttemperatur'].rolling(window=72, min_periods=1).mean()
 
-    temp_filtered = temp[(temp['Date'] >= start_date1) &
+    temp_filtered1 = temp[(temp['Date'] >= start_date1) &
                                       (temp['Date'] <= end_date1)]
+
+    temp_filtered2 = temp[(temp['Date'] >= start_date2) &
+                         (temp['Date'] <= end_date2)]
 
     # ------------------- Merge data ---------------- #
     merged_1 = pd.merge(total_hour1, price_filtered1, on=['Date', 'Hour'])
-    merged__1 = pd.merge(merged_1, temp_filtered, on=['Date', 'Hour'])
+    merged__1 = pd.merge(merged_1, temp_filtered1, on=['Date', 'Hour'])
 
     merged_2 = pd.merge(total_hour2, price_filtered2, on=['Date', 'Hour'])
-    merged__2 = pd.merge(merged_2, temp_filtered, on=['Date', 'Hour'])
+    #print('første sted', merged_2)
+    merged__2 = pd.merge(merged_2, temp_filtered2, on=['Date', 'Hour'])
+    pd.set_option('display.max_columns', None)
+    #print('andre sted', merged__2)
 
-    filtered1 = merged__1[(merged__1['kWh/Metering_point'] > 0) & (merged__1['Pris'] > 0) &
+    filtered1 = merged__1[(merged__1['demand'] > 0) & (merged__1['Pris'] > 0) &
                       (merged__1['Lufttemperatur'].notnull())].copy()
 
-    print(filtered1)
+    #print(filtered1)
 
-    filtered2 = merged__2[(merged__2['kWh/Metering_point'] > 0) & (merged__2['Pris'] > 0) &
+    filtered2 = merged__2[(merged__2['demand'] > 0) & (merged__2['Pris'] > 0) &
                       (merged__2['Lufttemperatur'].notnull())].copy()
+
+    #print('filter',filtered2)
 
     df1 = pd.DataFrame(filtered1)
     df2 = pd.DataFrame(filtered2)
+
+    #print('df2',df2)
+
 
     # ---------------- Beregeninger1 ---------------- #
 
@@ -192,14 +204,18 @@ def flex_sensitivitet(data, price_area, temp, price_data):
                            data=df2, return_type='dataframe', NA_action='drop')
 '''
 
-    df1['Price_Group'] = 'Before_ref'  # 2024-periode dette e pris
-    df2['Price_Group'] = 'After_ref'  # 2025-periode dette e pris
+    df1['Price_group'] = 'Before_ref'  # 2024-periode dette e pris
+    df2['Price_group'] = 'After_ref'  # 2025-periode dette e pris
 
     df = pd.concat([df1, df2], ignore_index=True)
 
+
+    pd.set_option('display.max_columns',None)
+    print('hele dfen', df)
+
     formula = (
-        'Q("kWh/Metering_point") ~ '
-        'C(Price_Group, Treatment(reference="Before_ref")) + '
+        'demand ~ '
+        'Pris + C(Price_group, Treatment(reference="Before_ref"))  + '                                      # C(Price_group, Treatment(reference="Before_ref")) 
         'Temperatur24 + I(Temperatur24**2) + I(Temperatur24**3) + '
         'Temperatur72 + C(Hour, Treatment(reference="1")) + '
         'C(Month, Treatment(reference="October"))'
@@ -213,29 +229,12 @@ def flex_sensitivitet(data, price_area, temp, price_data):
     )
 
 
-
-    model = sm.OLS(y, X).fit()
-    print(model.summary())
-    '''
-
-    #ny test
-    print('teeeest',df2['Price_Group2'].value_counts())
-
-
-    formula = (
-        'Q("kWh/Metering_point") ~ '
-        'C(Price_Group2, Treatment(reference="After_ref")) + '
-        'Temperatur24 + I(Temperatur24**2) + I(Temperatur24**3) + '
-        'Temperatur72 + C(Hour, Treatment(reference="1")) + '
-        'C(Month, Treatment(reference="October"))'
-    )
-
-    y, X = patsy.dmatrices(formula, data=df2, return_type='dataframe', NA_action='drop')
-
     model = sm.OLS(y, X).fit()
     print(model.summary())
 
-    # ----------- PLOT AV RESULTATER ----------------- #'''
+
+
+    # ----------- PLOT AV RESULTATER ----------------- #
 
 
 
