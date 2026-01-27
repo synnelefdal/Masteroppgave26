@@ -9,11 +9,10 @@ import row
 
 data = pd.read_csv('Forbruk_NO1_NO5.csv')
 
-
 Temp_Bergen = pd.read_csv('Temp_Bergen.csv')
 Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
 
-def metode2(data, price_area, Temp_Bergen, Temp_Oslo):
+def metode2(data, price_area, Temp):
 
     # ------------------- Filterer for dato ---------- #
     start_date1 = '2024-10-01'
@@ -43,17 +42,53 @@ def metode2(data, price_area, Temp_Bergen, Temp_Oslo):
         data_demand_filtered2.loc[index,'kWh/Metering_point'] = rad['quantity_kwh'] / rad['metering_point_count']
     #print(data_demand_filtered2.head(3))
 
-    total_hour1 = data_demand_filtered1.groupby(['Date', 'Hour'])['kWh/Metering_point'].sum().reset_index()
-    total_hour2 = data_demand_filtered2.groupby(['Date', 'Hour'])['kWh/Metering_point'].sum().reset_index()
+    total_demand_hour1 = data_demand_filtered1.groupby(['Date', 'Hour'])['kWh/Metering_point'].sum().reset_index()
+    total_demand_hour2 = data_demand_filtered2.groupby(['Date', 'Hour'])['kWh/Metering_point'].sum().reset_index()
     #print(total_hour1)
     #print(total_hour2)
 
     # -------------- Temperatur --------------- #
 
+    Temp['Date'] = pd.to_datetime(Temp['Date'])
+    Temp['Hour'] = Temp['Hour'].astype(float)
+
+    Temp['Temp24'] = Temp['Lufttemperatur'].rolling(window=24, min_periods=1).mean()
+    Temp['Temp72'] = Temp['Lufttemperatur'].rolling(window=72, min_periods=1).mean()
+
+    Temp_filtered1 = Temp[(Temp['Date'] >= start_date1) &
+                                       (Temp['Date'] <= end_date1)].copy()
+
+    Temp_filtered2 = Temp[(Temp['Date'] >= start_date2) &
+                          (Temp['Date'] <= end_date2)].copy()
+
+    #total_temp_hour1 = Temp_filtered1.groupby(['Date', 'Hour'])['Lufttemperatur'].sum().reset_index()
+    #total_temp_hour2 = Temp_filtered2.groupby(['Date', 'Hour'])['Lufttemperatur'].sum().reset_index()
+
+    #print(total_temp_hour2.head(3))
+
+    # -------- Merge data 1 ----------- #
+    merged1 = pd.merge(total_demand_hour1, Temp_filtered1, on = ['Date', 'Hour'])
+    filtered1 = merged1[(merged1['kWh/Metering_point'] > 0) & (merged1['Lufttemperatur'].notnull())].copy()
+
+    df1 = pd.DataFrame(filtered1)
+
+    #pd.set_option('display.max_columns', None)
+    #print(df1.head(3))
+
+    # ------------ Merge data 2 ----------- #
+    merged2 = pd.merge(total_demand_hour2, Temp_filtered2, on = ['Date', 'Hour'])
+    filtered2 = merged2[(merged2['kWh/Metering_point'] > 0) & (merged2['Lufttemperatur'].notnull())].copy()
+
+    df2 = pd.DataFrame(filtered2)
+
+    #pd.set_option('display.max_columns', None)
+    #print(df2.head(3))
+
+    # ----------------- Beregninger ------------------- #
 
 
 
-metode2(data, 'NO1', Temp_Bergen, Temp_Oslo)
+metode2(data, 'NO1', Temp_Oslo)      # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
 
 
 
