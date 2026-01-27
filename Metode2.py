@@ -118,7 +118,7 @@ def metode2(data, price_area, Temp):
     print(df)
 
     formula = (
-        'np.log(Q("kWh/Metering_point")) ~ '
+        'Q("kWh/Metering_point") ~ '
         'C(Group, Treatment(reference="Before_ref")) + '
         'Temp24 + I(Temp24**2) + I(Temp24**3) + '
         'Temp72 + C(Hour, Treatment(reference="1")) + '
