@@ -192,14 +192,14 @@ def flex_sensitivitet(data, price_area, temp, price_data):
                            data=df2, return_type='dataframe', NA_action='drop')
 '''
 
-    df1['Group'] = 'Before_ref'  # 2024-periode
-    df2['Group'] = 'After_ref'  # 2025-periode
+    df1['Price_Group'] = 'Before_ref'  # 2024-periode dette e pris
+    df2['Price_Group'] = 'After_ref'  # 2025-periode dette e pris
 
     df = pd.concat([df1, df2], ignore_index=True)
 
     formula = (
         'Q("kWh/Metering_point") ~ '
-        'C(Group, Treatment(reference="Before_ref")) + '
+        'C(Price_Group, Treatment(reference="Before_ref")) + '
         'Temperatur24 + I(Temperatur24**2) + I(Temperatur24**3) + '
         'Temperatur72 + C(Hour, Treatment(reference="1")) + '
         'C(Month, Treatment(reference="October"))'
