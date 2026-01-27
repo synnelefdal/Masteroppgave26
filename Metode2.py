@@ -5,6 +5,8 @@ import math
 import matplotlib.pyplot as plt
 import csv
 import row
+import statsmodels.api as sm
+import patsy
 
 
 data = pd.read_csv('Forbruk_NO1_NO5.csv')
@@ -84,8 +86,51 @@ def metode2(data, price_area, Temp):
     #pd.set_option('display.max_columns', None)
     #print(df2.head(3))
 
-    # ----------------- Beregninger ------------------- #
+    # ----------------- Beregninger1 ------------------- #
+    df1['Date'] = pd.to_datetime(df1['Date'])
+    df1['Month'] = df1['Date'].dt.strftime('%B')
 
+    df1['Hour'] = pd.Categorical(df1['Hour'].astype(str),
+                                 categories=[str(i) for i in range(1, 25)], ordered=True)
+    df1['Month'] = pd.Categorical(df1['Month'],
+                                  categories=['January', 'February', 'March', 'April', 'May', 'June',
+                                              'July', 'August', 'September', 'October', 'November', 'December'],
+                                  ordered=True)
+
+    # ----------------- Beregninger2 ------------------- #
+    df2['Date'] = pd.to_datetime(df2['Date'])
+    df2['Month'] = df2['Date'].dt.strftime('%B')
+
+    df2['Hour'] = pd.Categorical(df2['Hour'].astype(str),
+                                 categories=[str(i) for i in range(1, 25)], ordered=True)
+    df2['Month'] = pd.Categorical(df2['Month'],
+                                  categories=['January', 'February', 'March', 'April', 'May', 'June',
+                                              'July', 'August', 'September', 'October', 'November', 'December'],
+                                  ordered=True)
+
+    # --------------- Regresjonsanalyse ------------- #
+    df1['Group'] = 'Before_ref'  # 2024-periode
+    df2['Group'] = 'After_ref'  # 2025-periode
+
+    df = pd.concat([df1, df2], ignore_index=True)
+
+    formula = (
+        'Q("kWh/Metering_point") ~ '
+        'C(Group, Treatment(reference="Before_ref")) + '
+        'Temperatur24 + I(Temperatur24**2) + I(Temperatur24**3) + '
+        'Temperatur72 + C(Hour, Treatment(reference="1")) + '
+        'C(Month, Treatment(reference="October"))'
+    )
+
+    y, X = patsy.dmatrices(
+        formula,
+        data=df,
+        return_type="dataframe",
+        NA_action="drop"
+    )
+
+    model = sm.OLS(y, X).fit()
+    print(model.summary())
 
 
 metode2(data, 'NO1', Temp_Oslo)      # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
