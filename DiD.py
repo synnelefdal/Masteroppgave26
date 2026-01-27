@@ -69,3 +69,63 @@ def Difference_in_Difference(dataset, price_area):
 print('Prosent endring i NO1:',(f"{Difference_in_Difference(data,'NO1'):.3f}"), '\n', '\n')
 
 print('Prosent endring i NO5:',(f"{Difference_in_Difference(data,'NO5'):.3f}"), '\n', '\n')
+
+'''def total_forbruk_per_malepunkt(data):
+    return (data['quantity_kwh'] / data['metering_point_count']).sum()
+
+def Difference_in_Difference2(dataset, treatment_area, control_area):
+
+    # Perioder
+    start_date1 = '2024-10-01'
+    end_date1   = '2024-12-31'
+
+    start_date2 = '2025-10-01'
+    end_date2   = '2025-12-31'
+
+    dataset = dataset.copy()
+    dataset['Date'] = pd.to_datetime(dataset['Date'])
+    dataset['Hour'] = dataset['Hour'].astype(int)
+
+    # -------------------------
+    # TREATMENT AREA
+    # -------------------------
+    treat = dataset[dataset['price_area'] == treatment_area]
+
+    treat_before = treat[(treat['Date'] >= start_date1) & (treat['Date'] <= end_date1)]
+    treat_after  = treat[(treat['Date'] >= start_date2) & (treat['Date'] <= end_date2)]
+
+    forbruk_treat_before = total_forbruk_per_malepunkt(treat_before)
+    forbruk_treat_after  = total_forbruk_per_malepunkt(treat_after)
+
+    # -------------------------
+    # CONTROL AREA
+    # -------------------------
+    control = dataset[dataset['price_area'] == control_area]
+
+    control_before = control[(control['Date'] >= start_date1) & (control['Date'] <= end_date1)]
+    control_after  = control[(control['Date'] >= start_date2) & (control['Date'] <= end_date2)]
+
+    forbruk_control_before = total_forbruk_per_malepunkt(control_before)
+    forbruk_control_after  = total_forbruk_per_malepunkt(control_after)
+
+    # -------------------------
+    # DIFFERENCE-IN-DIFFERENCE
+    # -------------------------
+    change_treat = (forbruk_treat_after - forbruk_treat_before) / forbruk_treat_before
+    change_control = (forbruk_control_after - forbruk_control_before) / forbruk_control_before
+
+    DiD = change_treat - change_control
+
+    return {
+        "Treatment change": change_treat,
+        "Control change": change_control,
+        "DiD": DiD
+    }
+
+resultat = Difference_in_Difference2(
+    dataset=data,
+    treatment_area="NO1",
+    control_area="NO1"
+)
+
+print(resultat)'''
