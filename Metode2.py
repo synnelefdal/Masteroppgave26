@@ -114,11 +114,14 @@ def metode2(data, price_area, Temp):
 
     df = pd.concat([df1, df2], ignore_index=True)
 
+    pd.set_option('display.max_columns', None)
+    print(df)
+
     formula = (
-        'Q("kWh/Metering_point") ~ '
+        'np.log(Q("kWh/Metering_point")) ~ '
         'C(Group, Treatment(reference="Before_ref")) + '
-        'Temperatur24 + I(Temperatur24**2) + I(Temperatur24**3) + '
-        'Temperatur72 + C(Hour, Treatment(reference="1")) + '
+        'Temp24 + I(Temp24**2) + I(Temp24**3) + '
+        'Temp72 + C(Hour, Treatment(reference="1")) + '
         'C(Month, Treatment(reference="October"))'
     )
 
