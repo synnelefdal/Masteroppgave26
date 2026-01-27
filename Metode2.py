@@ -5,6 +5,8 @@ import math
 import matplotlib.pyplot as plt
 import csv
 import row
+import statsmodels.api as sm
+import patsy
 
 
 data = pd.read_csv('Forbruk_NO1_NO5.csv')
