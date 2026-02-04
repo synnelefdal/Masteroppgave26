@@ -61,14 +61,16 @@ def Difference_in_Difference(dataset, price_area):
 
     #Finne forskjell DiD
 
-    DiD = ((forbruk2-forbruk1) / forbruk1 ) * 100
+    prosent = ((forbruk2-forbruk1) / forbruk1 ) * 100
 
-    return DiD
+    return prosent
 
 
-print('Prosent endring i NO1:',(f"{Difference_in_Difference(data,'NO1'):.3f}"), '\n', '\n')
+print('Prosent endring i NO1(kan bli m/Norgespris):',(f"{Difference_in_Difference(data,'NO1'):.3f}"), '\n', '\n')
 
-print('Prosent endring i NO5:',(f"{Difference_in_Difference(data,'NO5'):.3f}"), '\n', '\n')
+print('Prosent endring i NO5(kan bli u/Norgespris):',(f"{Difference_in_Difference(data,'NO5'):.3f}"), '\n', '\n')
+
+print('DiD: må så ta minus mellom prosentene og se på forskjellen i endring')
 
 '''def total_forbruk_per_malepunkt(data):
     return (data['quantity_kwh'] / data['metering_point_count']).sum()
