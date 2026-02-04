@@ -8,7 +8,11 @@ import csv
 import row
 #from sympy.benchmarks.bench_discrete_log import data_set_1
 
-data = pd.read_csv('Forbruk_NO1_NO5.csv')
+#data = pd.read_csv('Forbruk_NO1_NO5.csv')
+
+Med_NP=pd.read_csv('Forbruk_NO1_NO5.csv')
+
+Uten_NP=pd.read_csv('Forbruk_NO1_NO5.csv')
 
 
 def Difference_in_Difference(dataset, price_area):
@@ -66,9 +70,9 @@ def Difference_in_Difference(dataset, price_area):
     return prosent
 
 
-print('Prosent endring i NO1(kan bli m/Norgespris):',(f"{Difference_in_Difference(data,'NO1'):.3f}"), '\n', '\n')
+print('Prosent endring i NO1(kan bli m/Norgespris):',(f"{Difference_in_Difference(Med_NP,'NO1'):.3f}"), '\n', '\n')
 
-print('Prosent endring i NO5(kan bli u/Norgespris):',(f"{Difference_in_Difference(data,'NO5'):.3f}"), '\n', '\n')
+print('Prosent endring i NO5(kan bli u/Norgespris):',(f"{Difference_in_Difference(Uten_NP,'NO5'):.3f}"), '\n', '\n')
 
 print('DiD: må så ta minus mellom prosentene og se på forskjellen i endring')
 
