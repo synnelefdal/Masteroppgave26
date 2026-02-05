@@ -119,10 +119,13 @@ def metode2(data, price_area, Temp):
 
     formula = (
         'Q("kWh/Metering_point") ~ '
-        'C(Group, Treatment(reference="Before_ref")) + '
+        'C(Group, Treatment(reference="Before_ref")) + (norgespris eller ikke, ref = ikke norgespris)'
+        
+        
+        '''+ '
         'Temp24 + I(Temp24**2) + I(Temp24**3) + '
         'Temp72 + C(Hour, Treatment(reference="1")) + '
-        'C(Month, Treatment(reference="October"))'
+        'C(Month, Treatment(reference="October"))'''
     )
 
     y, X = patsy.dmatrices(
