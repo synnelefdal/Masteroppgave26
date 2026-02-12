@@ -7,7 +7,8 @@ import row
 import statsmodels.api as sm
 import patsy
 
-data = pd.read_csv('Forbruk_NO1_NO5.csv')
+data_mNP = pd.read_csv('Forbruk_NO1_NO5.csv')
+data_uNP = pd.read_csv('Forbruk_NO1_NO5.csv')
 
 Temp_Bergen = pd.read_csv('Temp_Bergen.csv')
 Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
@@ -110,6 +111,10 @@ def metode2(data, price_area, Temp):
     df1['Group'] = 'Before_ref'  # 2024-periode
     df2['Group'] = 'After_ref'  # 2025-periode
 
+    df1['Norgespris'] = 'Uten_NP'  #
+    df2['Norgespris'] = 'Med_NP'  #
+
+
     df = pd.concat([df1, df2], ignore_index=True)
 
     pd.set_option('display.max_columns', None)
@@ -133,7 +138,7 @@ def metode2(data, price_area, Temp):
     print(model.summary())
 
 
-metode2(data, 'NO1', Temp_Oslo)  # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
+metode2(data_mNP, 'NO1', Temp_Oslo)  # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
 
 
 
