@@ -7,8 +7,14 @@ import row
 import statsmodels.api as sm
 import patsy
 
-data_mNP = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep= ';')
-data_uNP = pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep= ';')
+data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep= ';')
+data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep= ';')
+
+data_mNP_NO2 = pd.read_csv('All_Demand_Data/NO2_mNP.csv', sep= ';')
+data_uNP_NO2 = pd.read_csv('All_Demand_Data/NO2_uNP.csv', sep= ';')
+
+data_mNP_NO5 = pd.read_csv('All_Demand_Data/NO5_mNP.csv', sep= ';')
+data_uNP_NO5 = pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep= ';')
 
 Temp_Bergen = pd.read_csv('Temp_Bergen.csv')
 Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
@@ -70,10 +76,10 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area, Temp):
     data_demand_UtenNP['Date'] = pd.to_datetime(data_demand_UtenNP['Date'])
     data_demand_UtenNP['Hour'] = data_demand_UtenNP['Hour'].astype(int)
 
-    data_demand_UtenNP_filtered_before = data_demand_UtenNP[(data_demand_NP['Date'] >= start_date_before) &
+    data_demand_UtenNP_filtered_before = data_demand_UtenNP[(data_demand_UtenNP['Date'] >= start_date_before) &
                                         (data_demand_UtenNP['Date'] <= end_date_before)].copy()
 
-    data_demand_UtenNP_filtered_after = data_demand_UtenNP[(data_demand_NP['Date'] >= start_date_after) &
+    data_demand_UtenNP_filtered_after = data_demand_UtenNP[(data_demand_UtenNP['Date'] >= start_date_after) &
                                         (data_demand_UtenNP['Date'] <= end_date_after)].copy()
     #print(data_demand_filtered1)
     #print(data_demand_filtered2)
@@ -179,6 +185,15 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area, Temp):
     df = pd.concat([df_NP, df_UtenNP], ignore_index=True)
 
     df['Group'] = np.where(df['Date'] < '2025-10-01', 'Before_ref', 'After_ref')
+    df['Date'] = pd.to_datetime(df['Date'])
+    df['Month'] = df_UtenNP['Date'].dt.strftime('%B')
+    df['Month'] = pd.Categorical(df['Month'],
+                                  categories=['January', 'February', 'March', 'April', 'May', 'June',
+                                              'July', 'August', 'September', 'October', 'November', 'December'],
+                                  ordered=True)
+
+    df['Hour'] = pd.Categorical(df['Hour'].astype(str),
+                                 categories=[str(i) for i in range(1, 25)], ordered=True)
 
     #pd.set_option('display.max_columns', None)
     #pd.set_option('display.max_rows', None)
@@ -202,7 +217,7 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area, Temp):
     print(model.summary())
 
 
-DifferenceinDifference(data_mNP, data_uNP, 'NO1', Temp_Oslo)  # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
+DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2', Temp_Oslo)  # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
 
 
 
