@@ -141,7 +141,7 @@ resultat = Difference_in_Difference2(
 print(resultat)'''
 
 
-test=pd.read_csv('ntnu_norgespris_mba sortert.csv', sep=';')
+test=pd.read_csv('All_Demand_Data/ntnu_norgespris_mba sortert.csv', sep=';')
 print(test)
 
 #fåut= test[test['group_definition' == 'Med Norgespris']].copy

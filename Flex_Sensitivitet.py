@@ -15,8 +15,8 @@ from pandas import to_datetime
 
 data = pd.read_csv('Ikke_i_bruk/Forbruk_NO1_NO5.csv')
 
-price_NO1 = pd.read_csv('NO1_prices.csv')
-price_NO5 = pd.read_csv('NO5_prices.csv')
+price_NO1 = pd.read_csv('Ikke_i_bruk/NO1_prices.csv')
+price_NO5 = pd.read_csv('Ikke_i_bruk/NO5_prices.csv')
 
 Temp_Bergen = pd.read_csv('Temp_Bergen.csv')
 Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
