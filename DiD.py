@@ -10,43 +10,36 @@ import row
 
 #data = pd.read_csv('Forbruk_NO1_NO5.csv')
 
-Med_NP=pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep=';')
+Med_NP=pd.read_csv('All_Demand_Data/NO5_mNP.csv', sep=';')
 
-Uten_NP=pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep=';')
+Uten_NP=pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep=';')
 
 
-def Difference_in_Difference(dataset, price_area):
+def Difference_in_Difference(dataset):
     # filterer for dato
-    start_date1 = '2024-10-01'
-    end_date1   = '2024-12-31'
-
-    start_date2 = '2025-10-01'
-    end_date2   = '2025-12-31'
 
     #ny måte å gjør datoene på
-    start_date1 = pd.to_datetime('2025-01-01', utc=True)
+    start_date1 = pd.to_datetime('2024-10-01', utc=True)
     end_date1 = pd.to_datetime('2025-01-31',utc=True)
 
-    start_date2 = pd.to_datetime('2026-01-01',utc=True)
+    start_date2 = pd.to_datetime('2025-10-01',utc=True)
     end_date2 = pd.to_datetime('2026-01-31', utc=True)
 
 
-    dataset_updated_area = dataset[dataset['price_area'] == price_area].copy()
-
     #dette e for å ta ut timene i csv filen
-    dataset_updated_area['start_time_utc'] = pd.to_datetime(
-        dataset_updated_area['start_time_utc'],
+    dataset['start_time_utc'] = pd.to_datetime(
+        dataset['start_time_utc'],
         format='%Y-%m-%d %H:%M:%S',
         errors='coerce',
         utc=True
     )
 
     # Extract date and hour
-    dataset_updated_area['Date'] = dataset_updated_area['start_time_utc'].dt.date
-    dataset_updated_area['Hour'] = dataset_updated_area['start_time_utc'].dt.hour.astype('Int64')  # nullable int
+    dataset['Date'] = dataset['start_time_utc'].dt.date
+    dataset['Hour'] = dataset['start_time_utc'].dt.hour.astype('Int64')  # nullable int
 
     # Sort by Date then Hour
-    dataset_updated_area = dataset_updated_area.sort_values(['Date', 'Hour'])
+    dataset = dataset.sort_values(['Date', 'Hour'])
 
     '''
     #filtere for prissone
@@ -59,12 +52,12 @@ def Difference_in_Difference(dataset, price_area):
     #print(dataset_updated_area)
 
     #for første året
-    data_set_1 = dataset_updated_area[(dataset_updated_area['start_time_utc'] >= start_date1) & (dataset_updated_area['start_time_utc'] <= end_date1)]
+    data_set_1 = dataset[(dataset['start_time_utc'] >= start_date1) & (dataset['start_time_utc'] <= end_date1)]
     data_set_1 = data_set_1.copy()
 
 
     #for andre året
-    data_set_2 = dataset_updated_area[(dataset_updated_area['start_time_utc'] >= start_date2) & (dataset_updated_area['start_time_utc'] <= end_date2)]
+    data_set_2 = dataset[(dataset['start_time_utc'] >= start_date2) & (dataset['start_time_utc'] <= end_date2)]
     data_set_2 = data_set_2.copy()
 
 
@@ -76,7 +69,7 @@ def Difference_in_Difference(dataset, price_area):
         forbruk1 += rad['consumption_kwh'] / rad['metering_point_count']
         #print(forbruk1)
 
-    print(price_area ,'forbruk år 1:',forbruk1)
+    print('forbruk år 1:',forbruk1)
 
 
     # Finne totalt forbruk over valgt tid for hvert målepunkt år 2
@@ -87,7 +80,7 @@ def Difference_in_Difference(dataset, price_area):
         forbruk2 += rad['consumption_kwh'] / rad['metering_point_count']
         # print(forbruk2)
 
-    print(price_area ,'forbruk år 2:', forbruk2)
+    print('forbruk år 2:', forbruk2)
 
 
     #Finne forskjell DiD
@@ -97,11 +90,13 @@ def Difference_in_Difference(dataset, price_area):
     return prosent
 
 
-print('Prosent endring i NO1(kan bli m/Norgespris):',(f"{Difference_in_Difference(Med_NP,'NO1'):.3f}"), '\n', '\n')
+print('Prosent endring m/Norgespris:',(f"{Difference_in_Difference(Med_NP):.3f}"), '\n', '\n')
 
-print('Prosent endring i NO5(kan bli u/Norgespris):',(f"{Difference_in_Difference(Uten_NP,'NO1'):.3f}"), '\n', '\n')
+print('Prosent endring u/Norgespris:',(f"{Difference_in_Difference(Uten_NP):.3f}"), '\n', '\n')
 
 print('DiD: må så ta minus mellom prosentene og se på forskjellen i endring')
+
+print(Difference_in_Difference(Med_NP)-Difference_in_Difference(Uten_NP), ': ekstra endring i prosent med norgespris')
 
 
 
