@@ -13,7 +13,7 @@ import seaborn as sns
 from pandas import to_datetime
 
 
-data = pd.read_csv('Forbruk_NO1_NO5.csv')
+data = pd.read_csv('Ikke_i_bruk/Forbruk_NO1_NO5.csv')
 
 price_NO1 = pd.read_csv('NO1_prices.csv')
 price_NO5 = pd.read_csv('NO5_prices.csv')

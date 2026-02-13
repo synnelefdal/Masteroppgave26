@@ -7,8 +7,8 @@ import row
 import statsmodels.api as sm
 import patsy
 
-data_mNP = pd.read_csv('Forbruk_NO1_NO5.csv')
-data_uNP = pd.read_csv('Forbruk_NO1_NO5.csv')
+data_mNP = pd.read_csv('Ikke_i_bruk/Forbruk_NO1_NO5.csv')
+data_uNP = pd.read_csv('Ikke_i_bruk/Forbruk_NO1_NO5.csv')
 
 Temp_Bergen = pd.read_csv('Temp_Bergen.csv')
 Temp_Oslo = pd.read_csv('Temp_Oslo.csv')

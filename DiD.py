@@ -10,9 +10,9 @@ import row
 
 #data = pd.read_csv('Forbruk_NO1_NO5.csv')
 
-Med_NP=pd.read_csv('Forbruk_NO1_NO5.csv')
+Med_NP=pd.read_csv('Ikke_i_bruk/Forbruk_NO1_NO5.csv')
 
-Uten_NP=pd.read_csv('Forbruk_NO1_NO5.csv')
+Uten_NP=pd.read_csv('Ikke_i_bruk/Forbruk_NO1_NO5.csv')
 
 
 def Difference_in_Difference(dataset, price_area):
