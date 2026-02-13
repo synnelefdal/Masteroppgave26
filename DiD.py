@@ -76,6 +76,10 @@ print('Prosent endring i NO5(kan bli u/Norgespris):',(f"{Difference_in_Differenc
 
 print('DiD: må så ta minus mellom prosentene og se på forskjellen i endring')
 
+
+
+
+
 '''def total_forbruk_per_malepunkt(data):
     return (data['quantity_kwh'] / data['metering_point_count']).sum()
 
@@ -135,3 +139,11 @@ resultat = Difference_in_Difference2(
 )
 
 print(resultat)'''
+
+
+test=pd.read_csv('ntnu_norgespris_mba sortert.csv', sep=';')
+print(test)
+
+#fåut= test[test['group_definition' == 'Med Norgespris']].copy
+
+#print(fåut)
