@@ -1,5 +1,6 @@
 # Difference in Difference
 
+
 import numpy as np
 import pandas as pd
 import math
@@ -10,9 +11,9 @@ import row
 
 #data = pd.read_csv('Forbruk_NO1_NO5.csv')
 
-Med_NP=pd.read_csv('All_Demand_Data/NO5_mNP.csv', sep=';')
+Med_NP=pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep=';')
 
-Uten_NP=pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep=';')
+Uten_NP=pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep=';')
 
 
 def Difference_in_Difference(dataset):
@@ -41,12 +42,16 @@ def Difference_in_Difference(dataset):
     # Sort by Date then Hour
     dataset = dataset.sort_values(['Date', 'Hour'])
 
-    '''
+
     #filtere for prissone
-    dataset_updated_area = dataset[dataset['price_area'] == price_area].copy()
-    dataset_updated_area['start_time_utc'] = pd.to_datetime(dataset_updated_area['start_time_utc'])
-    dataset_updated_area['Hour'] = dataset_updated_area['Hour'].astype(int)
-    ''' #gamle måten me testa på
+
+    #dataset_updated_area = dataset[dataset['price_area'] == price_area].copy()
+    #dataset_updated_area['start_time_utc'] = pd.to_datetime(dataset_updated_area['start_time_utc'])
+    #dataset_updated_area['Hour'] = dataset_updated_area['Hour'].astype(int)
+
+    #ny
+
+    #gamle måten me testa på
 
     # filterer for dato videre
     #print(dataset_updated_area)
@@ -99,10 +104,10 @@ print('DiD: må så ta minus mellom prosentene og se på forskjellen i endring')
 print(Difference_in_Difference(Med_NP)-Difference_in_Difference(Uten_NP), ': ekstra endring i prosent med norgespris')
 
 
+'''
 
 
-
-'''def total_forbruk_per_malepunkt(data):
+def total_forbruk_per_malepunkt(data):
     return (data['quantity_kwh'] / data['metering_point_count']).sum()
 
 def Difference_in_Difference2(dataset, treatment_area, control_area):
@@ -162,3 +167,108 @@ resultat = Difference_in_Difference2(
 
 print(resultat)'''
 
+#ny did fra chat
+import pandas as pd
+import numpy as np
+
+
+Med_NP=pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep=';')
+
+Uten_NP=pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep=';')
+
+
+def aggregate_avg_per_mp(df, start, end):
+    df = df.copy()
+    # Parse timestamp
+    df['start_time_utc'] = pd.to_datetime(df['start_time_utc'], utc=True, errors='coerce')
+    # Filter period
+    mask = df['start_time_utc'].between(pd.to_datetime(start, utc=True),
+                                        pd.to_datetime(end,   utc=True),
+                                        inclusive='both')
+    dfp = df.loc[mask].copy()
+
+    # Clean
+    dfp = dfp.dropna(subset=['consumption_kwh', 'metering_point_count'])
+    dfp = dfp[dfp['metering_point_count'] > 0]
+
+    # Correct aggregation: sum first, then divide
+    total_kwh = dfp['consumption_kwh'].sum()
+    total_mp_hours = dfp['metering_point_count'].sum()
+    avg_kwh_per_mp = total_kwh / total_mp_hours if total_mp_hours > 0 else np.nan
+    return avg_kwh_per_mp
+
+def did_two_periods_percent(med_df, uten_df,
+                            pre_start='2024-10-01', pre_end='2025-01-31',
+                            post_start='2025-10-01', post_end='2026-01-31',
+                            percent_baseline='T_pre'):
+    """
+    percent_baseline ∈ {'T_pre','C_pre','pooled_pre'}
+      - 'T_pre'      : divides by Treatment pre (default)
+      - 'C_pre'      : divides by Control pre
+      - 'pooled_pre' : divides by average of T_pre and C_pre
+    """
+
+    # Averages (kWh per metering point) in each period
+    T_pre  = aggregate_avg_per_mp(med_df,  pre_start,  pre_end)
+    T_post = aggregate_avg_per_mp(med_df,  post_start, post_end)
+    C_pre  = aggregate_avg_per_mp(uten_df, pre_start,  pre_end)
+    C_post = aggregate_avg_per_mp(uten_df, post_start, post_end)
+
+    # Changes in levels
+    dT = T_post - T_pre
+    dC = C_post - C_pre
+
+    # DiD in levels
+    did_level = dT - dC
+
+    # Choose denominator for percent
+    if percent_baseline == 'T_pre':
+        denom = T_pre
+    elif percent_baseline == 'C_pre':
+        denom = C_pre
+    elif percent_baseline == 'pooled_pre':
+        denom = np.nanmean([T_pre, C_pre])
+    else:
+        raise ValueError("percent_baseline must be 'T_pre', 'C_pre', or 'pooled_pre'.")
+
+    did_percent = (did_level / denom) * 100 if denom and not np.isnan(denom) and denom != 0 else np.nan
+
+    # Also report each group’s own percent change (for context, not the DiD)
+    pct_T = (dT / T_pre) * 100 if T_pre and not np.isnan(T_pre) and T_pre != 0 else np.nan
+    pct_C = (dC / C_pre) * 100 if C_pre and not np.isnan(C_pre) and C_pre != 0 else np.nan
+
+    return {
+        'T_pre_avg_kWh_per_MP': T_pre,
+        'T_post_avg_kWh_per_MP': T_post,
+        'C_pre_avg_kWh_per_MP': C_pre,
+        'C_post_avg_kWh_per_MP': C_post,
+        'Treat_change_level': dT,
+        'Ctrl_change_level': dC,
+        'DiD_level': did_level,
+        'DiD_percent_baseline': percent_baseline,
+        'DiD_percent': did_percent,
+        'Treatment_own_pct_change': pct_T,
+        'Control_own_pct_change': pct_C
+    }
+
+# ---- Example usage ----
+# Med_NP = pd.read_csv('All_Demand_Data/NO5_mNP.csv', sep=';')
+# Uten_NP = pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep=';')
+
+res = did_two_periods_percent(
+    Med_NP, Uten_NP,
+    pre_start='2024-10-01', pre_end='2025-01-31',
+    post_start='2025-10-01', post_end='2026-01-31',
+    percent_baseline='T_pre'  # or 'C_pre' or 'pooled_pre'
+)
+
+print("\n--- Difference-in-Differences (percent) ---")
+print(f"Baseline for percent: {res['DiD_percent_baseline']}")
+print(f"DiD (level): {res['DiD_level']:.6f} kWh per MP-hour")
+print(f"DiD (percent): {res['DiD_percent']:.3f}%\n")
+
+print("--- Context ---")
+print(f"Treatment change (level): {res['Treat_change_level']:.6f}")
+print(f"Control change   (level): {res['Ctrl_change_level']:.6f}")
+print(f"Treatment own % change: {res['Treatment_own_pct_change']:.3f}%")
+print(f"Control   own % change: {res['Control_own_pct_change']:.3f}%")
