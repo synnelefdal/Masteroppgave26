@@ -708,10 +708,10 @@ def DifferenceinDifferenceTemp3(data_mNP, data_uNP, price_area, Temp, verbose=Tr
         'data': df
     }
 
-#DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')  # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
+DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2')  # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
 #DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)
 #DifferenceinDifferenceTemp2(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo, use_log=True, verbose=True)
-DifferenceinDifferenceTemp3(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo, verbose=True)
+#DifferenceinDifferenceTemp3(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo, verbose=True)
 
 
 
