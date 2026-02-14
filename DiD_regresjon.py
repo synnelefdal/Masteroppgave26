@@ -355,6 +355,8 @@ def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
     df['Hour'] = pd.Categorical(df['Hour'].astype(str),
                                  categories=[str(i) for i in range(0, 23+1)], ordered=True)
 
+    df['Lufttemperatur'] = df['Lufttemperatur']
+
 
 
     #pd.set_option('display.max_columns', None)
@@ -365,9 +367,9 @@ def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
     formula = (
         'np.log(Q("kWh/Metering_point")) ~ '
         'C(Group, Treatment(reference="Before_ref")) * C(Norgespris, Treatment(reference="Uten_NP")) '
-        '+ Temp24 '
-        '+ Temp24 * C(Norgespris, Treatment(reference="Uten_NP"))'
-        '+ C(Month) + C(Hour)'
+        '+ Lufttemperatur'
+        '+ Lufttemperatur * C(Norgespris, Treatment(reference="Uten_NP"))'
+        '+ C(Hour)'
     )
 
     y, X = patsy.dmatrices(
@@ -544,10 +546,172 @@ def DifferenceinDifferenceTemp2(data_mNP, data_uNP, price_area, Temp, use_log=Fa
     }
 
 
+def DifferenceinDifferenceTemp3(data_mNP, data_uNP, price_area, Temp, verbose=True):
+    """
+    DiD med log-utfall og Temp24 (24t rullende snitt):
+      ln(Y_it) = α + β*(treated*post) + γ*Temp24_t + θ*(Temp24_t*treated) + δ_i + τ_t + ε_it
+    - Enhets-FE: C(group_definition)
+    - Tids-FE:   C(Hour) + C(Month)
+    - Cluster-robuste SE på group_definition
+
+    Parametre
+    ---------
+    data_mNP : pd.DataFrame    # Med_NP
+    data_uNP : pd.DataFrame    # Uten_NP
+    price_area : str
+    Temp : pd.DataFrame        # kolonner: Date, Hour, Lufttemperatur
+    verbose : bool             # print summary
+
+    Returnerer
+    ----------
+    dict med 'model', 'n_obs', 'coef' (β, θ, γ) og 'data' (analysematrise).
+    """
+
+    # ------------------- Dato-vinduer ------------------- #
+    start_date_before = pd.Timestamp('2024-10-01')
+    end_date_before   = pd.Timestamp('2025-01-31')
+
+    start_date_after  = pd.Timestamp('2025-10-01')
+    end_date_after    = pd.Timestamp('2026-01-31')
+
+    cutoff = pd.Timestamp('2025-10-01')  # Post-periode starter
+
+    # ------------------- Tidsfelter ------------------- #
+    def prep_time(df):
+        df = df.copy()
+        df['start_time_utc'] = pd.to_datetime(
+            df['start_time_utc'],
+            format='%Y-%m-%d %H:%M:%S',
+            errors='coerce',
+            utc=True
+        )
+        # Normaliser til "naiv" UTC for enkel Date/Hour
+        st = df['start_time_utc'].dt.tz_convert('UTC').dt.tz_localize(None)
+        df['Date'] = pd.to_datetime(st.dt.date)
+        df['Hour'] = st.dt.hour.astype(int)
+        return df
+
+    data_mNP = prep_time(data_mNP)
+    data_uNP = prep_time(data_uNP)
+
+    # ----------------- Filter prisområde ------------------ #
+    data_demand_NP     = data_mNP.loc[data_mNP['price_area'] == price_area].copy()
+    data_demand_UtenNP = data_uNP.loc[data_uNP['price_area'] == price_area].copy()
+
+    # ----------------- Filtrer perioder ------------------- #
+    def window(df):
+        m_before = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
+        m_after  = (df['Date'] >= start_date_after)  & (df['Date'] <= end_date_after)
+        return df.loc[m_before | m_after].copy()
+
+    data_demand_NP     = window(data_demand_NP)
+    data_demand_UtenNP = window(data_demand_UtenNP)
+
+    # ------------- KPI: kWh per målepunkt ------------- #
+    for df0 in [data_demand_NP, data_demand_UtenNP]:
+        df0['kWh/Metering_point'] = df0['consumption_kwh'] / df0['metering_point_count']
+
+    # ----------- Aggreger per (Date, Hour, group_definition) ----------- #
+    group_keys = ['Date', 'Hour', 'group_definition']
+    np_g   = data_demand_NP.groupby(group_keys, as_index=False)['kWh/Metering_point'].mean()
+    uten_g = data_demand_UtenNP.groupby(group_keys, as_index=False)['kWh/Metering_point'].mean()
+
+    # ----------------- Temperatur ------------------ #
+    # 1) Aggreger til én rad per (Date, Hour)
+    T = Temp.copy()
+    T['Date'] = pd.to_datetime(T['Date'])
+    T['Hour'] = T['Hour'].astype(int)
+
+    mTb = (T['Date'] >= start_date_before) & (T['Date'] <= end_date_before)
+    mTa = (T['Date'] >= start_date_after)  & (T['Date'] <= end_date_after)
+    T = T.loc[mTb | mTa].copy()
+
+    temp_hourly = (T.groupby(['Date', 'Hour'], as_index=False)
+                     .agg(Lufttemperatur=('Lufttemperatur', 'mean')))
+
+    # 2) Lag tidsstempel for ryddig rullende vindu (24 timer)
+    temp_hourly['ts'] = temp_hourly['Date'] + pd.to_timedelta(temp_hourly['Hour'], unit='h')
+    temp_hourly = temp_hourly.sort_values('ts')
+
+    # Obs: Dette forutsetter (omtrent) komplett time-serie. Hvis det er hull,
+    # vurder tidbasert rolling med resampling til H-frekvens først.
+    temp_hourly['Temp24'] = temp_hourly['Lufttemperatur'].rolling(window=24, min_periods=1).mean()
+
+    # Behold bare nødvendige felter til merge
+    temp_hourly = temp_hourly[['Date', 'Hour', 'Lufttemperatur', 'Temp24']]
+
+    # -------- Merge datasett -------- #
+    np_g['Norgespris']   = 'Med_NP'
+    uten_g['Norgespris'] = 'Uten_NP'
+    df = pd.concat([np_g, uten_g], ignore_index=True)
+
+    df = df.merge(temp_hourly, on=['Date', 'Hour'], how='left')
+
+    # Fjern ikke-positive utfall (for log)
+    df = df[df['kWh/Metering_point'] > 0].copy()
+    # Lag log-utfall
+    df['ln_kwh_mp'] = np.log(df['kWh/Metering_point'])
+
+    # ----------------- DiD-variabler ------------------ #
+    df['treated'] = (df['Norgespris'] == 'Med_NP').astype(int)  # Treatment_i
+    df['post']    = (df['Date'] >= cutoff).astype(int)          # Post_t
+    df['Month']   = df['Date'].dt.month                         # 1..12
+
+    # ----------------- Modell (log + Temp24) ------------------ #
+    # ln(Y) = β*(treated*post) + γ*Temp24 + θ*(Temp24*treated) + FE + ε
+    fe_terms = 'C(Hour) + C(Month)'
+    use_group_fe = ('group_definition' in df.columns) and (df['group_definition'].nunique() > 1)
+    if use_group_fe:
+        fe_terms = f'C(group_definition) + {fe_terms}'
+
+    formula = f'ln_kwh_mp ~ treated:post + Temp24 + Temp24:treated + {fe_terms}'
+
+    # Cluster-robuste SE
+    cov_type = 'cluster'
+    if use_group_fe:
+        cov_kwds = {'groups': df['group_definition']}
+    else:
+        cov_kwds = {'groups': df['Date']}  # fallback: svakere, men bedre enn ingenting
+
+    model = smf.ols(formula=formula, data=df).fit(cov_type=cov_type, cov_kwds=cov_kwds)
+
+    # ----------------- Nøkkelkoeffisienter ------------------ #
+    def ci_get(name):
+        if name in model.params.index:
+            lo, hi = model.conf_int().loc[name].tolist()
+            return model.params[name], lo, hi
+        return np.nan, np.nan, np.nan
+
+    beta,  beta_lo,  beta_hi  = ci_get('treated:post')      # DiD-effekt (log-skala)
+    theta, theta_lo, theta_hi = ci_get('Temp24:treated')    # diff. temperaturrespons
+    gamma, gamma_lo, gamma_hi = ci_get('Temp24')            # temp-effekt i kontroll
+
+    if verbose:
+        print(model.summary())
+
+    return {
+        'model': model,
+        'n_obs': int(model.nobs),
+        'coef': {
+            'DiD_beta_treated_post (log)': {
+                'coef': beta, 'ci_low': beta_lo, 'ci_high': beta_hi,
+                'pct_effect_approx': 100 * beta,  # liten beta
+                'pct_effect_exact': 100 * (np.exp(beta) - 1)  # eksakt
+            },
+            'theta_Temp24_x_treated': {
+                'coef': theta, 'ci_low': theta_lo, 'ci_high': theta_hi
+            },
+            'gamma_Temp24_level': {
+                'coef': gamma, 'ci_low': gamma_lo, 'ci_high': gamma_hi
+            }
+        },
+        'data': df
+    }
+
 #DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')  # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
 #DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)
-DifferenceinDifferenceTemp2(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo, use_log=True, verbose=True)
-
+#DifferenceinDifferenceTemp2(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo, use_log=True, verbose=True)
+DifferenceinDifferenceTemp3(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo, verbose=True)
 
 
 
