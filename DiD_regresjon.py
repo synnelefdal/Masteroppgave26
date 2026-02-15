@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
+import points
 import statsmodels.api as sm
 import patsy
 import statsmodels.formula.api as smf
+import matplotlib.pyplot as plt
 
 data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep= ';')
 data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep= ';')
@@ -17,7 +19,8 @@ Temp_Bergen = pd.read_csv('Temp_Bergen.csv')
 Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
 
 
-def DifferenceinDifference(data_mNP, data_uNP, price_area):
+def DifferenceinDifference(data_mNP, data_uNP, price_area,
+                           make_plot = True, plot_adjusted = True, backtransform_log = False, savepath = None):
     # ------------------- Filterer for dato ---------- #
     start_date_before = '2024-10-01'
     end_date_before = '2025-01-31'
@@ -179,6 +182,146 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
 
     model = sm.OLS(y, X).fit()
     print(model.summary())
+
+
+    # ----------------- Plotting ----------------- #
+    fig, ax = (None, None)
+    if make_plot:
+        # Robuste rader: bruk samme posisjoner som i designmatrisen y
+        df_model = df.iloc[y.index.to_numpy()].copy()
+
+        # Prediksjoner fra modellen
+        yhat = np.asarray(model.fittedvalues).reshape(-1)
+        if backtransform_log:
+            # Duan-smearing for nivåskala
+            smear = np.exp(model.mse_resid / 2.0)
+            df_model['_y_for_plot'] = np.exp(yhat) * smear
+            y_label = 'Pred. kWh per målepunkt (nivå, smearing)'
+            pct_from_log = False
+        else:
+            # Log-skala (matcher modellen)
+            df_model['_y_for_plot'] = yhat
+            y_label = 'Pred. log(kWh per målepunkt)'
+            pct_from_log = True
+
+        # Aggreger til pre/post × gruppe
+        agg = (df_model
+               .groupby(['Norgespris', 'Group'])['_y_for_plot']
+               .mean()
+               .unstack())
+
+        # Sjekk at alle 4 celler finnes
+        needed = [('Uten_NP', 'Before_ref'), ('Uten_NP', 'After_ref'),
+                  ('Med_NP', 'Before_ref'), ('Med_NP', 'After_ref')]
+        for g0, p0 in needed:
+            if (g0 not in agg.index) or (p0 not in agg.columns) or pd.isna(agg.loc[g0, p0]):
+                raise ValueError(f"Mangler ({g0}, {p0}) for plottet. Sjekk data/filtre.")
+
+        # Punkter (A,B,C,D i teorien)
+        # Her velger vi: A = Treatment Pre, B = Kontroll Pre, C = Treatment Post (obs), D = Kontroll Post
+        A = float(agg.loc['Med_NP', 'Before_ref'])
+        B = float(agg.loc['Uten_NP', 'Before_ref'])
+        C = float(agg.loc['Med_NP', 'After_ref'])
+        D = float(agg.loc['Uten_NP', 'After_ref'])
+
+        # Kontrafaktisk behandling Post: A + (D - B)
+        C_cf = A + (D - B)
+
+        # DiD = (C - A) - (D - B)
+        did_val = (C - A) - (D - B)
+        did_pct_exact = (100 * (np.exp(did_val) - 1)) if pct_from_log else None
+
+        # X-akse: 0=Pre, 1=Post
+        x_pre, x_post = 0.0, 1.0
+
+        # Start figur
+        fig, ax = plt.subplots(figsize=(8.6, 5.2))
+
+        # --- Kontroll: grønn heltrukket linje B -> D ---
+        ax.plot([x_pre, x_post], [B, D],
+                color='tab:green', lw=3.0, label='Kontroll (observasjon)', zorder=2)
+        ax.scatter([x_pre, x_post], [B, D],
+                   color='tab:green', s=50, zorder=3)
+
+        # --- Behandling (observasjon): rød heltrukket linje A -> C ---
+        ax.plot([x_pre, x_post], [A, C],
+                color='tab:red', lw=3.0, label='Behandling (observasjon)', zorder=2)
+        ax.scatter([x_pre, x_post], [A, C],
+                   color='tab:red', s=50, zorder=3)
+
+        # --- Behandling (kontrafaktisk): rød stiplet linje A -> C_cf ---
+        ax.plot([x_pre, x_post], [A, C_cf],
+                color='tab:red', lw=3.0, ls='--', label='Behandling (kontrafaktisk)', zorder=1)
+
+        # Vertikal intervensjonslinje
+        ax.axvline(0.5, color='gray', lw=1.2)
+        ax.text(0.5, ax.get_ylim()[0], 'Intervensjon', ha='center', va='bottom', color='gray')
+
+        # --- Annoter A, B, C, D (som i teorifiguren) ---
+        ax.text(x_pre - 0.02, A, 'A', color='tab:red', va='center', ha='right', fontsize=11)
+        ax.text(x_pre - 0.02, B, 'B', color='tab:green', va='center', ha='right', fontsize=11)
+        ax.text(x_post + 0.02, C, 'C', color='tab:red', va='center', ha='left', fontsize=11)
+        ax.text(x_post + 0.02, D, 'D', color='tab:green', va='center', ha='left', fontsize=11)
+
+        # --- Intervensjonseffekt (vertikal brakett) ved Post ---
+        y_top = max(C, C_cf)
+        y_bot = min(C, C_cf)
+        ax.annotate(
+            '', xy=(x_post, y_top), xytext=(x_post, y_bot),
+            arrowprops=dict(arrowstyle='<->', color='tab:red', lw=2.0)
+        )
+        label = f"Intervensjonseffekt"
+        if pct_from_log:
+            label += f" (log) = {did_val:.3f}"
+            if did_pct_exact is not None:
+                label += f"\n≈ {did_pct_exact:.1f}%"
+        else:
+            label += f" ≈ {did_val:.3f}"
+        ax.text(x_post + 0.03, (y_top + y_bot) / 2, label, color='tab:red', va='center', ha='left')
+
+        # --- Konstant forskjell i utfall (pre og post) som vertikale braketter ---
+        # Pre: mellom A og B ved x_pre
+        y_top_pre = max(A, B)
+        y_bot_pre = min(A, B)
+        ax.annotate('', xy=(x_pre, y_top_pre), xytext=(x_pre, y_bot_pre),
+                    arrowprops=dict(arrowstyle='<->', color='black', lw=1.5))
+        ax.text(x_pre - 0.03, (y_top_pre + y_bot_pre) / 2, 'Konstant forskjell\n(Pre)',
+                ha='right', va='center', color='black')
+
+        # Post: mellom C (obs) og D ved x_post
+        y_top_post = max(C, D)
+        y_bot_post = min(C, D)
+        ax.annotate('', xy=(x_post, y_top_post), xytext=(x_post, y_bot_post),
+                    arrowprops=dict(arrowstyle='<->', color='black', lw=1.5))
+        ax.text(x_post + 0.03, (y_top_post + y_bot_post) / 2, 'Konstant forskjell\n(Post)',
+                ha='left', va='center', color='black')
+
+        # Akseoppsett
+        ax.set_xticks([x_pre, x_post])
+        ax.set_xticklabels(['Pre Intervention', 'Post Intervention'])
+
+        # Litt luft på y-aksen for å få plass til tekst/markører
+        y_vals = [A, B, C, D, C_cf]
+        y_min, y_max = min(y_vals), max(y_vals)
+        pad = 0.07 * (y_max - y_min if y_max > y_min else 1.0)
+        ax.set_ylim(y_min - pad, y_max + pad)
+
+        ax.set_title('Difference-in-Differences (teori-stil)')
+        ax.set_ylabel(y_label)
+        ax.legend(loc='upper left', frameon=False)
+        ax.grid(True, axis='y', alpha=0.25)
+        plt.tight_layout()
+        plt.show()
+
+        if savepath:
+            plt.savefig(savepath, dpi=200, bbox_inches='tight')
+            print(f"[Plot] Lagret figur til: {savepath}")
+
+        # Sørg for at figuren vises i skript/terminal
+        try:
+            plt.show()
+        except Exception as e:
+            print(f"[Plot] Kunne ikke vise automatisk: {e}. Åpne filen du lagret, eller bruk riktig backend.")
 
 
 def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
@@ -708,10 +851,20 @@ def DifferenceinDifferenceTemp3(data_mNP, data_uNP, price_area, Temp, verbose=Tr
         'data': df
     }
 
-DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2')  # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
+#DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1',
+                           #make_plot = True, plot_adjusted = True, backtransform_log = False, savepath = None)  # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
 #DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)
 #DifferenceinDifferenceTemp2(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo, use_log=True, verbose=True)
 #DifferenceinDifferenceTemp3(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo, verbose=True)
+
+
+model, df_used, fig, ax = DifferenceinDifference(
+    data_mNP_NO1, data_uNP_NO1, price_area='NO1',
+    make_plot=True,           # slå plott på
+    plot_adjusted=True,       # bruk modellens prediksjoner i figuren
+    backtransform_log=True,  # sett True hvis du vil ha nivå-akse via smearing
+    savepath=None             # evt. 'did_plot.png'
+)
 
 
 
