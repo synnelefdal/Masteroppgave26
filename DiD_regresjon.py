@@ -256,18 +256,21 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
                         post='After_ref',
                         ctrl='Uten_NP',
                         trt='Med_NP'):
-        import matplotlib.pyplot as plt
-        import numpy as np
-        from matplotlib.patches import FancyArrowPatch
 
         # --- Beregn A B C D direkte fra data ---
-        A = df[(df[time] == pre) & (df[treat] == ctrl)][y].mean()
+        #A = df[(df[time] == pre) & (df[treat] == ctrl)][y].mean()
+        #D = df[(df[time] == post) & (df[treat] == ctrl)][y].mean()
+        #B = df[(df[time] == pre) & (df[treat] == trt)][y].mean()
+        #C = df[(df[time] == post) & (df[treat] == trt)][y].mean()
+
+        A = df[(df[time] == pre) & (df[treat] == trt)][y].mean()
         D = df[(df[time] == post) & (df[treat] == ctrl)][y].mean()
-        B = df[(df[time] == pre) & (df[treat] == trt)][y].mean()
+        B = df[(df[time] == pre) & (df[treat] == ctrl)][y].mean()
         C = df[(df[time] == post) & (df[treat] == trt)][y].mean()
 
         # kontrafaktisk C'
-        Cprime = B + (D - A)
+        #Cprime = B + (D - A)
+        Cprime = A + (D - B)
 
         # --- Figur ---
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -276,16 +279,25 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
         ax.axvline(0.5, color='steelblue', lw=2)
 
         # kontrollgruppe (A -> D)
-        ax.plot([0, 1], [A, D], color='green', lw=3, label='Kontrollgruppe')
-        ax.scatter([0, 1], [A, D], color='green')
+        #ax.plot([0, 1], [A, D], color='green', lw=3, label='Kontrollgruppe')
+        #ax.scatter([0, 1], [A, D], color='green')
+
+        ax.plot([0, 1], [B, D], color='green', lw=3, label='Kontrollgruppe')
+        ax.scatter([0, 1], [B, D], color='green')
 
         # behandlingsgruppe før knekk (B -> kink)
-        kink_y = B + 0.5 * (D - A)
-        ax.plot([0, 0.5], [B, kink_y], color='firebrick', lw=3)
+        #kink_y = B + 0.5 * (D - A)
+        #ax.plot([0, 0.5], [B, kink_y], color='firebrick', lw=3)
+
+        kink_y = A + 0.5 * (D - B)
+        ax.plot([0, 0.5], [A, kink_y], color='firebrick', lw=3)
 
         # behandlingsgruppe etter knekk (kink -> C)
+        #ax.plot([0.5, 1], [kink_y, C], color='firebrick', lw=3, label='Behandlingsgruppe')
+        #ax.scatter([0, 1], [B, C], color='firebrick')
+
         ax.plot([0.5, 1], [kink_y, C], color='firebrick', lw=3, label='Behandlingsgruppe')
-        ax.scatter([0, 1], [B, C], color='firebrick')
+        ax.scatter([0, 1], [A, C], color='firebrick')
 
         # kontrafaktisk stiplet
         ax.plot([0.5, 1], [kink_y, Cprime], color='firebrick', linestyle=':', lw=2)
@@ -302,14 +314,14 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
         ax.set_ylabel("kWh per målepunkt")
         ax.set_title("Difference-in-Differences (basert på data)")
 
-        ax.set_xlim(-0.1, 1.2)
-        ax.set_ylim(0, max(A, B, C, D, Cprime) * 1.1)
+        ax.set_xlim(-0.12, 1.10)
+        #ax.set_ylim(0, max(A, B, C, D, Cprime) * 1.1)
+        ax.set_ylim(1, 2.7)
 
         ax.legend()
         plt.tight_layout()
         plt.show()
 
-        return {'A': A, 'B': B, 'C': C, 'D': D, 'Cprime': Cprime}
 
     print(plot_did_simple(df, y='kWh/Metering_point',
                         time='Group',  # Before_ref / After_ref
@@ -318,6 +330,65 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
                         post='After_ref',
                         ctrl='Uten_NP',
                         trt='Med_NP'))
+
+
+    def plot_did_from_df(df, time_col='Group', treat_col='Norgespris', y_col='kWh/Metering_point',
+                         treat_label='Med_NP', control_label='Uten_NP', pre_label='Before_ref', post_label='After_ref',
+                         title='DiD: pre/post middelverdier per gruppe'):
+        # Sjekk at kategorier finnes
+        assert set(df[time_col].unique()) >= {pre_label, post_label}
+        assert set(df[treat_col].unique()) >= {treat_label, control_label}
+
+        # Aggreger til middelverdi per gruppe og periode
+        means = (df[[time_col, treat_col, y_col]]
+                 .groupby([time_col, treat_col], observed=False)
+                 .mean()
+                 .reset_index())
+
+        # Hent verdier A,B,C,D
+        def m(period, grp):
+            return means[(means[time_col] == period) & (means[treat_col] == grp)][y_col].iloc[0]
+
+        A, D = m(pre_label, control_label), m(post_label, control_label)
+        B, C = m(pre_label, treat_label), m(post_label, treat_label)
+
+        # Uformelle betaer
+        beta1 = D - A  # trend i kontroll
+        beta2 = B - A  # gruppediff pre
+        beta3 = (C - B) - (D - A)  # DiD
+
+        # Plot
+        fig, ax = plt.subplots(figsize=(8, 5))
+        ax.set_xlim(-0.2, 1.2)
+        ax.set_xticks([0, 1])
+        ax.set_xticklabels(['Pre', 'Post'])
+        ax.set_ylabel(y_col)
+
+        ax.axvline(x=0.5, color='steelblue', linestyle='-', linewidth=2, alpha=0.8)
+
+        ax.plot([0, 1], [A, D], color='forestgreen', lw=3, label='Control, without Norgespris')
+        ax.plot([0, 1], [B, C], color='firebrick', lw=3, label='Treatment, with Norgespris ')
+
+        # Kontrafaktisk behandlet post
+        cprime = B + (D - A)
+        ax.plot([0, 1], [B, cprime], color='firebrick', ls=':', lw=2)
+
+        # Marker β3
+        ax.annotate('', xy=(1, cprime), xytext=(1, C), arrowprops=dict(arrowstyle='<->'))
+        ax.text(1.03, (cprime + C) / 2, r'$\beta_3$')
+
+        ax.scatter([0, 1, 0, 1], [A, D, B, C], c=['forestgreen', 'forestgreen', 'firebrick', 'firebrick'], s=60)
+        ax.legend()
+        ax.set_title(title)
+        fig.tight_layout()
+        plt.show()
+
+
+    print(plot_did_from_df(df, time_col='Group', treat_col='Norgespris', y_col='kWh/Metering_point',
+                     treat_label='Med_NP', control_label='Uten_NP', pre_label='Before_ref', post_label='After_ref',
+                     title='DiD: pre/post middelverdier per gruppe'))
+
+
 
 
 
@@ -524,7 +595,7 @@ def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
 
 
 
-model = DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
+DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
 #DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)     #Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
 
 
