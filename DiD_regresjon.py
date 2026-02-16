@@ -140,8 +140,8 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
     #df_NP['Group'] = 'Norgespris'  # 2024-periode
     #df_UtenNP['Group'] = 'Uten Norgespris'  # 2025-periode
 
-    df_NP['Norgespris'] = 'Med_NP'  #
-    df_UtenNP['Norgespris'] = 'Uten_NP'  #
+    df_NP['Norgespris'] = 'Med_NP'  #Treatment
+    df_UtenNP['Norgespris'] = 'Uten_NP'  #Treatment
 
 
     df = pd.concat([df_NP, df_UtenNP], ignore_index=True)
@@ -149,7 +149,7 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
 
     cutoff = pd.Timestamp('2025-10-01')
     df['Date'] = pd.to_datetime(df['Date'])
-    df['Group'] = np.where(df['Date'] < cutoff, 'Before_ref', 'After_ref')
+    df['Group'] = np.where(df['Date'] < cutoff, 'Before_ref', 'After_ref')   #Post
 
     df['Month'] = df['Date'].dt.strftime('%B')
     df['Month'] = pd.Categorical(df['Month'],
