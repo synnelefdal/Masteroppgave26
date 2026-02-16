@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
+import points
 import statsmodels.api as sm
 import patsy
 import statsmodels.formula.api as smf
+import matplotlib.pyplot as plt
 
 data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep= ';')
 data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep= ';')
@@ -167,7 +169,8 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
     formula = (
         'np.log(Q("kWh/Metering_point")) ~ '
         'C(Group, Treatment(reference="Before_ref")) '
-        '* C(Norgespris, Treatment(reference="Uten_NP"))'
+        '* C(Norgespris, Treatment(reference="Uten_NP")) '
+        '+ C(Hour) + C(Month)'
     )
 
     y, X = patsy.dmatrices(
@@ -179,6 +182,8 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
 
     model = sm.OLS(y, X).fit()
     print(model.summary())
+
+
 
 
 def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
@@ -708,10 +713,12 @@ def DifferenceinDifferenceTemp3(data_mNP, data_uNP, price_area, Temp, verbose=Tr
         'data': df
     }
 
-DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2')  # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
+DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')  # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
 #DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)
 #DifferenceinDifferenceTemp2(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo, use_log=True, verbose=True)
 #DifferenceinDifferenceTemp3(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo, verbose=True)
+
+
 
 
 
