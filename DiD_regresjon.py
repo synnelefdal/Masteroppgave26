@@ -19,8 +19,7 @@ Temp_Bergen = pd.read_csv('Temp_Bergen.csv')
 Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
 
 
-def DifferenceinDifference(data_mNP, data_uNP, price_area,
-                           make_plot = True, plot_adjusted = True, backtransform_log = False, savepath = None):
+def DifferenceinDifference(data_mNP, data_uNP, price_area):
     # ------------------- Filterer for dato ---------- #
     start_date_before = '2024-10-01'
     end_date_before = '2025-01-31'
