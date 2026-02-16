@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
-import points
 import statsmodels.api as sm
 import patsy
 import statsmodels.formula.api as smf
 import matplotlib.pyplot as plt
+from matplotlib.patches import FancyArrowPatch
 
 data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep= ';')
 data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep= ';')
@@ -183,6 +183,141 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
     model = sm.OLS(y, X).fit()
     print(model.summary())
 
+
+    # ------- Plotting ----------- #
+
+    '''fig, ax = plt.subplots(figsize=(10, 6))
+
+    # --- A, B, C, D punkter ---
+    A = (0, 2.0)  # Kontroll pre
+    D = (1, 4.0)  # Kontroll post
+    B = (0, 3.5)  # Behandling pre
+
+    # Kontrafaktisk post (parallell med kontroll)
+    Cprime_y = B[1] + (D[1] - A[1])
+    Cprime = (1, Cprime_y)
+
+    # Faktisk post med DiD-effekt
+    beta3 = 2.0
+    C = (1, Cprime_y + beta3)
+
+    # --- Plot kontrollgruppen ---
+    ax.plot([A[0], D[0]], [A[1], D[1]], color='green', lw=3, label='Kontrollgruppe')
+    ax.scatter(A[0], A[1], s=80, color='green')
+    ax.scatter(D[0], D[1], s=80, color='green')
+    ax.text(A[0] - 0.05, A[1] - 0.25, "A", fontsize=12, fontweight="bold", color="green")
+    ax.text(D[0] + 0.03, D[1] + 0.2, "D", fontsize=12, fontweight="bold", color="green")
+
+    # --- Plot behandlingsgruppen før intervensjon ---
+    ax.plot([B[0], 0.5], [B[1], Cprime_y - (0.5 * (D[1] - A[1]))],
+            color='firebrick', lw=3)
+    ax.scatter(B[0], B[1], s=80, color='firebrick')
+    ax.text(B[0] - 0.05, B[1] - 0.25, "B", fontsize=12, fontweight="bold", color="firebrick")
+
+    # --- Punktet der linjen skal "knekke" ---
+    kink_x = 0.5
+    kink_y = B[1] + (0.5 * (D[1] - A[1]))  # høyden der første linje slutter
+
+    # --- Ny linje etter intervensjon ---
+    ax.plot([kink_x, C[0]], [kink_y, C[1]], color='firebrick', lw=3, label='Behandlingsgruppe')
+    ax.scatter(C[0], C[1], s=80, color='firebrick')
+    ax.text(C[0] + 0.03, C[1] + 0.2, "C", fontsize=12, fontweight="bold", color="firebrick")
+
+    # --- Kontrafaktisk stiplet linje ---
+    ax.plot([kink_x, Cprime[0]], [kink_y, Cprime[1]],
+            linestyle=':', color='firebrick', lw=2)
+
+    # --- β3 marker ---
+    arrow = FancyArrowPatch((1.05, Cprime[1]), (1.05, C[1]),
+                            arrowstyle='<->', linewidth=1.5, color='black')
+    ax.add_patch(arrow)
+    ax.text(1.08, (Cprime[1] + C[1]) / 2, r'$\beta_3$', fontsize=14)
+
+    # --- Blå vertikal intervensjonslinje ---
+    ax.axvline(x=0.5, color='steelblue', linewidth=2)
+
+    # --- Layout ---
+    ax.set_xlim(-0.1, 1.2)
+    ax.set_ylim(0, 10)
+    ax.set_xticks([0, 1])
+    ax.set_xticklabels(['Pre-intervention', 'Post-intervention'])
+    ax.set_ylabel("Outcome")
+    ax.set_title("Difference-in-Differences")
+    ax.legend()
+
+    plt.tight_layout()
+    plt.show()'''
+
+    def plot_did_simple(df,
+                        y='kWh/Metering_point',
+                        time='Group',  # Before_ref / After_ref
+                        treat='Norgespris',  # Uten_NP / Med_NP
+                        pre='Before_ref',
+                        post='After_ref',
+                        ctrl='Uten_NP',
+                        trt='Med_NP'):
+        import matplotlib.pyplot as plt
+        import numpy as np
+        from matplotlib.patches import FancyArrowPatch
+
+        # --- Beregn A B C D direkte fra data ---
+        A = df[(df[time] == pre) & (df[treat] == ctrl)][y].mean()
+        D = df[(df[time] == post) & (df[treat] == ctrl)][y].mean()
+        B = df[(df[time] == pre) & (df[treat] == trt)][y].mean()
+        C = df[(df[time] == post) & (df[treat] == trt)][y].mean()
+
+        # kontrafaktisk C'
+        Cprime = B + (D - A)
+
+        # --- Figur ---
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # blå intervensjonslinje
+        ax.axvline(0.5, color='steelblue', lw=2)
+
+        # kontrollgruppe (A -> D)
+        ax.plot([0, 1], [A, D], color='green', lw=3, label='Kontrollgruppe')
+        ax.scatter([0, 1], [A, D], color='green')
+
+        # behandlingsgruppe før knekk (B -> kink)
+        kink_y = B + 0.5 * (D - A)
+        ax.plot([0, 0.5], [B, kink_y], color='firebrick', lw=3)
+
+        # behandlingsgruppe etter knekk (kink -> C)
+        ax.plot([0.5, 1], [kink_y, C], color='firebrick', lw=3, label='Behandlingsgruppe')
+        ax.scatter([0, 1], [B, C], color='firebrick')
+
+        # kontrafaktisk stiplet
+        ax.plot([0.5, 1], [kink_y, Cprime], color='firebrick', linestyle=':', lw=2)
+
+        # β3-markering
+        arrow = FancyArrowPatch((1.05, Cprime), (1.05, C),
+                                arrowstyle='<->', color='black', lw=1.5)
+        ax.add_patch(arrow)
+        ax.text(1.08, (C + Cprime) / 2, r'$\beta_3$', fontsize=14)
+
+        # labels
+        ax.set_xticks([0, 1])
+        ax.set_xticklabels(['Pre-intervention', 'Post-intervention'])
+        ax.set_ylabel("kWh per målepunkt")
+        ax.set_title("Difference-in-Differences (basert på data)")
+
+        ax.set_xlim(-0.1, 1.2)
+        ax.set_ylim(0, max(A, B, C, D, Cprime) * 1.1)
+
+        ax.legend()
+        plt.tight_layout()
+        plt.show()
+
+        return {'A': A, 'B': B, 'C': C, 'D': D, 'Cprime': Cprime}
+
+    print(plot_did_simple(df, y='kWh/Metering_point',
+                        time='Group',  # Before_ref / After_ref
+                        treat='Norgespris',  # Uten_NP / Med_NP
+                        pre='Before_ref',
+                        post='After_ref',
+                        ctrl='Uten_NP',
+                        trt='Med_NP'))
 
 
 
@@ -389,10 +524,8 @@ def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
 
 
 
-
-DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')  # Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
-#DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)
-
+model = DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
+#DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)     #Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
 
 
 
