@@ -633,6 +633,11 @@ _print_ft("Post H0: alle post-lag er like", post_flat_ft)
 _print_ft("HOVED log-OLS H0: interaksjon = 0", main_interaction_ft)
 _print_ft("PLACEBO log-OLS H0: interaksjon = 0", placebo_interaction_ft)
 
+
+
+
+
+
 # -----------------------------
 # Lagring: tabeller og tester
 # -----------------------------
