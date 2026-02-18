@@ -5,20 +5,21 @@ import matplotlib.pyplot as plt
 import csv
 import row
 
-data1 = pd.DataFrame({
+DiD = pd.DataFrame({
     "region":  ["NO1","NO1","NO1","NO2","NO2","NO2","NO5","NO5","NO5"],
-    "vindu":   ["January","December","4 Winter Months(Oct,Nov,Dec,Jan)"] * 3,
-    "value":   [4.7 , 3.25 , 3.69,  5.02, 4.82, 4.24,  3.5, 2.78, 2.65],
-    "ci_high":  [6.4, 5.02, 4.29,  6.60, 6.5, 5.23,  5.34, 4.2, 3.67],
-    "ci_low": [3.04, 1.61, 2.33 ,  3.46, 3.25, 3.25,  1.61, 1.41, 1.61],
+    "vindu":   ["January","December","3 Winter Months(Nov,Dec,Jan)"] * 3,
+    "value":    [4.7 , 3.25 , 3.45,    5.02, 4.82, 4.51,     3.5, 2.78, 2.83],
+    "ci_high":  [6.4, 5.02, 5.22,      6.60, 6.5, 6.3,       5.34, 4.2, 4.61],
+    "ci_low":   [3.04, 1.61, 1.72 ,    3.46, 3.25, 2.76,     1.61, 1.41, 1.08],
 })
 
-data2 = pd.DataFrame({
-    "region":  ["NO1","NO1","NO1","NO2","NO2","NO2","NO5","NO5","NO5"],
-    "vindu":   ["With Norgespris","Without Norgespris","Noe mer"] * 3,
-    "value":   [4.53 , 0.93 , 0,  7.38, 2.83, 0,  6.09, 3.21, 0],
-    "ci_high":  [0, 0, 0,  0, 0, 0,  0, 0, 0],
-    "ci_low": [10, 10, 10,  10, 10, 10,  10, 10, 10,],
+delta_consump = pd.DataFrame({
+    "region":  ["NO1","NO1","NO1","NO1","NO2","NO2","NO2","NO2","NO5","NO5","NO5","NO5"],
+    "vindu":   ["γ_1: Effect of Norgespris","γ_1: Effect of no Norgespris", "γ_2: Effect of temperature with NP","γ_2: Effect of temperature without NP"] * 3,
+
+    "value":    [2.74 ,  -0.61 , -3.16,  -2.85,    5.03,  0.6,-3.57, -3.39,      3.45, 0.76, -3.05, -2.87],
+    "ci_high":  [3.12,   -0.29,  -3.12,  -2.81,    5.44, 0.94, -3.51, -3.34,     3.85, 1.13, -3.01, -2.82],
+    "ci_low":   [2.36,   -0.94,  -3.21,  -2.89,    4.63, 0.26,-3.62, -3.44,      3.05, 0.4, -3.10, -2.91],
 })
 
 
@@ -34,7 +35,7 @@ def plot_errorbars_by_group(
     y_ref_lines=None,
     annotate=None,
     palette="Set2",
-    point_size=60,
+    point_size=100,
     capsize=0.15
 ):
     """
@@ -91,9 +92,9 @@ def plot_errorbars_by_group(
         )
 
     ax.set_xticks(x_idx)
-    ax.set_xticklabels(cats, fontsize=11)
-    ax.set_ylabel(y_label)
-    ax.set_title(title)
+    ax.set_xticklabels(cats, fontsize=15)
+    ax.set_ylabel(y_label, fontsize= 15)
+    ax.set_title(title, fontsize = 17)
 
     if y_ref_lines is None:
         y_ref_lines = [0]
@@ -102,7 +103,7 @@ def plot_errorbars_by_group(
         ax.axhline(ref, color="gray", linestyle="--", linewidth=0.9, alpha=0.6)
 
     ax.margins(x=0.08)
-    ax.legend(loc="best")
+    ax.legend(loc="best", fontsize = 15)
     ax.grid(axis="y", color="0.9")
     sns.despine(ax=ax)
 
@@ -113,7 +114,7 @@ def plot_errorbars_by_group(
             xytext=annotate.get("xytext",(0.2,0.2)),
             textcoords="axes fraction" if annotate.get("axescoords", True) else "data",
             arrowprops=dict(arrowstyle="->", color="0.3"),
-            fontsize=11
+            fontsize=15
         )
 
     plt.tight_layout()
@@ -121,18 +122,18 @@ def plot_errorbars_by_group(
 
 
 plot_errorbars_by_group(
-    data1,
-    title="Difference in Difference 2025->2026",
-    y_label=" Change in Consumption for With Norgespris and Without Norgespris (%)",
+    DiD,
+    title="Difference in Difference 2024(5)->2025(6)",
+    y_label=" Δ Consumption in Percent[%]",
     y_ref_lines=[0, 7]
     #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}
 )
 
 
 plot_errorbars_by_group(
-    data2,
-    title="Change in Consumption 2025->2026",
-    y_label=" Change in Consumption in Categories (%)",
-    y_ref_lines=[0, 7]
+    delta_consump,
+    title=" Coefficient Illustration Regression Model 2024(5)->2025(6)",
+    y_label=" Δ Consumption in Percent [%]",
+    y_ref_lines=[-4, 6]
     #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}
 )
