@@ -125,10 +125,10 @@ def Placebo_DiD(data_mNP, data_uNP, price_area):
 
 def DifferenceinDifference(data_mNP, data_uNP, price_area):
     # ------------------- Filterer for dato ---------- #
-    start_date_before = '2024-10-01'
+    start_date_before = '2024-11-01'
     end_date_before = '2025-01-31'
 
-    start_date_after = '2025-12-01'
+    start_date_after = '2025-11-01'
     end_date_after = '2026-01-31'
 
     # ----------- Endring til Date og Hour ------------ #
@@ -790,10 +790,10 @@ def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
 
 def NorgesprisTemp(data_mNP, price_area, Temp):
     # ------------------- Filterer for dato ---------- #
-    start_date_before = '2024-10-01'
+    start_date_before = '2024-11-01'
     end_date_before = '2025-01-31'
 
-    start_date_after = '2025-10-01'
+    start_date_after = '2025-11-01'
     end_date_after = '2026-01-31'
 
     # ----------- Endring til Date og Hour ------------ #
@@ -929,10 +929,10 @@ def NorgesprisTemp(data_mNP, price_area, Temp):
 
 def UtenNorgesprisTemp(data_uNP, price_area, Temp):
     # ------------------- Filterer for dato ---------- #
-    start_date_before = '2024-10-01'
+    start_date_before = '2024-11-01'
     end_date_before = '2025-01-31'
 
-    start_date_after = '2025-10-01'
+    start_date_after = '2025-11-01'
     end_date_after = '2026-01-31'
 
     # ----------- Endring til Date og Hour ------------ #
