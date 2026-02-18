@@ -19,6 +19,110 @@ Temp_Bergen = pd.read_csv('Temp_Bergen.csv')
 Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
 
 
+def Placebo_DiD(data_mNP, data_uNP, price_area):
+    """
+    Ren placebo Difference-in-Differences for 'kWh/Metering_point'
+    basert på strukturen du allerede bruker i DifferenceinDifference().
+    """
+
+    import numpy as np
+    import pandas as pd
+
+    # ------------------- Placebo-vindu (ett år tidligere) ------------------- #
+    start_before = '2023-10-01'
+    end_before   = '2024-01-31'
+
+    start_after  = '2024-10-01'
+    end_after    = '2025-01-31'
+
+    # ------------------- Konverter dato ------------------- #
+    for df in [data_mNP, data_uNP]:
+        df['start_time_utc'] = pd.to_datetime(
+            df['start_time_utc'],
+            format='%Y-%m-%d %H:%M:%S',
+            errors='coerce',
+            utc=True
+        )
+        df['Date'] = df['start_time_utc'].dt.date
+        df['Date'] = pd.to_datetime(df['Date'])
+        df['Hour'] = df['start_time_utc'].dt.hour.astype(int)
+
+    # ------------------- Filter: PRICE AREA ------------------- #
+    dNP = data_mNP[data_mNP['price_area'] == price_area].copy()
+    dUP = data_uNP[data_uNP['price_area'] == price_area].copy()
+
+    # ------------------- Perioder ------------------- #
+    dNP_before = dNP[(dNP['Date'] >= start_before) & (dNP['Date'] <= end_before)].copy()
+    dNP_after  = dNP[(dNP['Date'] >= start_after)  & (dNP['Date'] <= end_after)].copy()
+
+    dUP_before = dUP[(dUP['Date'] >= start_before) & (dUP['Date'] <= end_before)].copy()
+    dUP_after  = dUP[(dUP['Date'] >= start_after)  & (dUP['Date'] <= end_after)].copy()
+
+    # ------------------- kWh per metering point ------------------- #
+    for df in [dNP_before, dNP_after, dUP_before, dUP_after]:
+        df['kWh/Metering_point'] = (
+            df['consumption_kwh'] / df['metering_point_count']
+        )
+
+    # ------------------- Aggregering per Date × Hour × group_definition ------------------- #
+    agg_NP_before = dNP_before.groupby(['Date','Hour','group_definition'])['kWh/Metering_point'].sum().reset_index()
+    agg_NP_after  = dNP_after.groupby(['Date','Hour','group_definition'])['kWh/Metering_point'].sum().reset_index()
+
+    agg_UP_before = dUP_before.groupby(['Date','Hour','group_definition'])['kWh/Metering_point'].sum().reset_index()
+    agg_UP_after  = dUP_after.groupby(['Date','Hour','group_definition'])['kWh/Metering_point'].sum().reset_index()
+
+    # ------------------- Kombiner ------------------- #
+    df_NP = pd.concat([agg_NP_before, agg_NP_after], ignore_index=True)
+    df_UP = pd.concat([agg_UP_before, agg_UP_after], ignore_index=True)
+
+    df_NP['Norgespris'] = 'Med_NP'
+    df_UP['Norgespris'] = 'Uten_NP'
+
+    df = pd.concat([df_NP, df_UP], ignore_index=True)
+
+    # ------------------- Gi hver observasjon periode ------------------- #
+    df['Period'] = np.where(df['Date'] < start_after, 'Before', 'After')
+
+    # ------------------- Beregn gjennomsnitt per gruppe ------------------- #
+    mean_NP_before = df[(df['Norgespris']=='Med_NP') & (df['Period']=='Before')]['kWh/Metering_point'].mean()
+    mean_NP_after  = df[(df['Norgespris']=='Med_NP') & (df['Period']=='After') ]['kWh/Metering_point'].mean()
+
+    mean_UP_before = df[(df['Norgespris']=='Uten_NP') & (df['Period']=='Before')]['kWh/Metering_point'].mean()
+    mean_UP_after  = df[(df['Norgespris']=='Uten_NP') & (df['Period']=='After') ]['kWh/Metering_point'].mean()
+
+    # ------------------- ΔT, ΔC, DiD ------------------- #
+    delta_T = mean_NP_after - mean_NP_before
+    delta_C = mean_UP_after - mean_UP_before
+    did_est = delta_T - delta_C
+
+    # ------------------- Prosent endring ------------------- #
+    pct_T = (mean_NP_after / mean_NP_before - 1) * 100
+    pct_C = (mean_UP_after / mean_UP_before - 1) * 100
+    did_pct = pct_T - pct_C
+
+    # ------------------- Print ------------------- #
+    print("\n===== PLACEBO DiD =====")
+    print(f"Treatment før: {mean_NP_before:.4f}")
+    print(f"Treatment etter: {mean_NP_after:.4f}")
+    print(f"Control før: {mean_UP_before:.4f}")
+    print(f"Control etter: {mean_UP_after:.4f}")
+    print(f"ΔT = {delta_T:.4f}, ΔC = {delta_C:.4f}")
+    print(f"DiD = {did_est:.4f}")
+    print(f"Prosent-DiD = {did_pct:.4f} p.p.")
+
+    return {
+        "treatment_before": mean_NP_before,
+        "treatment_after": mean_NP_after,
+        "control_before": mean_UP_before,
+        "control_after": mean_UP_after,
+        "delta_treatment": delta_T,
+        "delta_control": delta_C,
+        "did": did_est,
+        "treatment_pct_change": pct_T,
+        "control_pct_change": pct_C,
+        "did_pct": did_pct
+    }
+
 def DifferenceinDifference(data_mNP, data_uNP, price_area):
     # ------------------- Filterer for dato ---------- #
     start_date_before = '2024-10-01'
@@ -185,6 +289,7 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
     model = sm.OLS(y, X).fit()
     print(model.summary())
 
+
     # ------------- F-Test ----------- #
     print('------------------- F TEST -------------------')
     param_names = model.params.index.tolist()
@@ -287,49 +392,199 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
     print(es_mod,es_df)'''
 
     # -------------------- Placebo test ------------ #
-    print('--------------- Placebo test ------------------')
-    def run_placebo_test(df, real_cutoff="2025-10-01", placebo_cutoff="2024-12-15"):
-        dfp = df.copy()
+    '''print('--------------- Placebo test ------------------')
 
-        # Begrens til pre ift. ekte cutoff
-        real_cutoff = pd.to_datetime(real_cutoff)
-        dfp = dfp[dfp["Date"] < real_cutoff].copy()
+    def run_placebo_did(
+            treatment_file="All_Demand_Data/NO1_mNP.csv",
+            control_file="All_Demand_Data/NO1_uNP.csv",
+            placebo_before_start="2023-10-01",
+            placebo_before_end="2024-01-31",
+            placebo_after_start="2024-10-01",
+            placebo_after_end="2025-01-31",
+            n_boot=2000,
+    ):
+        """
+        Kjør en komplett PLACEBO Difference-in-Differences med:
+          - Nivå-DiD
+          - Prosent-DiD
+          - Bootstrap-KI
+          - OLS (log)
+        Returnerer et dictionary med alle resultater.
+        """
 
-        if dfp.empty:
-            raise ValueError("Ingen observasjoner i pre-perioden for placebo-testen.")
+        import pandas as pd
+        import numpy as np
+        import statsmodels.formula.api as smf
 
-        # Lag placebo-gruppeindikator (før/etter placebo)
-        placebo_cutoff = pd.to_datetime(placebo_cutoff)
-        dfp["Group_placebo"] = np.where(dfp["Date"] >= placebo_cutoff, "After_ref", "Before_ref")
+        # --------------------------
+        # Konverter datoer
+        # --------------------------
+        PBS = pd.Timestamp(placebo_before_start)
+        PBE = pd.Timestamp(placebo_before_end)
+        PAS = pd.Timestamp(placebo_after_start)
+        PAE = pd.Timestamp(placebo_after_end)
 
-        # Pass på at kategorier er riktige/tilgjengelige
-        dfp["Group_placebo"] = pd.Categorical(dfp["Group_placebo"], categories=["Before_ref", "After_ref"])
-        dfp["Norgespris"] = pd.Categorical(dfp["Norgespris"], categories=["Uten_NP", "Med_NP"])
+        DATE_COL = "start_time_utc"
+        CONS_COL = "consumption_kwh"
+        MP_COL = "metering_point_count"
 
-        # Estimer placebo-DID (samme FE som din modell)
-        formula_placebo = (
-            'np.log(Q("kWh/Metering_point")) ~ '
-            'C(Group_placebo, Treatment(reference="Before_ref")) '
-            '* C(Norgespris, Treatment(reference="Uten_NP")) '
-            '+ C(Hour) + C(Month)'
-        )
-        placebo_mod = smf.ols(formula_placebo, data=dfp).fit(cov_type="HC1")
-        #print(placebo_mod.summary())
+        # --------------------------
+        # Leser + aggregerer daglig
+        # --------------------------
+        def load_and_prepare(path, group):
+            df = pd.read_csv(path, sep=";", encoding="utf-8")
+            dt = pd.to_datetime(df[DATE_COL], errors="coerce", utc=True).dt.tz_convert(None)
+            date = dt.dt.floor("D")
 
-        # F-test: placebo-interaksjon = 0
-        pname = [p for p in placebo_mod.params.index
-                 if "C(Group_placebo)" in p and "T.After_ref" in p
-                 and "C(Norgespris)" in p and "T.Med_NP" in p]
-        if len(pname) == 0:
-            raise RuntimeError("Fant ikke placebo-interaksjon i placebo-modellen.")
-        print("\nF-test av placebo-interaksjon = 0:")
-        print(placebo_mod.f_test(f"{pname[0]} = 0"))
+            df[CONS_COL] = pd.to_numeric(df[CONS_COL], errors="coerce")
+            df[MP_COL] = pd.to_numeric(df[MP_COL], errors="coerce")
 
-        return placebo_mod
-    # Kjør:
-    placebo_mod = run_placebo_test(df, real_cutoff="2025-10-01", placebo_cutoff="2024-12-15")
-    print(placebo_mod)
+            daily = (
+                pd.DataFrame({"date": date, CONS_COL: df[CONS_COL], MP_COL: df[MP_COL]})
+                .groupby("date", as_index=False)
+                .sum()
+            )
+            daily["per_mp"] = daily[CONS_COL] / daily[MP_COL]
+            daily["group"] = group
+            return daily
 
+        treatment = load_and_prepare(treatment_file, "treatment")
+        control = load_and_prepare(control_file, "control")
+        daily = pd.concat([treatment, control], ignore_index=True)
+
+        # --------------------------
+        # Før/Efter-vindu
+        # --------------------------
+        def label_periods(date):
+            out = pd.Series(index=date.index, dtype="object")
+            out[(date >= PBS) & (date <= PBE)] = "before_ref"
+            out[(date >= PAS) & (date <= PAE)] = "after_ref"
+            return out
+
+        daily["period"] = label_periods(daily["date"])
+
+        # --------------------------
+        # Aggreger nivå per periode
+        # --------------------------
+        def summarize(df):
+            ag = (
+                df.groupby(["group", "period"], as_index=False)
+                .agg(sum_c=(CONS_COL, "sum"), sum_mp=(MP_COL, "sum"))
+            )
+            ag["avg_per_mp"] = ag["sum_c"] / ag["sum_mp"]
+            return ag
+
+        agg = summarize(daily.dropna(subset=["period"]))
+
+        # --------------------------
+        # DiD (nivå)
+        # --------------------------
+        def get_avg(g, p):
+            row = agg[(agg["group"] == g) & (agg["period"] == p)]
+            return float(row["avg_per_mp"].values[0]) if not row.empty else np.nan
+
+        tb, ta = get_avg("treatment", "before_ref"), get_avg("treatment", "after_ref")
+        cb, ca = get_avg("control", "before_ref"), get_avg("control", "after_ref")
+
+        dt = ta - tb
+        dc = ca - cb
+        did = dt - dc
+
+        # --------------------------
+        # DiD (prosent)
+        # --------------------------
+        pct_t = (ta / tb - 1) * 100
+        pct_c = (ca / cb - 1) * 100
+        did_pct = pct_t - pct_c
+
+        # --------------------------
+        # Bootstrap
+        # --------------------------
+        dfb = daily.dropna(subset=["period"]).copy()
+        rng = np.random.default_rng(42)
+
+        strata = {
+            (g, p): np.array(sorted(df_part["date"].unique()))
+            for (g, p), df_part in dfb.groupby(["group", "period"])
+        }
+
+        def boot_once():
+            rows = []
+            for (g, p), days in strata.items():
+                boot_days = days[rng.integers(0, len(days), len(days))]
+                sub = dfb[(dfb["group"] == g) &
+                          (dfb["period"] == p) &
+                          (dfb["date"].isin(boot_days))]
+                avg = sub[CONS_COL].sum() / sub[MP_COL].sum()
+                rows.append({"group": g, "period": p, "avg_per_mp": avg})
+            ag_b = pd.DataFrame(rows)
+
+            tb = ag_b[(ag_b["group"] == "treatment") & (ag_b["period"] == "before_ref")]["avg_per_mp"].values[0]
+            ta = ag_b[(ag_b["group"] == "treatment") & (ag_b["period"] == "after_ref")]["avg_per_mp"].values[0]
+            cb = ag_b[(ag_b["group"] == "control") & (ag_b["period"] == "before_ref")]["avg_per_mp"].values[0]
+            ca = ag_b[(ag_b["group"] == "control") & (ag_b["period"] == "after_ref")]["avg_per_mp"].values[0]
+            return (ta - tb) - (ca - cb)
+
+        boots = np.array([boot_once() for _ in range(n_boot)])
+        ci_low, ci_high = np.percentile(boots, [2.5, 97.5])
+
+        # --------------------------
+        # OLS-DiD (log)
+        # --------------------------
+        df_ols = daily.dropna(subset=["period", "per_mp"]).copy()
+        df_ols = df_ols[df_ols["per_mp"] > 0].copy()
+
+        df_ols["post"] = (df_ols["period"] == "after_ref").astype(int)
+        df_ols["treat"] = (df_ols["group"] == "treatment").astype(int)
+        df_ols["log_per_mp"] = np.log(df_ols["per_mp"])
+
+        model = smf.ols("log_per_mp ~ treat:post", data=df_ols).fit(cov_type="HC1")
+
+        b = float(model.params["treat:post"])
+        ci_b_low, ci_b_high = model.conf_int().loc["treat:post"].tolist()
+        pct_eff = (np.exp(b) - 1) * 100
+
+        # --------------------------
+        # Print
+        # --------------------------
+        print("\n===== PLACEBO-DID RESULTATER =====")
+        print(f"Treatment før   = {tb:.4f}")
+        print(f"Treatment etter = {ta:.4f}")
+        print(f"Control før     = {cb:.4f}")
+        print(f"Control etter   = {ca:.4f}")
+        print(f"ΔT = {dt:.4f}, ΔC = {dc:.4f}")
+        print(f"DiD = {did:.4f}")
+        print(f"Prosent-DiD = {did_pct:.4f} p.p.")
+        print(f"Bootstrap 95% KI: [{ci_low:.4f}, {ci_high:.4f}]")
+
+        print("\n===== OLS LOG-DiD =====")
+        print(f"β = {b:.6f}, 95% KI = [{ci_b_low:.6f}, {ci_b_high:.6f}]")
+        print(f"EFFEKT I % = {pct_eff:.3f}%")
+
+        # --------------------------
+        # Returner alt
+        # --------------------------
+        return {
+            "treatment_before": tb,
+            "treatment_after": ta,
+            "control_before": cb,
+            "control_after": ca,
+            "delta_treatment": dt,
+            "delta_control": dc,
+            "did": did,
+            "treatment_pct_change": pct_t,
+            "control_pct_change": pct_c,
+            "did_pct": did_pct,
+            "bootstrap_ci_low": ci_low,
+            "bootstrap_ci_high": ci_high,
+            "ols_coef": b,
+            "ols_ci_low": ci_b_low,
+            "ols_ci_high": ci_b_high,
+            "ols_pct_effect": pct_eff,
+            "ols_model": model,
+        }
+
+    run_placebo_did()'''
 
 
 def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
@@ -532,6 +787,13 @@ def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
 
     model = sm.OLS(y, X).fit()
     print(model.summary())
+
+
+
+
+Placebo_DiD(data_mNP_NO1, data_uNP_NO1, "NO1")
+Placebo_DiD(data_mNP_NO2, data_uNP_NO2, "NO2")
+Placebo_DiD(data_mNP_NO5, data_uNP_NO5, "NO5")
 
 
 

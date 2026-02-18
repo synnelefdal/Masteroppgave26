@@ -210,7 +210,7 @@ def try_ols_log_did(daily_df: pd.DataFrame):
     df["post"] = (df["period"] == "after_ref").astype(int)
     df["group_treatment"] = (df["group"] == "treatment").astype(int)
     df["log_per_mp"] = np.log(df["per_mp"])
-    model = smf.ols("log_per_mp ~ group_treatment + post + group_treatment:post", data=df).fit(cov_type="HC1")
+    model = smf.ols("log_per_mp ~  group_treatment:post", data=df).fit(cov_type="HC1")
     if "group_treatment:post" in model.params.index:
         b = float(model.params["group_treatment:post"])
         ci_low, ci_high = model.conf_int().loc["group_treatment:post"].tolist()
