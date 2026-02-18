@@ -291,7 +291,7 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
 
 
     # ------------- F-Test ----------- #
-    print('------------------- F TEST -------------------')
+    '''print('------------------- F TEST -------------------')
     param_names = model.params.index.tolist()
     did_term_candidates = [
         name for name in param_names
@@ -309,7 +309,7 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
 
     # (Valgfritt) hent t-verdi/p-verdi direkte:
     print("\nDirekte fra koeffisienten:")
-    print(model.t_test(f"{did_term} = 0"))
+    print(model.t_test(f"{did_term} = 0"))'''
 
     # -------------- Event study ----------- #
     '''print('-------- Event study ------------')
