@@ -21,11 +21,11 @@ Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
 
 def DifferenceinDifference(data_mNP, data_uNP, price_area):
     # ------------------- Filterer for dato ---------- #
-    start_date_before = '2024-10-01'
-    end_date_before = '2025-01-31'
+    start_date_before = '2024-12-01'
+    end_date_before = '2024-12-31'
 
-    start_date_after = '2025-10-01'
-    end_date_after = '2026-01-31'
+    start_date_after = '2025-12-01'
+    end_date_after = '2025-12-31'
 
     # ----------- Endring til Date og Hour ------------ #
     data_mNP['start_time_utc'] = pd.to_datetime(data_mNP['start_time_utc'],
@@ -389,6 +389,8 @@ def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
 
 
 DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
+DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2')
+DifferenceinDifference(data_mNP_NO5, data_uNP_NO5, 'NO5')
 #DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)     #Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
 
 
