@@ -16,7 +16,7 @@ import statsmodels.api as sm
 # ============================================================
 # Juster filnavn/paths etter behov
 data_mNP = pd.read_csv(
-    'All_Demand_Data/NO1_mNP.csv',
+    'All_Demand_Data/NO2_mNP.csv',
     sep=';',
     dtype={
         'usage_date_id': str,
@@ -26,7 +26,7 @@ data_mNP = pd.read_csv(
 )
 
 data_uNP = pd.read_csv(
-    'All_Demand_Data/NO1_uNP.csv',
+    'All_Demand_Data/NO2_uNP.csv',
     sep=';',
     dtype={
         'usage_date_id': str,
@@ -38,10 +38,10 @@ data_uNP = pd.read_csv(
 # ============================================================
 # 3) Sett dato-intervaller utenfor funksjonen (globalt)
 # ============================================================
-start_date_before = '2025-01-07'
-end_date_before   = '2025-01-07'
-start_date_after  = '2026-01-07'
-end_date_after    = '2026-01-07'
+start_date_before = '2025-01-01'
+end_date_before   = '2025-01-31'
+start_date_after  = '2026-01-01'
+end_date_after    = '2026-01-31'
 
 # ============================================================
 # 4) Funksjonen (ingen price_area-parameter, hour er valgfri)
@@ -243,4 +243,4 @@ def DifferenceinDifference(data_mNP, data_uNP, Temp=None, hour=None):
 # C) Vilkårlig liste timer (morgen + kveld)
 # model, used_df = DifferenceinDifference(data_mNP, data_uNP, hour=[7, 8, 9, 17])
 
-DifferenceinDifference(data_mNP, data_uNP,hour=[8,9,10])
+DifferenceinDifference(data_mNP, data_uNP,hour=[7,8,9,10])

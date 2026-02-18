@@ -5,14 +5,21 @@ import matplotlib.pyplot as plt
 import csv
 import row
 
-data = pd.DataFrame({
+data1 = pd.DataFrame({
     "region":  ["NO1","NO1","NO1","NO2","NO2","NO2","NO5","NO5","NO5"],
-    "vindu":   ["Med Norgespris(3 mnd)","Uten Norgespris(3 mnd)","Januar med Norgespris"] * 3,
-    "value":   [5, 4.6, 4.2,  6.8, 6.1, 5.9,  6.5, 6.0, 6.1],
-    "ci_high":  [6, 5.3, 4.9,  7.3, 6.6, 6.3,  6.9, 6.3, 6.5],
-    "ci_low": [4, 3.9, 3.5,  6.2, 5.6, 5.5,  6.1, 5.7, 5.8],
+    "vindu":   ["January","December","4 Winter Months(Oct,Nov,Dec,Jan)"] * 3,
+    "value":   [4.7 , 3.25 , 3.69,  5.02, 4.82, 4.24,  3.5, 2.78, 2.65],
+    "ci_high":  [6.4, 5.02, 4.29,  6.60, 6.5, 5.23,  5.34, 4.2, 3.67],
+    "ci_low": [3.04, 1.61, 2.33 ,  3.46, 3.25, 3.25,  1.61, 1.41, 1.61],
 })
 
+data2 = pd.DataFrame({
+    "region":  ["NO1","NO1","NO1","NO2","NO2","NO2","NO5","NO5","NO5"],
+    "vindu":   ["With Norgespris","Without Norgespris","Noe mer"] * 3,
+    "value":   [4.53 , 0.93 , 0,  7.38, 2.83, 0,  6.09, 3.21, 0],
+    "ci_high":  [0, 0, 0,  0, 0, 0,  0, 0, 0],
+    "ci_low": [10, 10, 10,  10, 10, 10,  10, 10, 10,],
+})
 
 
 def plot_errorbars_by_group(
@@ -114,9 +121,18 @@ def plot_errorbars_by_group(
 
 
 plot_errorbars_by_group(
-    data,
+    data1,
+    title="Difference in Difference 2025->2026",
+    y_label=" Change in Consumption for With Norgespris and Without Norgespris (%)",
+    y_ref_lines=[0, 7]
+    #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}
+)
+
+
+plot_errorbars_by_group(
+    data2,
     title="Change in Consumption 2025->2026",
-    y_label=" Change in consumtption for different categories (%)",
-    y_ref_lines=[3, 7],
-    annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}
+    y_label=" Change in Consumption in Categories (%)",
+    y_ref_lines=[0, 7]
+    #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}
 )

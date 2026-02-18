@@ -11,9 +11,9 @@ import row
 
 #data = pd.read_csv('Forbruk_NO1_NO5.csv')
 
-Med_NP=pd.read_csv('All_Demand_Data/NO5_mNP.csv', sep=';')
+Med_NP=pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep=';')
 
-Uten_NP=pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep=';')
+Uten_NP=pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep=';')
 
 
 def Difference_in_Difference(dataset):
