@@ -17,6 +17,7 @@ data_uNP_NO5 = pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep= ';')
 
 Temp_Bergen = pd.read_csv('Temp_Bergen.csv')
 Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
+Temp_Stavanger = pd.read_csv('Temp_Stavanger.csv')
 
 
 def Placebo_DiD(data_mNP, data_uNP, price_area):
@@ -288,6 +289,15 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
     model = sm.OLS(y, X).fit()
     print(model.summary())
 
+    beta3 = model.params['C(Group, Treatment(reference="Before_ref"))[T.After_ref]:C(Norgespris, Treatment(reference="Uten_NP"))[T.Med_NP]']
+    DiD = (np.exp(beta3) - 1)*100
+
+    ci_low, ci_high = model.conf_int().loc['C(Group, Treatment(reference="Before_ref"))[T.After_ref]:C(Norgespris, Treatment(reference="Uten_NP"))[T.Med_NP]']
+    DiD_low = (np.exp(ci_low) - 1)*100
+    DiD_high = (np.exp(ci_high) - 1)*100
+
+    print(f'DiD prosent for {price_area}: {DiD:.2f}%')
+    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
 
     # ------------- F-Test ----------- #
     '''print('------------------- F TEST -------------------')
@@ -926,6 +936,29 @@ def NorgesprisTemp(data_mNP, price_area, Temp):
     model = sm.OLS(y, X).fit()
     print(model.summary())
 
+    beta3 = model.params[
+        'C(Group, Treatment(reference="Before_ref"))[T.After_ref]']
+    DiD = (np.exp(beta3) - 1) * 100
+
+    ci_low, ci_high = model.conf_int().loc[
+        'C(Group, Treatment(reference="Before_ref"))[T.After_ref]']
+    DiD_low = (np.exp(ci_low) - 1) * 100
+    DiD_high = (np.exp(ci_high) - 1) * 100
+
+    gamma2 = model.params['Temp24']
+    effect_temp = (np.exp(gamma2) - 1) * 100
+
+    ci_low_temp, ci_high_temp = model.conf_int().loc[
+        'Temp24']
+    DiD_low_temp = (np.exp(ci_low_temp) - 1) * 100
+    DiD_high_temp = (np.exp(ci_high_temp) - 1) * 100
+
+    print(f'DiD prosent for {price_area}: {DiD:.2f}%')
+    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
+    print(f'Effekt prosent for temp i {price_area}: {effect_temp:.2f}%')
+    print(f'KI for temperatur effekt: [{DiD_low_temp:.2f}%, {DiD_high_temp:.2f}%]')
+
+
 def UtenNorgesprisTemp(data_uNP, price_area, Temp):
     # ------------------- Filterer for dato ---------- #
     start_date_before = '2024-11-01'
@@ -1053,6 +1086,27 @@ def UtenNorgesprisTemp(data_uNP, price_area, Temp):
     model = sm.OLS(y, X).fit()
     print(model.summary())
 
+    beta3 = model.params[
+        'C(Group, Treatment(reference="Before_ref"))[T.After_ref]']
+    DiD = (np.exp(beta3) - 1) * 100
+
+    ci_low, ci_high = model.conf_int().loc[
+        'C(Group, Treatment(reference="Before_ref"))[T.After_ref]']
+    DiD_low = (np.exp(ci_low) - 1) * 100
+    DiD_high = (np.exp(ci_high) - 1) * 100
+
+    gamma2 = model.params['Temp24']
+    effect_temp = (np.exp(gamma2) - 1) * 100
+
+    ci_low_temp, ci_high_temp = model.conf_int().loc['Temp24']
+    DiD_low_temp = (np.exp(ci_low_temp) - 1) * 100
+    DiD_high_temp = (np.exp(ci_high_temp) - 1) * 100
+
+    print(f'DiD prosent for {price_area}: {DiD:.2f}%')
+    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
+    print(f'Effekt prosent for temp i {price_area}: {effect_temp:.2f}%')
+    print(f'KI for temperatur effekt: [{DiD_low_temp:.2f}%, {DiD_high_temp:.2f}%]')
+
 #Placebo_DiD(data_mNP_NO1, data_uNP_NO1, "NO1")
 #Placebo_DiD(data_mNP_NO2, data_uNP_NO2, "NO2")
 #Placebo_DiD(data_mNP_NO5, data_uNP_NO5, "NO5")
@@ -1060,12 +1114,24 @@ def UtenNorgesprisTemp(data_uNP, price_area, Temp):
 
 
 DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
-#DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2')
-#DifferenceinDifference(data_mNP_NO5, data_uNP_NO5, 'NO5')
+DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2')
+DifferenceinDifference(data_mNP_NO5, data_uNP_NO5, 'NO5')
 #DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)     #Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
+
+'''print(' ------------ NO1 --------------- ')
 
 NorgesprisTemp(data_mNP_NO1, 'NO1', Temp_Oslo)
 NorgesprisTemp(data_uNP_NO1, 'NO1', Temp_Oslo)
+
+print(' ------------ NO2 --------------- ')
+
+NorgesprisTemp(data_mNP_NO2, 'NO2', Temp_Stavanger)
+NorgesprisTemp(data_uNP_NO2, 'NO2', Temp_Stavanger)
+
+print(' ------------ NO5 --------------- ')
+
+NorgesprisTemp(data_mNP_NO5, 'NO5', Temp_Bergen)
+NorgesprisTemp(data_uNP_NO5, 'NO5', Temp_Bergen)'''
 
 
 
