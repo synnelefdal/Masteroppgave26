@@ -276,7 +276,6 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
         'np.log(Q("kWh/Metering_point")) ~ '
         'C(Group, Treatment(reference="Before_ref")) '
         '* C(Norgespris, Treatment(reference="Uten_NP")) '
-        '+ C(Hour) + C(Month)'
     )
 
     y, X = patsy.dmatrices(
@@ -1060,7 +1059,7 @@ def UtenNorgesprisTemp(data_uNP, price_area, Temp):
 
 
 
-#DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
+DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
 #DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2')
 #DifferenceinDifference(data_mNP_NO5, data_uNP_NO5, 'NO5')
 #DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)     #Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
