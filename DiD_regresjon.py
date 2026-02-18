@@ -21,11 +21,11 @@ Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
 
 def DifferenceinDifference(data_mNP, data_uNP, price_area):
     # ------------------- Filterer for dato ---------- #
-    start_date_before = '2024-12-01'
-    end_date_before = '2024-12-31'
+    start_date_before = '2024-10-01'
+    end_date_before = '2025-01-31'
 
     start_date_after = '2025-12-01'
-    end_date_after = '2025-12-31'
+    end_date_after = '2026-01-31'
 
     # ----------- Endring til Date og Hour ------------ #
     data_mNP['start_time_utc'] = pd.to_datetime(data_mNP['start_time_utc'],
@@ -184,6 +184,153 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
 
     model = sm.OLS(y, X).fit()
     print(model.summary())
+
+    # ------------- F-Test ----------- #
+    print('------------------- F TEST -------------------')
+    param_names = model.params.index.tolist()
+    did_term_candidates = [
+        name for name in param_names
+        if ("C(Group" in name and "T.After_ref" in name
+            and "C(Norgespris" in name and "T.Med_NP" in name)
+    ]
+    if len(did_term_candidates) == 0:
+        raise RuntimeError("Fant ikke DID-interaksjon i modellen. Sjekk formel og nivånavn.")
+    did_term = did_term_candidates[0]
+
+    # F-test (Wald-test) for at DID-koeffisienten = 0
+    f_test_res = model.f_test(f"{did_term} = 0")
+    print("F-test for DID-effekt = 0")
+    print(f_test_res)  # viser F-stat, df og p-verdi
+
+    # (Valgfritt) hent t-verdi/p-verdi direkte:
+    print("\nDirekte fra koeffisienten:")
+    print(model.t_test(f"{did_term} = 0"))
+
+    # -------------- Event study ----------- #
+    '''print('-------- Event study ------------')
+
+    def run_event_study(df, cutoff="2025-10-01", min_k=-6, max_k=6, baseline=-1):
+        dfe = df.copy()
+        cutoff = pd.to_datetime(cutoff)
+
+        # Relativ måned (k)
+        dfe["Date"] = pd.to_datetime(dfe["Date"])
+        rel = (dfe["Date"].dt.to_period("M") - cutoff.to_period("M")).apply(lambda x: x.n)
+        dfe["rel_month"] = rel.astype(int)
+
+        # Klipp vindu
+        dfe = dfe[(dfe["rel_month"] >= min_k) & (dfe["rel_month"] <= max_k)].copy()
+
+        # Kategoriske nivåer (viktig for stabile dummier)
+        kept_levels = list(range(min_k, max_k + 1))
+        # Bruk baseline = -1 (vanlig i litteraturen), men fallback hvis den ikke finnes i data
+        if baseline not in dfe["rel_month"].unique():
+            # velg en annen baseline som finnes og er <0 hvis mulig, ellers 0
+            negs = sorted([k for k in kept_levels if k in dfe["rel_month"].unique() and k < 0])
+            baseline = negs[-1] if len(negs) else 0
+
+        dfe["rel_month"] = pd.Categorical(dfe["rel_month"], categories=kept_levels, ordered=True)
+        dfe["Norgespris"] = pd.Categorical(dfe["Norgespris"], categories=["Uten_NP", "Med_NP"])
+
+        # Bygg formel: Interaksjoner for alle k != baseline
+        # Baselineleddet utelates automatisk i C(rel_month)
+        formula_es = (
+            'np.log(Q("kWh/Metering_point")) ~ '
+            'C(Norgespris, Treatment(reference="Uten_NP")) '
+            '+ C(rel_month) * C(Norgespris, Treatment(reference="Uten_NP")) '
+            '+ C(Hour) + C(Month)'
+        )
+
+        es_mod = smf.ols(formula_es, data=dfe).fit(cov_type="HC1")
+        print(es_mod.summary())
+
+        # Trekk ut koeffisienter for (rel_month=k) × Med_NP
+        coef_rows = []
+        for k in kept_levels:
+            if k == baseline:
+                continue
+            term = f"C(rel_month)[T.{k}]:C(Norgespris, Treatment(reference='Uten_NP'))[T.Med_NP]"
+            # I praksis genererer patsy navn uten Treatment(...) i strengen;
+            # finn matchende navn robust:
+            cand = [p for p in es_mod.params.index if
+                    f"C(rel_month)[T.{k}]:" in p and "C(Norgespris)" in p and "T.Med_NP" in p]
+            if len(cand) == 0:
+                # Noen ganger kommer interaksjonsnavnet i motsatt rekkefølge
+                cand = [p for p in es_mod.params.index if
+                        "C(rel_month)" in p and f"[T.{k}]" in p and "C(Norgespris)" in p and "T.Med_NP" in p]
+            if len(cand) == 0:
+                continue
+
+            pname = cand[0]
+            beta = es_mod.params[pname]
+            se = es_mod.bse[pname]
+            ci_l, ci_u = es_mod.conf_int().loc[pname].tolist()
+            coef_rows.append({"k": k, "beta": beta, "se": se, "ci_l": ci_l, "ci_u": ci_u, "param": pname})
+
+        es_df = pd.DataFrame(coef_rows).sort_values("k")
+        print("\nEvent-study (interaksjonskoeffisienter for Med_NP, baseline k = {}):".format(baseline))
+        print(es_df)
+
+        # F-test av pretrender: alle leads (k < 0, k != baseline) = 0
+        lead_params = [r["param"] for _, r in es_df.iterrows() if r["k"] < 0]
+        if len(lead_params) >= 1:
+            hyp = " , ".join([f"{p} = 0" for p in lead_params])  # kommaseparert = multippel restriksjon
+            print("\nF-test: Alle pretrender (leads) = 0")
+            print(es_mod.f_test(hyp))
+        else:
+            print("\nIngen leads i vinduet – kan ikke gjennomføre pretrend F-test.")
+
+        return es_mod, es_df
+
+    # Kjør:
+    es_mod, es_df = run_event_study(df, cutoff="2025-10-01", min_k=-6, max_k=6, baseline=-1)
+    print(es_mod,es_df)'''
+
+    # -------------------- Placebo test ------------ #
+    print('--------------- Placebo test ------------------')
+    def run_placebo_test(df, real_cutoff="2025-10-01", placebo_cutoff="2024-12-15"):
+        dfp = df.copy()
+
+        # Begrens til pre ift. ekte cutoff
+        real_cutoff = pd.to_datetime(real_cutoff)
+        dfp = dfp[dfp["Date"] < real_cutoff].copy()
+
+        if dfp.empty:
+            raise ValueError("Ingen observasjoner i pre-perioden for placebo-testen.")
+
+        # Lag placebo-gruppeindikator (før/etter placebo)
+        placebo_cutoff = pd.to_datetime(placebo_cutoff)
+        dfp["Group_placebo"] = np.where(dfp["Date"] >= placebo_cutoff, "After_ref", "Before_ref")
+
+        # Pass på at kategorier er riktige/tilgjengelige
+        dfp["Group_placebo"] = pd.Categorical(dfp["Group_placebo"], categories=["Before_ref", "After_ref"])
+        dfp["Norgespris"] = pd.Categorical(dfp["Norgespris"], categories=["Uten_NP", "Med_NP"])
+
+        # Estimer placebo-DID (samme FE som din modell)
+        formula_placebo = (
+            'np.log(Q("kWh/Metering_point")) ~ '
+            'C(Group_placebo, Treatment(reference="Before_ref")) '
+            '* C(Norgespris, Treatment(reference="Uten_NP")) '
+            '+ C(Hour) + C(Month)'
+        )
+        placebo_mod = smf.ols(formula_placebo, data=dfp).fit(cov_type="HC1")
+        #print(placebo_mod.summary())
+
+        # F-test: placebo-interaksjon = 0
+        pname = [p for p in placebo_mod.params.index
+                 if "C(Group_placebo)" in p and "T.After_ref" in p
+                 and "C(Norgespris)" in p and "T.Med_NP" in p]
+        if len(pname) == 0:
+            raise RuntimeError("Fant ikke placebo-interaksjon i placebo-modellen.")
+        print("\nF-test av placebo-interaksjon = 0:")
+        print(placebo_mod.f_test(f"{pname[0]} = 0"))
+
+        return placebo_mod
+    # Kjør:
+    placebo_mod = run_placebo_test(df, real_cutoff="2025-10-01", placebo_cutoff="2024-12-15")
+    print(placebo_mod)
+
+
 
 def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
     # ------------------- Filterer for dato ---------- #
@@ -389,8 +536,8 @@ def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
 
 
 DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
-DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2')
-DifferenceinDifference(data_mNP_NO5, data_uNP_NO5, 'NO5')
+#DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2')
+#DifferenceinDifference(data_mNP_NO5, data_uNP_NO5, 'NO5')
 #DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)     #Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
 
 
