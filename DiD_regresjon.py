@@ -126,10 +126,10 @@ def Placebo_DiD(data_mNP, data_uNP, price_area):
 
 def DifferenceinDifference(data_mNP, data_uNP, price_area):
     # ------------------- Filterer for dato ---------- #
-    start_date_before = '2024-11-01'
+    start_date_before = '2025-01-01'
     end_date_before = '2025-01-31'
 
-    start_date_after = '2025-11-01'
+    start_date_after = '2026-01-01'
     end_date_after = '2026-01-31'
 
     # ----------- Endring til Date og Hour ------------ #
@@ -274,7 +274,7 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
     #print(df)
 
     formula = (
-        'Q("kWh/Metering_point") ~ '
+        'np.log(Q("kWh/Metering_point")) ~ '
         'C(Group, Treatment(reference="Before_ref")) '
         '* C(Norgespris, Treatment(reference="Uten_NP")) '
     )
@@ -289,7 +289,7 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
     model = sm.OLS(y, X).fit()
     print(model.summary())
 
-    '''beta3 = model.params['C(Group, Treatment(reference="Before_ref"))[T.After_ref]:C(Norgespris, Treatment(reference="Uten_NP"))[T.Med_NP]']
+    beta3 = model.params['C(Group, Treatment(reference="Before_ref"))[T.After_ref]:C(Norgespris, Treatment(reference="Uten_NP"))[T.Med_NP]']
     DiD = (np.exp(beta3) - 1)*100
 
     ci_low, ci_high = model.conf_int().loc['C(Group, Treatment(reference="Before_ref"))[T.After_ref]:C(Norgespris, Treatment(reference="Uten_NP"))[T.Med_NP]']
@@ -297,7 +297,7 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
     DiD_high = (np.exp(ci_high) - 1)*100
 
     print(f'DiD prosent for {price_area}: {DiD:.2f}%')
-    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')'''
+    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
 
     # ------------- F-Test ----------- #
     '''print('------------------- F TEST -------------------')
