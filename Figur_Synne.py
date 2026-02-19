@@ -7,10 +7,10 @@ import row
 
 DiD = pd.DataFrame({
     "region":  ["NO1","NO1","NO1","NO2","NO2","NO2","NO5","NO5","NO5"],
-    "vindu":   ["January","December","3 Winter Months(Nov,Dec,Jan)"] * 3,
-    "value":    [4.7 , 3.25 , 3.45,    5.02, 4.82, 4.51,     3.5, 2.78, 2.83],
-    "ci_high":  [6.4, 5.02, 5.22,      6.60, 6.5, 6.3,       5.34, 4.2, 4.61],
-    "ci_low":   [3.04, 1.61, 1.72 ,    3.46, 3.25, 2.76,     1.61, 1.41, 1.08],
+    "vindu":   ["January","Afternoon (Hours: 17,18,19)","3 Winter Months(Nov,Dec,Jan)"] * 3,
+    "value":    [4.7 , 5.66 , 3.45,    5.02, 5.66, 4.51,     3.5, 2.78, 2.83],
+    "ci_high":  [6.4, 9.64, 5.22,      6.60,9.64, 6.3,       5.34, 4.2, 4.61],
+    "ci_low":   [3.04, 1.82, 1.72 ,    3.46, 1.82, 2.76,     1.61, 1.41, 1.08],
 })
 
 delta_consump = pd.DataFrame({

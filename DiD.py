@@ -1,6 +1,4 @@
 # Difference in Difference
-
-
 import numpy as np
 import pandas as pd
 import math
@@ -20,10 +18,10 @@ def Difference_in_Difference(dataset):
     # filterer for dato
 
     #ny måte å gjør datoene på
-    start_date1 = pd.to_datetime('2024-10-01', utc=True)
+    start_date1 = pd.to_datetime('2025-01-01', utc=True)
     end_date1 = pd.to_datetime('2025-01-31',utc=True)
 
-    start_date2 = pd.to_datetime('2025-10-01',utc=True)
+    start_date2 = pd.to_datetime('2026-01-01',utc=True)
     end_date2 = pd.to_datetime('2026-01-31', utc=True)
 
 
@@ -74,7 +72,7 @@ def Difference_in_Difference(dataset):
         forbruk1 += rad['consumption_kwh'] / rad['metering_point_count']
         #print(forbruk1)
 
-    print('forbruk år 1:',forbruk1)
+    #print('forbruk år 1:',forbruk1)
 
 
     # Finne totalt forbruk over valgt tid for hvert målepunkt år 2
@@ -85,23 +83,73 @@ def Difference_in_Difference(dataset):
         forbruk2 += rad['consumption_kwh'] / rad['metering_point_count']
         # print(forbruk2)
 
-    print('forbruk år 2:', forbruk2)
+    #print('forbruk år 2:', forbruk2)
 
 
     #Finne forskjell DiD
 
     prosent = ((forbruk2-forbruk1) / forbruk1 ) * 100
+    endring_kwh=forbruk2-forbruk1
+    #print('endring', endring_kwh)
 
-    return prosent
+
+    #print('-------------og så ordentlig med level: ------------')
 
 
-print('Prosent endring m/Norgespris:',(f"{Difference_in_Difference(Med_NP):.3f}"), '\n', '\n')
+    forbruk1 = 0
+    mp1=0
 
-print('Prosent endring u/Norgespris:',(f"{Difference_in_Difference(Uten_NP):.3f}"), '\n', '\n')
+    for index, rad in data_set_1.iterrows():
+        forbruk1 += rad['consumption_kwh']
+        mp1 += rad['metering_point_count']
+        #print(forbruk1)
 
-print('DiD: må så ta minus mellom prosentene og se på forskjellen i endring')
+    #print('forbruk år 1 level:',forbruk1)
 
-print(Difference_in_Difference(Med_NP)-Difference_in_Difference(Uten_NP), ': ekstra endring i prosent med norgespris')
+
+    # Finne totalt forbruk over valgt tid for hvert målepunkt år 2
+
+    forbruk2 = 0
+    mp2=0
+
+    for index, rad in data_set_2.iterrows():
+        forbruk2 += rad['consumption_kwh']
+        mp2 += rad['metering_point_count']
+        # print(forbruk2)
+
+    #print('forbruk år 2 level :', forbruk2)
+
+    delta_level1 = forbruk1/mp1
+    delta_level2 = forbruk2/mp2
+
+    #print('endring i level 1 per husholdning', delta_level1)
+    #print('endring i level 2 per husholdning', delta_level2)
+
+    delta=delta_level2-delta_level1
+
+    #print('level endring', delta_level2-delta_level1 )
+
+
+    return prosent, delta
+
+
+prosentNP, deltaNP = Difference_in_Difference(Med_NP)
+
+prosentuNP , deltauNP = Difference_in_Difference(Uten_NP)
+
+print('DiD prosent: ',prosentNP-prosentuNP)
+print('DiD level: ', deltaNP-deltauNP)
+
+
+#print('Prosent endring m/Norgespris:',(f"{Difference_in_Difference(Med_NP)[0]:.3f}"), '\n', '\n')
+
+#print('Prosent endring u/Norgespris:',(f"{Difference_in_Difference(Uten_NP)[0]:.3f}"), '\n', '\n')
+
+#print('DiD: må så ta minus mellom prosentene og se på forskjellen i endring')
+
+#print(Difference_in_Difference(Med_NP)-Difference_in_Difference(Uten_NP), ': ekstra endring i prosent med norgespris')
+
+
 
 
 '''
@@ -166,7 +214,7 @@ resultat = Difference_in_Difference2(
 )
 
 print(resultat)'''
-
+'''
 #ny did fra chat
 import pandas as pd
 import numpy as np
@@ -271,4 +319,4 @@ print("--- Context ---")
 print(f"Treatment change (level): {res['Treat_change_level']:.6f}")
 print(f"Control change   (level): {res['Ctrl_change_level']:.6f}")
 print(f"Treatment own % change: {res['Treatment_own_pct_change']:.3f}%")
-print(f"Control   own % change: {res['Control_own_pct_change']:.3f}%")
+print(f"Control   own % change: {res['Control_own_pct_change']:.3f}%")'''

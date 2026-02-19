@@ -38,9 +38,9 @@ data_uNP = pd.read_csv(
 # ============================================================
 # 3) Sett dato-intervaller utenfor funksjonen (globalt)
 # ============================================================
-start_date_before = '2025-01-01'
+start_date_before = '2024-11-01'
 end_date_before   = '2025-01-31'
-start_date_after  = '2026-01-01'
+start_date_after  = '2025-11-01'
 end_date_after    = '2026-01-31'
 
 # ============================================================
@@ -243,4 +243,4 @@ def DifferenceinDifference(data_mNP, data_uNP, Temp=None, hour=None):
 # C) Vilkårlig liste timer (morgen + kveld)
 # model, used_df = DifferenceinDifference(data_mNP, data_uNP, hour=[7, 8, 9, 17])
 
-DifferenceinDifference(data_mNP, data_uNP,hour=[7,8,9,10])
+DifferenceinDifference(data_mNP, data_uNP,hour=[17,18,19])
