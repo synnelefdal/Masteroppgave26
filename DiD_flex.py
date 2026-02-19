@@ -16,7 +16,7 @@ import statsmodels.api as sm
 # ============================================================
 # Juster filnavn/paths etter behov
 data_mNP = pd.read_csv(
-    'All_Demand_Data/NO2_mNP.csv',
+    'All_Demand_Data/NO5_mNP.csv',
     sep=';',
     dtype={
         'usage_date_id': str,
@@ -26,7 +26,7 @@ data_mNP = pd.read_csv(
 )
 
 data_uNP = pd.read_csv(
-    'All_Demand_Data/NO2_uNP.csv',
+    'All_Demand_Data/NO5_uNP.csv',
     sep=';',
     dtype={
         'usage_date_id': str,
@@ -229,6 +229,18 @@ def DifferenceinDifference(data_mNP, data_uNP, Temp=None, hour=None):
     model = sm.OLS(y, X).fit()
     print(model.summary())
 
+    beta3 = model.params[
+        'C(Group, Treatment(reference="Before_ref"))[T.After_ref]:C(Norgespris, Treatment(reference="Uten_NP"))[T.Med_NP]']
+    DiD = (np.exp(beta3) - 1) * 100
+
+    ci_low, ci_high = model.conf_int().loc[
+        'C(Group, Treatment(reference="Before_ref"))[T.After_ref]:C(Norgespris, Treatment(reference="Uten_NP"))[T.Med_NP]']
+    DiD_low = (np.exp(ci_low) - 1) * 100
+    DiD_high = (np.exp(ci_high) - 1) * 100
+
+    print(f'DiD prosent for: {DiD:.2f}%')
+    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
+
     return model, df
 
 # ============================================================
@@ -243,4 +255,4 @@ def DifferenceinDifference(data_mNP, data_uNP, Temp=None, hour=None):
 # C) Vilkårlig liste timer (morgen + kveld)
 # model, used_df = DifferenceinDifference(data_mNP, data_uNP, hour=[7, 8, 9, 17])
 
-DifferenceinDifference(data_mNP, data_uNP,hour=[17,18,19])
+DifferenceinDifference(data_mNP, data_uNP,hour=[7,8,9,10,16,17,18,19,20])
