@@ -1113,12 +1113,12 @@ def UtenNorgesprisTemp(data_uNP, price_area, Temp):
 
 
 
-DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
-DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2')
-DifferenceinDifference(data_mNP_NO5, data_uNP_NO5, 'NO5')
+#DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
+#DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2')
+#DifferenceinDifference(data_mNP_NO5, data_uNP_NO5, 'NO5')
 #DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)     #Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
 
-'''print(' ------------ NO1 --------------- ')
+print(' ------------ NO1 --------------- ')
 
 NorgesprisTemp(data_mNP_NO1, 'NO1', Temp_Oslo)
 NorgesprisTemp(data_uNP_NO1, 'NO1', Temp_Oslo)
@@ -1131,7 +1131,7 @@ NorgesprisTemp(data_uNP_NO2, 'NO2', Temp_Stavanger)
 print(' ------------ NO5 --------------- ')
 
 NorgesprisTemp(data_mNP_NO5, 'NO5', Temp_Bergen)
-NorgesprisTemp(data_uNP_NO5, 'NO5', Temp_Bergen)'''
+NorgesprisTemp(data_uNP_NO5, 'NO5', Temp_Bergen)
 
 
 
