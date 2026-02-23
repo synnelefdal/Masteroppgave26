@@ -126,10 +126,10 @@ def Placebo_DiD(data_mNP, data_uNP, price_area):
 
 def DifferenceinDifference(data_mNP, data_uNP, price_area):
     # ------------------- Filterer for dato ---------- #
-    start_date_before = '2023-10-01'
-    end_date_before = '2024-01-31'
+    start_date_before = '2025-01-01'
+    end_date_before = '2025-01-31'
 
-    start_date_after = '2025-10-01'
+    start_date_after = '2026-01-01'
     end_date_after = '2026-01-31'
 
     # ----------- Endring til Date og Hour ------------ #
@@ -277,6 +277,7 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
         'np.log(Q("kWh/Metering_point")) ~ '
         'C(Group, Treatment(reference="Before_ref")) '
         '* C(Norgespris, Treatment(reference="Uten_NP")) '
+        '+ C(Hour, Treatment(reference="1") ) + C(Month, Treatment(reference = "November"))'
     )
 
     y, X = patsy.dmatrices(
