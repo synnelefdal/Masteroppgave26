@@ -256,7 +256,7 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
 
     cutoff = pd.Timestamp('2025-10-01')
     df['Date'] = pd.to_datetime(df['Date'])
-    df['Group'] = np.where(df['Date'] < cutoff, 'Before_ref', 'After_ref')   #Post
+    df['Periode'] = np.where(df['Date'] < cutoff, 'Before_ref', 'After_ref')   #Post
 
     df['Month'] = df['Date'].dt.strftime('%B')
     df['Month'] = pd.Categorical(df['Month'],
@@ -267,6 +267,8 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
     df['Hour'] = pd.Categorical(df['Hour'].astype(str),
                                  categories=[str(i) for i in range(0, 23+1)], ordered=True)
 
+    print(df.head(30))
+
 
     #pd.set_option('display.max_columns', None)
     #pd.set_option('display.max_rows', None)
@@ -275,7 +277,7 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
 
     formula = (
         'np.log(Q("kWh/Metering_point")) ~ '
-        'C(Group, Treatment(reference="Before_ref")) '
+        'C(Periode, Treatment(reference="Before_ref")) '
         '* C(Norgespris, Treatment(reference="Uten_NP")) '
         '+ C(Hour, Treatment(reference="1") ) + C(Month, Treatment(reference = "November"))'
     )
@@ -290,7 +292,7 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
     model = sm.OLS(y, X).fit()
     print(model.summary())
 
-    beta3 = model.params['C(Group, Treatment(reference="Before_ref"))[T.After_ref]:C(Norgespris, Treatment(reference="Uten_NP"))[T.Med_NP]']
+    '''beta3 = model.params['C(Group, Treatment(reference="Before_ref"))[T.After_ref]:C(Norgespris, Treatment(reference="Uten_NP"))[T.Med_NP]']
     DiD = (np.exp(beta3) - 1)*100
 
     ci_low, ci_high = model.conf_int().loc['C(Group, Treatment(reference="Before_ref"))[T.After_ref]:C(Norgespris, Treatment(reference="Uten_NP"))[T.Med_NP]']
@@ -298,7 +300,7 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
     DiD_high = (np.exp(ci_high) - 1)*100
 
     print(f'DiD prosent for {price_area}: {DiD:.2f}%')
-    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
+    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')'''
 
     # ------------- F-Test ----------- #
     '''print('------------------- F TEST -------------------')
@@ -1114,12 +1116,12 @@ def UtenNorgesprisTemp(data_uNP, price_area, Temp):
 
 
 
-#DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
+DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
 #DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2')
 #DifferenceinDifference(data_mNP_NO5, data_uNP_NO5, 'NO5')
 #DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)     #Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
 
-print(' ------------ NO1 --------------- ')
+'''print(' ------------ NO1 --------------- ')
 
 NorgesprisTemp(data_mNP_NO1, 'NO1', Temp_Oslo)
 NorgesprisTemp(data_uNP_NO1, 'NO1', Temp_Oslo)
@@ -1132,7 +1134,7 @@ NorgesprisTemp(data_uNP_NO2, 'NO2', Temp_Stavanger)
 print(' ------------ NO5 --------------- ')
 
 NorgesprisTemp(data_mNP_NO5, 'NO5', Temp_Bergen)
-NorgesprisTemp(data_uNP_NO5, 'NO5', Temp_Bergen)
+NorgesprisTemp(data_uNP_NO5, 'NO5', Temp_Bergen)'''
 
 
 
