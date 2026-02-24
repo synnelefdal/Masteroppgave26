@@ -5,15 +5,19 @@ import patsy
 import statsmodels.formula.api as smf
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch
+from linearmodels.panel import PanelOLS
 
 data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep= ';')
 data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep= ';')
+data_rest_NO1 = pd.read_csv('All_Demand_Data/NO1_resten.csv', sep = ';')
 
 data_mNP_NO2 = pd.read_csv('All_Demand_Data/NO2_mNP.csv', sep= ';')
 data_uNP_NO2 = pd.read_csv('All_Demand_Data/NO2_uNP.csv', sep= ';')
+data_rest_NO2 = pd.read_csv('All_Demand_Data/NO2_resten.csv', sep = ';')
 
 data_mNP_NO5 = pd.read_csv('All_Demand_Data/NO5_mNP.csv', sep= ';')
 data_uNP_NO5 = pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep= ';')
+data_rest_NO5 = pd.read_csv('All_Demand_Data/NO5_resten.csv', sep = ';')
 
 Temp_Bergen = pd.read_csv('Temp_Bergen.csv')
 Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
@@ -598,6 +602,171 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
 
     run_placebo_did()'''
 
+def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
+
+    # ----------- Norgespris gruppen -------------- #
+    data_mNP['start_time_utc'] = pd.to_datetime(data_mNP['start_time_utc'],
+                                                format='%Y-%m-%d %H:%M:%S',
+                                                errors='coerce',
+                                                utc=True)
+
+    data_mNP['Date'] = data_mNP['start_time_utc'].dt.date
+    data_mNP['Hour'] = data_mNP['start_time_utc'].dt.hour.astype(int)
+    data_demand_NP = data_mNP[data_mNP['price_area'] == price_area].copy()
+
+    data_demand_NP['kWh/Metering_point'] = data_demand_NP['consumption_kwh'] / data_demand_NP['metering_point_count']
+    total_demand_NP= data_demand_NP.groupby(['Date', 'Hour', 'group_definition'])[ 'kWh/Metering_point'].sum().reset_index()
+
+    total_demand_NP['Date'] = pd.to_datetime(total_demand_NP['Date'], errors='coerce')
+
+    total_demand_NP['time'] = (
+            total_demand_NP['Date'] +
+            pd.to_timedelta(total_demand_NP['Hour'], unit='h')
+    )
+
+    total_demand_NP['time'] = total_demand_NP['time'].dt.tz_localize('UTC')
+
+    #print(total_demand_NP)
+
+    # -------------- Ikke Norgespris gruppen ---------- #
+    data_uNP['start_time_utc'] = pd.to_datetime(data_uNP['start_time_utc'],
+                                                format='%Y-%m-%d %H:%M:%S',
+                                                errors='coerce',
+                                                utc=True)
+
+    data_uNP['Date'] = data_uNP['start_time_utc'].dt.date
+    data_uNP['Hour'] = data_uNP['start_time_utc'].dt.hour.astype(int)
+    data_demand_uNP = data_uNP[data_uNP['price_area'] == price_area].copy()
+
+    data_demand_uNP['kWh/Metering_point'] = data_demand_uNP['consumption_kwh'] / data_demand_uNP['metering_point_count']
+    total_demand_uNP = data_demand_uNP.groupby(['Date', 'Hour', 'group_definition'])[
+        'kWh/Metering_point'].sum().reset_index()
+
+    total_demand_uNP['Date'] = pd.to_datetime(total_demand_uNP['Date'], errors='coerce')
+
+    total_demand_uNP['time'] = (
+            total_demand_uNP['Date'] +
+            pd.to_timedelta(total_demand_uNP['Hour'], unit='h')
+    )
+
+    total_demand_uNP['time'] = total_demand_uNP['time'].dt.tz_localize('UTC')
+
+    #print(total_demand_uNP)
+
+    # ------------ Resten ------------- #
+    data_resten['start_time_utc'] = pd.to_datetime(data_resten['start_time_utc'],
+                                                format='%Y-%m-%d %H:%M:%S',
+                                                errors='coerce',
+                                                utc=True)
+
+    data_resten['Date'] = data_resten['start_time_utc'].dt.date
+    data_resten['Hour'] = data_resten['start_time_utc'].dt.hour.astype(int)
+    data_demand_resten = data_resten[data_resten['price_area'] == price_area].copy()
+
+    data_demand_resten['kWh/Metering_point'] = data_demand_resten['consumption_kwh'] / data_demand_resten['metering_point_count']
+    total_demand_resten = data_demand_resten.groupby(['Date', 'Hour', 'group_definition'])['kWh/Metering_point'].sum().reset_index()
+
+    total_demand_resten['Date'] = pd.to_datetime(total_demand_resten['Date'], errors='coerce')
+
+    total_demand_resten['time'] = (
+            total_demand_resten['Date'] +
+            pd.to_timedelta(total_demand_resten['Hour'], unit='h')
+    )
+
+    total_demand_resten['time'] = total_demand_resten['time'].dt.tz_localize('UTC')
+
+    #print(total_demand_resten)
+
+    # ------------ Dataframe ----------- #
+    df_NP = pd.DataFrame(total_demand_NP)
+    df_uNP = pd.DataFrame(total_demand_uNP)
+    df_resten = pd.DataFrame(total_demand_resten)
+
+    df = pd.concat([df_NP,df_uNP,df_resten],ignore_index=True)
+    df = df[df['kWh/Metering_point'] > 0].copy()
+
+    start_date_before = '2025-01-01'
+    end_date_before = '2025-01-31'
+
+    start_date_after = '2026-01-01'
+    end_date_after = '2026-01-31'
+
+    before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
+    after_ref = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
+
+    df['Periode'] = np.select([before_ref, after_ref],
+                              ['Before_ref', 'After_ref'],
+                              default = 'rest')
+
+    df['Month'] = df['Date'].dt.strftime('%B')
+    df['Month'] = pd.Categorical(df['Month'],
+                                 categories=['January', 'February', 'March', 'April', 'May', 'June',
+                                             'July', 'August', 'September', 'October', 'November', 'December'],
+                                 ordered=True)
+
+    # --------- Model ------------ #
+    #df['time'] = df['start_time_utc']
+
+    df['entity'] = df['group_definition'].astype(str)                       #Treatment
+    df['post'] = (df['Periode'] == 'After_ref').astype(int)
+
+
+    df['log_y'] = np.log(df['kWh/Metering_point'])
+    panel_df = df.set_index(["entity","time"]).sort_index()
+    panel_df["treated"] = (panel_df.index.get_level_values("entity") == "Med Norgespris").astype(int)
+
+    #print(panel_df.index.names)
+
+    model = PanelOLS.from_formula('log_y ~ treated:post + EntityEffects + TimeEffects', data = panel_df, drop_absorbed=True)
+
+    res = model.fit(cov_type='clustered', cluster_time = True)
+    #print(res.summary)
+
+
+    #print(df.head(10))
+
+    formula = (
+        'np.log(Q("kWh/Metering_point")) ~ '
+        'C(Periode, Treatment(reference="Before_ref")) '
+        '* C(group_definition, Treatment(reference="Uten Norgespris")) '
+        '+ C(Hour) + C(Month)'
+    )
+
+    y, X = patsy.dmatrices(
+        formula,
+        data=df,
+        return_type="dataframe",
+        NA_action="drop"
+    )
+
+    model = sm.OLS(y, X).fit()
+    #print(model.summary())
+
+    # -------- Utregning --------- #
+    print('----------- Annen OLS -----------------')
+    beta3 = res.params['treated:post']
+    DiD = (np.exp(beta3) - 1) * 100
+    print(f'DiD for {price_area}: {DiD}')
+
+    ci_low, ci_high = res.conf_int().loc['treated:post']
+    DiD_low = (np.exp(ci_low) - 1) * 100
+    DiD_high = (np.exp(ci_high) - 1) * 100
+
+    print(f'DiD prosent for {price_area}: {DiD:.2f}%')
+    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
+
+    print('------------- Vanlig OLS -----------')
+    beta3 = model.params['C(Periode, Treatment(reference="Before_ref"))[T.After_ref]:C(group_definition, Treatment(reference="Uten Norgespris"))[T.Med Norgespris]']
+    DiD = (np.exp(beta3) - 1) * 100
+    print(f'DiD for {price_area}: {DiD}')
+
+    ci_low, ci_high = model.conf_int().loc['C(Periode, Treatment(reference="Before_ref"))[T.After_ref]:C(group_definition, Treatment(reference="Uten Norgespris"))[T.Med Norgespris]']
+    DiD_low = (np.exp(ci_low) - 1) * 100
+    DiD_high = (np.exp(ci_high) - 1) * 100
+
+    print(f'DiD prosent for {price_area}: {DiD:.2f}%')
+    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
+
 
 def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
     # ------------------- Filterer for dato ---------- #
@@ -1114,9 +1283,11 @@ def UtenNorgesprisTemp(data_uNP, price_area, Temp):
 #Placebo_DiD(data_mNP_NO2, data_uNP_NO2, "NO2")
 #Placebo_DiD(data_mNP_NO5, data_uNP_NO5, "NO5")
 
+Difference_in_Difference(data_mNP_NO1,data_uNP_NO1,data_rest_NO1, 'NO1')
+Difference_in_Difference(data_mNP_NO2,data_uNP_NO2,data_rest_NO2, 'NO2')
+Difference_in_Difference(data_mNP_NO5,data_uNP_NO5,data_rest_NO5, 'NO5')
 
-
-DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
+#DifferenceinDifference(data_mNP_NO1, data_uNP_NO1, 'NO1')
 #DifferenceinDifference(data_mNP_NO2, data_uNP_NO2, 'NO2')
 #DifferenceinDifference(data_mNP_NO5, data_uNP_NO5, 'NO5')
 #DifferenceinDifferenceTemp(data_mNP_NO1, data_uNP_NO1, 'NO1', Temp_Oslo)     #Ved NO1 bruk Temp_Oslo, og ved NO5 bruk Temp_Bergen
