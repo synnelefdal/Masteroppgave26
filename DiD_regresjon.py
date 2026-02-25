@@ -737,7 +737,9 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
                                   categories = ['Reference', 'Treatment', 'Rest'],     # Reference = Reference
                                   ordered = True)
     df['log_y'] = np.log(df['kWh/Metering_point'])
-    panel_df = df.set_index(['entity', 'time'], drop = False).sort_index()
+    panel_df = df.copy()
+    panel_df = panel_df.set_index(['entity', 'time'], drop = False)
+    #print(panel_df.info())
 
     model = PanelOLS.from_formula(
         'log_y ~ C(entity)*C(period) + EntityEffects + TimeEffects',
@@ -746,7 +748,7 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
     )
 
     res = model.fit(cov_type='clustered', cluster_time=True)
-    #print(res.summary)
+    print(res.summary)
 
     #print(df.head(10))
 
@@ -903,9 +905,9 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
     after_ref = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
 
-    df['Periode'] = np.select([before_ref, after_ref],
-                              ['Before_ref', 'After_ref'],
-                              default='rest')
+    df['Period'] = np.select([before_ref, after_ref],
+                              ['Reference', 'Treatment'],
+                              default='Rest')
 
     df['Month'] = df['Date'].dt.strftime('%B')
     df['Month'] = pd.Categorical(df['Month'],
@@ -914,19 +916,25 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
                                  ordered=True)
 
     # --------- Model ------------ #
-    df['entity'] = df['group_definition'].astype(str)
-    df['treated'] = (df['group_definition'] == 'Med Norgespris').astype(int)
-    df['post'] = (df['Periode'] == 'After_ref').astype(int)
+    df['entity'] = pd.Categorical(df['group_definition'],
+                                  categories=['Uten Norgespris', 'Med Norgespris', 'Resten'],
+                                  # Referanse = Uten Norgespris
+                                  ordered=True)
+    df['period'] = pd.Categorical(df['Period'],
+                                  categories=['Reference', 'Treatment', 'Rest'],  # Reference = Reference
+                                  ordered=True)
     df['log_y'] = np.log(df['kWh/Metering_point'])
-    panel_df = df.set_index(["entity", "time"]).sort_index()
+    panel_df = df.set_index(['entity', 'time'], drop=False).sort_index()
 
-    # print(panel_df.index.names)
-
-    model = PanelOLS.from_formula('log_y ~ (Temp24 + Temp24^2 + Temp24^3) + Temp24:treated + Temp24^2:treated + Temp24^3:treated + EntityEffects + TimeEffects', data=panel_df,
-                                  drop_absorbed=True)
+    model = PanelOLS.from_formula(
+        'log_y ~ Temp24 + I(Temp24**2) + I(Temp24**3) + C(entity):Temp24 + C(entity):I(Temp24**2) + C(entity):I(Temp24**3) + EntityEffects + TimeEffects',
+        data=panel_df,
+        drop_absorbed=True
+    )
 
     res = model.fit(cov_type='clustered', cluster_time=True)
-    print(res.summary)
+
+    print(res)
 
 
 def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
@@ -1443,8 +1451,8 @@ def UtenNorgesprisTemp(data_uNP, price_area, Temp):
 
 
 Difference_in_Difference(data_mNP_NO1,data_uNP_NO1,data_rest_NO1, 'NO1')
-Difference_in_Difference(data_mNP_NO2,data_uNP_NO2,data_rest_NO2, 'NO2')
-Difference_in_Difference(data_mNP_NO5,data_uNP_NO5,data_rest_NO5, 'NO5')
+#Difference_in_Difference(data_mNP_NO2,data_uNP_NO2,data_rest_NO2, 'NO2')
+#Difference_in_Difference(data_mNP_NO5,data_uNP_NO5,data_rest_NO5, 'NO5')
 
 #Difference_in_Difference_temp(data_mNP_NO1,data_uNP_NO1,data_rest_NO1,'NO1',Temp_Oslo)
 
