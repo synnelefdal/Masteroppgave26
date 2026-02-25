@@ -4,6 +4,7 @@ import statsmodels.api as sm
 import patsy
 import statsmodels.formula.api as smf
 import matplotlib.pyplot as plt
+from linearmodels.panel.utility import AbsorbingEffectWarning
 from matplotlib.patches import FancyArrowPatch
 from linearmodels.panel import PanelOLS
 
@@ -697,9 +698,9 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
     before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
     after_ref = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
 
-    df['Periode'] = np.select([before_ref, after_ref],
-                              ['Before_ref', 'After_ref'],
-                              default = 'rest')
+    df['Period'] = np.select([before_ref, after_ref],
+                              ['Reference', 'Treatment'],
+                              default = 'Rest')
 
     df['Month'] = df['Date'].dt.strftime('%B')
     df['Month'] = pd.Categorical(df['Month'],
@@ -718,19 +719,34 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
     df['log_y'] = np.log(df['kWh/Metering_point'])
     panel_df = df.set_index(["entity", "time"]).sort_index()'''
 
-    df['entity'] = df['group_definition'].astype(str)
+    '''df['entity'] = df['group_definition'].astype(str)
     df['treated'] = (df['group_definition'] == 'Med Norgespris').astype(int)
-    df['post'] = (df['Periode'] == 'After_ref').astype(int)
+    df['post'] = (df['Period'] == 'Treatment').astype(int)
     df['log_y'] = np.log(df['kWh/Metering_point'])
     panel_df = df.set_index(["entity", "time"]).sort_index()
 
-    #print(panel_df.index.names)
+    # print(panel_df.index.names)
 
-    model = PanelOLS.from_formula('log_y ~ treated:post + EntityEffects + TimeEffects', data = panel_df, drop_absorbed=True)
+    model = PanelOLS.from_formula('log_y ~ treated:post + EntityEffects + TimeEffects', data=panel_df,
+                                  drop_absorbed=True)'''
 
-    res = model.fit(cov_type='clustered', cluster_time = True)
+    df['entity'] = pd.Categorical(df['group_definition'],
+                                  categories=['Uten Norgespris', 'Med Norgespris', 'Resten'],   # Referanse = Uten Norgespris
+                                  ordered = True)
+    df['period'] = pd.Categorical(df['Period'],
+                                  categories = ['Reference', 'Treatment', 'Rest'],     # Reference = Reference
+                                  ordered = True)
+    df['log_y'] = np.log(df['kWh/Metering_point'])
+    panel_df = df.set_index(['entity', 'time'], drop = False).sort_index()
+
+    model = PanelOLS.from_formula(
+        'log_y ~ C(entity)*C(period) + EntityEffects + TimeEffects',
+        data = panel_df,
+        drop_absorbed=True
+    )
+
+    res = model.fit(cov_type='clustered', cluster_time=True)
     #print(res.summary)
-
 
     #print(df.head(10))
 
@@ -753,15 +769,17 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
 
     # -------- Utregning --------- #
     print('----------- PanelOLS -----------------')
-    beta3 = res.params['treated:post']
+    beta3 = res.params['C(entity)[T.Med Norgespris]:C(period)[T.Treatment]']
     DiD = (np.exp(beta3) - 1) * 100
 
-    ci_low, ci_high = res.conf_int().loc['treated:post']
+    ci_low, ci_high = res.conf_int().loc['C(entity)[T.Med Norgespris]:C(period)[T.Treatment]']
     DiD_low = (np.exp(ci_low) - 1) * 100
     DiD_high = (np.exp(ci_high) - 1) * 100
 
     print(f'DiD prosent for {price_area}: {DiD:.2f}%')
     print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
+
+
 
     '''print('------------- sm.OLS -----------')
     beta3 = model.params['C(Periode, Treatment(reference="Before_ref"))[T.After_ref]:C(group_definition, Treatment(reference="Uten Norgespris"))[T.Med Norgespris]']
@@ -1424,11 +1442,11 @@ def UtenNorgesprisTemp(data_uNP, price_area, Temp):
 
 
 
-#Difference_in_Difference(data_mNP_NO1,data_uNP_NO1,data_rest_NO1, 'NO1')
-#Difference_in_Difference(data_mNP_NO2,data_uNP_NO2,data_rest_NO2, 'NO2')
-#Difference_in_Difference(data_mNP_NO5,data_uNP_NO5,data_rest_NO5, 'NO5')
+Difference_in_Difference(data_mNP_NO1,data_uNP_NO1,data_rest_NO1, 'NO1')
+Difference_in_Difference(data_mNP_NO2,data_uNP_NO2,data_rest_NO2, 'NO2')
+Difference_in_Difference(data_mNP_NO5,data_uNP_NO5,data_rest_NO5, 'NO5')
 
-Difference_in_Difference_temp(data_mNP_NO1,data_uNP_NO1,data_rest_NO1,'NO1',Temp_Oslo)
+#Difference_in_Difference_temp(data_mNP_NO1,data_uNP_NO1,data_rest_NO1,'NO1',Temp_Oslo)
 
 '''print(' ------------ NO1 --------------- ')
 
