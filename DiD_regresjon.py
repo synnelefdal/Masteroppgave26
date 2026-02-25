@@ -602,6 +602,9 @@ def DifferenceinDifference(data_mNP, data_uNP, price_area):
 
     run_placebo_did()'''
 
+
+# ------------------------------- MODELL 1 ------------------------------- #
+
 def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
 
     # ----------- Norgespris gruppen -------------- #
@@ -705,7 +708,7 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
                                  ordered=True)
 
     # --------- Model ------------ #
-    df['entity'] = df['group_definition'].astype(str)
+    '''df['entity'] = df['group_definition'].astype(str)
     df['treated'] = np.where(df['group_definition'] == 'Med Norgespris', 1,
                              np.where(df['group_definition'] == 'Uten Norgespris', 0, 0))          #Treatment
 
@@ -713,11 +716,17 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
     df['treated_post'] = np.where(df['group_definition'] == 'Resten', 0, df['treated'] * df['post'])
 
     df['log_y'] = np.log(df['kWh/Metering_point'])
+    panel_df = df.set_index(["entity", "time"]).sort_index()'''
+
+    df['entity'] = df['group_definition'].astype(str)
+    df['treated'] = (df['group_definition'] == 'Med Norgespris').astype(int)
+    df['post'] = (df['Periode'] == 'After_ref').astype(int)
+    df['log_y'] = np.log(df['kWh/Metering_point'])
     panel_df = df.set_index(["entity", "time"]).sort_index()
 
     #print(panel_df.index.names)
 
-    model = PanelOLS.from_formula('log_y ~ treated_post + EntityEffects + TimeEffects', data = panel_df, drop_absorbed=True)
+    model = PanelOLS.from_formula('log_y ~ treated:post + EntityEffects + TimeEffects', data = panel_df, drop_absorbed=True)
 
     res = model.fit(cov_type='clustered', cluster_time = True)
     #print(res.summary)
@@ -744,10 +753,10 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
 
     # -------- Utregning --------- #
     print('----------- PanelOLS -----------------')
-    beta3 = res.params['treated_post']
+    beta3 = res.params['treated:post']
     DiD = (np.exp(beta3) - 1) * 100
 
-    ci_low, ci_high = res.conf_int().loc['treated_post']
+    ci_low, ci_high = res.conf_int().loc['treated:post']
     DiD_low = (np.exp(ci_low) - 1) * 100
     DiD_high = (np.exp(ci_high) - 1) * 100
 
@@ -765,6 +774,9 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
 
     print(f'DiD prosent for {price_area}: {DiD:.2f}%')
     print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')'''
+
+
+# ------------------------------- MODELL 2 ------------------------------- #
 
 
 def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
