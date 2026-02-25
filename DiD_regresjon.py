@@ -685,10 +685,10 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
     df = pd.concat([df_NP,df_uNP,df_resten],ignore_index=True)
     df = df[df['kWh/Metering_point'] > 0].copy()
 
-    start_date_before = '2025-01-01'
+    start_date_before = '2024-11-01'
     end_date_before = '2025-01-31'
 
-    start_date_after = '2026-01-01'
+    start_date_after = '2025-11-01'
     end_date_after = '2026-01-31'
 
     before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
@@ -705,19 +705,19 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
                                  ordered=True)
 
     # --------- Model ------------ #
-    #df['time'] = df['start_time_utc']
+    df['entity'] = df['group_definition'].astype(str)
+    df['treated'] = np.where(df['group_definition'] == 'Med Norgespris', 1,
+                             np.where(df['group_definition'] == 'Uten Norgespris', 0, 0))          #Treatment
 
-    df['entity'] = df['group_definition'].astype(str)                       #Treatment
     df['post'] = (df['Periode'] == 'After_ref').astype(int)
-
+    df['treated_post'] = np.where(df['group_definition'] == 'Resten', 0, df['treated'] * df['post'])
 
     df['log_y'] = np.log(df['kWh/Metering_point'])
-    panel_df = df.set_index(["entity","time"]).sort_index()
-    panel_df["treated"] = (panel_df.index.get_level_values("entity") == "Med Norgespris").astype(int)
+    panel_df = df.set_index(["entity", "time"]).sort_index()
 
     #print(panel_df.index.names)
 
-    model = PanelOLS.from_formula('log_y ~ treated:post + EntityEffects + TimeEffects', data = panel_df, drop_absorbed=True)
+    model = PanelOLS.from_formula('log_y ~ treated_post + EntityEffects + TimeEffects', data = panel_df, drop_absorbed=True)
 
     res = model.fit(cov_type='clustered', cluster_time = True)
     #print(res.summary)
@@ -725,7 +725,7 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
 
     #print(df.head(10))
 
-    formula = (
+    '''formula = (
         'np.log(Q("kWh/Metering_point")) ~ '
         'C(Periode, Treatment(reference="Before_ref")) '
         '* C(group_definition, Treatment(reference="Uten Norgespris")) '
@@ -740,22 +740,21 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
     )
 
     model = sm.OLS(y, X).fit()
-    #print(model.summary())
+    #print(model.summary())'''
 
     # -------- Utregning --------- #
-    print('----------- Annen OLS -----------------')
-    beta3 = res.params['treated:post']
+    print('----------- PanelOLS -----------------')
+    beta3 = res.params['treated_post']
     DiD = (np.exp(beta3) - 1) * 100
-    print(f'DiD for {price_area}: {DiD}')
 
-    ci_low, ci_high = res.conf_int().loc['treated:post']
+    ci_low, ci_high = res.conf_int().loc['treated_post']
     DiD_low = (np.exp(ci_low) - 1) * 100
     DiD_high = (np.exp(ci_high) - 1) * 100
 
     print(f'DiD prosent for {price_area}: {DiD:.2f}%')
     print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
 
-    print('------------- Vanlig OLS -----------')
+    '''print('------------- sm.OLS -----------')
     beta3 = model.params['C(Periode, Treatment(reference="Before_ref"))[T.After_ref]:C(group_definition, Treatment(reference="Uten Norgespris"))[T.Med Norgespris]']
     DiD = (np.exp(beta3) - 1) * 100
     print(f'DiD for {price_area}: {DiD}')
@@ -765,7 +764,7 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
     DiD_high = (np.exp(ci_high) - 1) * 100
 
     print(f'DiD prosent for {price_area}: {DiD:.2f}%')
-    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
+    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')'''
 
 
 def DifferenceinDifferenceTemp(data_mNP, data_uNP, price_area, Temp):
