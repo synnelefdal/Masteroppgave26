@@ -5,13 +5,74 @@ import matplotlib.pyplot as plt
 import csv
 import row
 
-DiD = pd.DataFrame({
-    "region":  ["NO1","NO1","NO1","NO2","NO2","NO2","NO5","NO5","NO5"],
-    "vindu":   ["January","Afternoon (Hours: 17,18,19)","3 Winter Months(Nov,Dec,Jan)"] * 3,
-    "value":    [4.7 , 5.66 , 3.45,    5.02, 5.66, 4.51,     3.5, 2.78, 2.83],
-    "ci_high":  [6.4, 9.64, 5.22,      6.60,9.64, 6.3,       5.34, 4.2, 4.61],
-    "ci_low":   [3.04, 1.82, 1.72 ,    3.46, 1.82, 2.76,     1.61, 1.41, 1.08],
-})
+'''DiD = pd.DataFrame({
+    "region":
+        ["NO1","NO2","NO5"],
+    "vindu":
+        ["3 Winter Months (Nov,Dec,Jan)",
+         "November",
+         "Desember",
+         "January"] * 3,
+    "value":
+        [3.45 , 4.51 , 2.83,    #3 vinter måneder
+         2.47, 3.76, 2.32,      #Nov
+         3.2, 4.79, 2.76,       #Des
+         4.63,4.97,3.40],       #Jan
+    "ci_high":
+        [3.67, 4.71, 2.98,      #3 vinter måneder
+         2.90,4.14, 2.60,       #Nov
+         3.58, 5.10, 2.99,      #Des
+         4.97,5.27,3.65],       #Jan
+    "ci_low":
+        [3.23, 4.32, 2.68,      #3 vinter måneder
+         2.04, 3.38, 2.04,      #Nov
+         2.91, 4.48, 2.52,      #Des
+         4.29,4.67,3.14],       #Jan
+})'''
+
+regions = ["NO1", "NO2", "NO5"]
+
+vindu = [
+    "3 Winter Months (Nov,Dec,Jan)",
+    "November",
+    "Desember",
+    "January"]
+
+values = [
+    [3.45, 4.51, 2.83],   # 3 vinter måneder
+    [2.47, 3.76, 2.32],   # November
+    [3.20, 4.79, 2.76],   # Desember
+    [4.63, 4.97, 3.40]    # January
+]
+
+ci_high = [
+    [3.67, 4.71, 2.98],
+    [2.90, 4.14, 2.60],
+    [3.58, 5.10, 2.99],
+    [4.97, 5.27, 3.65]
+]
+
+ci_low = [
+    [3.23, 4.32, 2.68],
+    [2.04, 3.38, 2.04],
+    [2.91, 4.48, 2.52],
+    [4.29, 4.67, 3.14]
+]
+
+rows = []
+
+for i, win in enumerate(vindu):
+    for r in range(3):
+        rows.append({
+            "region": regions[r],
+            "vindu": win,
+            "value": values[i][r],
+            "ci_high": ci_high[i][r],
+            "ci_low": ci_low[i][r]
+        })
+
+DiD = pd.DataFrame(rows)
+
 
 delta_consump = pd.DataFrame({
     "region":  ["NO1","NO1","NO1","NO1","NO2","NO2","NO2","NO2","NO5","NO5","NO5","NO5"],
@@ -123,7 +184,7 @@ def plot_errorbars_by_group(
 
 plot_errorbars_by_group(
     DiD,
-    title="Difference in Difference 2024(5)->2025(6)",
+    title="Difference in Difference",
     y_label=" Δ Consumption in Percent[%]",
     y_ref_lines=[0, 7]
     #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}

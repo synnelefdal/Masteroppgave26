@@ -689,10 +689,10 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
     df = pd.concat([df_NP,df_uNP,df_resten],ignore_index=True)
     df = df[df['kWh/Metering_point'] > 0].copy()
 
-    start_date_before = pd.Timestamp('2024-11-01', tz=None)
+    start_date_before = pd.Timestamp('2025-01-01', tz=None)
     end_date_before = pd.Timestamp('2025-01-31', tz = None)
 
-    start_date_after = pd.Timestamp('2025-11-01', tz = None)
+    start_date_after = pd.Timestamp('2026-01-01', tz = None)
     end_date_after = pd.Timestamp('2026-01-31', tz = None)
 
     reference = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
@@ -736,22 +736,19 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
     df['period'] = pd.Categorical(df['Period'],
                                   categories = ['Reference', 'Treatment', 'Rest'],     # Reference = Reference
                                   ordered = True)
-    df['treated'] = (df['entity'] == 'Med Norgespris').astype(int)
-    df['post'] = (df['period'] == 'Treatment').astype(int)
 
     df['log_y'] = np.log(df['kWh/Metering_point'])
     panel_df = df.copy()
-    panel_df = panel_df.set_index(['entity', 'time'], drop = False)
-    #panel_df = panel_df[panel_df['period'].isin(['Reference', 'Treatment'])].copy()
+    panel_df = panel_df.set_index(['entity', 'time'], drop=False)
 
     model = PanelOLS.from_formula(
-        'log_y ~ treated*post + EntityEffects + TimeEffects',
+        'log_y ~ 1 + C(entity)*C(period) + TimeEffects',
         data = panel_df,
         drop_absorbed=True
     )
 
     res = model.fit(cov_type='clustered', cluster_time=True)
-    print(res.summary)
+    #print(res.summary)
 
     #print(df.head(10))
 
@@ -774,10 +771,10 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
 
     # -------- Utregning --------- #
     print('----------- PanelOLS -----------------')
-    beta3 = res.params['treated:post']
+    beta3 = res.params['C(entity)[T.Med Norgespris]:C(period)[T.Treatment]']
     DiD = (np.exp(beta3) - 1) * 100
 
-    ci_low, ci_high = res.conf_int().loc['treated:post']
+    ci_low, ci_high = res.conf_int().loc['C(entity)[T.Med Norgespris]:C(period)[T.Treatment]']
     DiD_low = (np.exp(ci_low) - 1) * 100
     DiD_high = (np.exp(ci_high) - 1) * 100
 
