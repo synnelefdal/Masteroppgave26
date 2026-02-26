@@ -22,7 +22,7 @@ Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
 Temp_Stavanger = pd.read_csv('Temp_Stavanger.csv')
 
 
-def Difference_in_Difference_Flex(data_mNP, data_uNP, price_area, selected_hours = None):
+def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, price_area):
 
     # ----------- Norgespris gruppen -------------- #
     data_mNP['start_time_utc'] = pd.to_datetime(data_mNP['start_time_utc'],
