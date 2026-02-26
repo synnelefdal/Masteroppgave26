@@ -1,8 +1,11 @@
+from cProfile import label
+
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 import patsy
 from linearmodels.panel import PanelOLS
+import matplotlib.pyplot as plt
 
 
 data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep= ';')
@@ -105,10 +108,10 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, price_area):
     df = pd.concat([df_NP,df_uNP,df_resten],ignore_index=True)
     df = df[df['kWh/Metering_point'] > 0].copy()
 
-    start_date_before = pd.Timestamp('2025-01-01', tz=None)
+    start_date_before = pd.Timestamp('2024-11-01', tz=None)
     end_date_before = pd.Timestamp('2025-01-31', tz = None)
 
-    start_date_after = pd.Timestamp('2026-01-01', tz = None)
+    start_date_after = pd.Timestamp('2025-11-01', tz = None)
     end_date_after = pd.Timestamp('2026-01-31', tz = None)
 
     reference = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
@@ -117,12 +120,6 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, price_area):
     df['Period'] = np.select([reference, treatment],
                               ['Reference', 'Treatment'],
                               default = 'Rest')
-
-    df['Month'] = df['Date'].dt.strftime('%B')
-    df['Month'] = pd.Categorical(df['Month'],
-                                 categories=['January', 'February', 'March', 'April', 'May', 'June',
-                                             'July', 'August', 'September', 'October', 'November', 'December'],
-                                 ordered=True)
 
     # --------- Model ------------ #
 
@@ -134,29 +131,107 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, price_area):
                                   ordered = True)
 
     df['log_y'] = np.log(df['kWh/Metering_point'])
-    panel_df = df.copy()
-    panel_df = panel_df.set_index(['entity', 'time'], drop=False)
 
-    model = PanelOLS.from_formula(
+    results = []
+    for h in range(24):
+        sub = df[df['Hour'] == h].copy()
+
+        if sub.empty:
+            results.append({
+                'Hour': h,
+                'DiD': np.nan,
+                'CI_low': np.nan,
+                'CI_high': np.nan
+            })
+            continue
+
+        panel_df = sub.set_index(['entity', 'time'], drop = False)
+
+        model = PanelOLS.from_formula(
         'log_y ~ 1 + C(entity)*C(period) + TimeEffects',
-        data = panel_df,
-        drop_absorbed=True
-    )
+            data = panel_df,
+            drop_absorbed=True
+        )
 
-    res = model.fit(cov_type='clustered', cluster_time=True)
-    #print(res.summary)
+        res = model.fit(cov_type='clustered', cluster_time=True)
+        key = 'C(entity)[T.Med Norgespris]:C(period)[T.Treatment]'
 
-    #print(df.head(10))
+        if key not in res.params.index:
+            results.append({
+                'Hour': h,
+                'DiD' : np.nan,
+                'CI_low': np.nan,
+                'CI_high': np.nan,
+            })
+            continue
+
+        beta3 = res.params[key]
+        ci_low, ci_high = res.conf_int().loc[key]
+        DiD = (np.exp(beta3)-1)*100
+        CI_low = (np.exp(ci_low)-1)*100
+        CI_high = (np.exp(ci_high)-1)*100
+
+        results.append({
+            'Hour': h,
+            'DiD': DiD,
+            'CI_low': CI_low,
+            'CI_high': CI_high
+        })
+
+    results_df = pd.DataFrame(results).sort_values('Hour').reset_index(drop=True)
+
+    print('----------- DiD per time -----------------')
+    for _, r in results_df.iterrows():
+        if pd.isna(r['DiD']):
+            print(f"Time {int(r['Hour']):02d}")
+        else:
+            print(
+                f"Time {int(r['Hour']):02d}: DiD = {r['DiD']:.2f}%  | KI [{r['CI_low']:.2f}%, {r['CI_high']:.2f}%]")
+
+    return results_df
+
+    # --------- PLOTT DØGNPROFIL ---------- #
+def plot_dognprofil(results_df, price_area):
+    hours = results_df['Hour']
+    DiD = results_df['DiD']
+    ci_low = results_df['CI_low']
+    ci_high = results_df['CI_high']
+
+    plt.figure(figsize=(12, 6))
+
+    plt.plot(hours, DiD, label='DiD', color='royalblue', linewidth=2)
+
+    # ------- KI ------ #
+    '''plt.fill_between(
+        hours,
+        ci_low,
+        ci_high,
+        color='royalblue',
+        label='95% CI'
+    )'''
+
+    plt.axhline(0, color='black', linewidth=1, linestyle='--')
+
+    plt.xticks(range(0, 24))
+    plt.xlabel("Hour")
+    plt.ylabel("Change in COnsumption (%)")
+    plt.title(f"Daily Profile for the DiD estimate – {price_area}")
+    plt.grid(alpha=0.3)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
 
 
-    # -------- Utregning --------- #
-    print('----------- PanelOLS -----------------')
-    beta3 = res.params['C(entity)[T.Med Norgespris]:C(period)[T.Treatment]']
-    DiD = (np.exp(beta3) - 1) * 100
 
-    ci_low, ci_high = res.conf_int().loc['C(entity)[T.Med Norgespris]:C(period)[T.Treatment]']
-    DiD_low = (np.exp(ci_low) - 1) * 100
-    DiD_high = (np.exp(ci_high) - 1) * 100
 
-    print(f'DiD prosent for {price_area}: {DiD:.2f}%')
-    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
+
+
+#results_NO1 = Difference_in_Difference_Flex(data_mNP_NO1, data_uNP_NO1, data_rest_NO1, 'NO1')
+#plot_dognprofil(results_NO1, 'NO1')
+
+#results_NO2 = Difference_in_Difference_Flex(data_mNP_NO2, data_uNP_NO2, data_rest_NO2, 'NO2')
+#plot_dognprofil(results_NO2, 'NO2')
+
+results_NO5 = Difference_in_Difference_Flex(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, 'NO5')
+plot_dognprofil(results_NO5, 'NO5')
+

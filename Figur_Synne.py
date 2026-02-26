@@ -5,31 +5,7 @@ import matplotlib.pyplot as plt
 import csv
 import row
 
-'''DiD = pd.DataFrame({
-    "region":
-        ["NO1","NO2","NO5"],
-    "vindu":
-        ["3 Winter Months (Nov,Dec,Jan)",
-         "November",
-         "Desember",
-         "January"] * 3,
-    "value":
-        [3.45 , 4.51 , 2.83,    #3 vinter måneder
-         2.47, 3.76, 2.32,      #Nov
-         3.2, 4.79, 2.76,       #Des
-         4.63,4.97,3.40],       #Jan
-    "ci_high":
-        [3.67, 4.71, 2.98,      #3 vinter måneder
-         2.90,4.14, 2.60,       #Nov
-         3.58, 5.10, 2.99,      #Des
-         4.97,5.27,3.65],       #Jan
-    "ci_low":
-        [3.23, 4.32, 2.68,      #3 vinter måneder
-         2.04, 3.38, 2.04,      #Nov
-         2.91, 4.48, 2.52,      #Des
-         4.29,4.67,3.14],       #Jan
-})'''
-
+# --------- DiD ---------- #
 regions = ["NO1", "NO2", "NO5"]
 
 vindu = [
@@ -73,7 +49,7 @@ for i, win in enumerate(vindu):
 
 DiD = pd.DataFrame(rows)
 
-
+# ----------- DiD Flex ------------ #
 delta_consump = pd.DataFrame({
     "region":  ["NO1","NO1","NO1","NO1","NO2","NO2","NO2","NO2","NO5","NO5","NO5","NO5"],
     "vindu":   ["γ_1: Effect of Norgespris","γ_1: Effect of no Norgespris", "γ_2: Effect of temperature with NP","γ_2: Effect of temperature without NP"] * 3,
