@@ -49,15 +49,6 @@ for i, win in enumerate(vindu):
 
 DiD = pd.DataFrame(rows)
 
-# ----------- DiD Flex ------------ #
-delta_consump = pd.DataFrame({
-    "region":  ["NO1","NO1","NO1","NO1","NO2","NO2","NO2","NO2","NO5","NO5","NO5","NO5"],
-    "vindu":   ["γ_1: Effect of Norgespris","γ_1: Effect of no Norgespris", "γ_2: Effect of temperature with NP","γ_2: Effect of temperature without NP"] * 3,
-
-    "value":    [2.74 ,  -0.61 , -3.16,  -2.85,    5.03,  0.6,-3.57, -3.39,      3.45, 0.76, -3.05, -2.87],
-    "ci_high":  [3.12,   -0.29,  -3.12,  -2.81,    5.44, 0.94, -3.51, -3.34,     3.85, 1.13, -3.01, -2.82],
-    "ci_low":   [2.36,   -0.94,  -3.21,  -2.89,    4.63, 0.26,-3.62, -3.44,      3.05, 0.4, -3.10, -2.91],
-})
 
 
 def plot_errorbars_by_group(
