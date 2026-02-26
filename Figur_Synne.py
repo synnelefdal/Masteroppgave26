@@ -66,12 +66,6 @@ def plot_errorbars_by_group(
     point_size=100,
     capsize=0.15
 ):
-    """
-    Lager en multi-series errorbar-figur per kategori (x),
-    med flere serier (series), og viser figuren på skjerm.
-
-    Ingen lagring skjer (ingen PNG/PDF).
-    """
 
     import numpy as np
     import matplotlib.pyplot as plt
@@ -157,11 +151,3 @@ plot_errorbars_by_group(
     #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}
 )
 
-
-plot_errorbars_by_group(
-    delta_consump,
-    title=" Coefficient Illustration Regression Model 2024(5)->2025(6)",
-    y_label=" Δ Consumption in Percent [%]",
-    y_ref_lines=[-4, 6]
-    #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}
-)
