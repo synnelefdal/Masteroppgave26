@@ -13,13 +13,13 @@ import seaborn as sns
 from pandas import to_datetime
 
 
-data = pd.read_csv('Ikke_i_bruk/Forbruk_NO1_NO5.csv')
+data = pd.read_csv('Forbruk_NO1_NO5.csv')
 
-price_NO1 = pd.read_csv('Ikke_i_bruk/NO1_prices.csv')
-price_NO5 = pd.read_csv('Ikke_i_bruk/NO5_prices.csv')
+price_NO1 = pd.read_csv('NO1_prices.csv')
+price_NO5 = pd.read_csv('NO5_prices.csv')
 
-Temp_Bergen = pd.read_csv('Temp_Bergen.csv')
-Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
+Temp_Bergen = pd.read_csv('../Temp_Bergen.csv')
+Temp_Oslo = pd.read_csv('../Temp_Oslo.csv')
 
 def flex_sensitivitet(data, price_area, temp, price_data):
     # ------------------- Filterer for dato ---------- #

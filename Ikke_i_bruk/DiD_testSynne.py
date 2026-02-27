@@ -22,8 +22,8 @@ import matplotlib.pyplot as plt
 # -----------------------------
 # Parametere for innlesing
 # -----------------------------
-TREATMENT_FILE = "All_Demand_Data/NO1_mNP.csv"
-CONTROL_FILE   = "All_Demand_Data/NO1_uNP.csv"
+TREATMENT_FILE = "../All_Demand_Data/NO1_mNP.csv"
+CONTROL_FILE   = "../All_Demand_Data/NO1_uNP.csv"
 
 DATE_COL = "start_time_utc"
 CONSUMPTION_COL = "consumption_kwh"
