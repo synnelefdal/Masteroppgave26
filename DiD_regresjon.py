@@ -107,10 +107,10 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
     df = pd.concat([df_NP,df_uNP,df_resten],ignore_index=True)
     df = df[df['kWh/Metering_point'] > 0].copy()
 
-    start_date_before = pd.Timestamp('2025-01-01', tz=None)
+    start_date_before = pd.Timestamp('2024-11-01', tz=None)
     end_date_before = pd.Timestamp('2025-01-31', tz = None)
 
-    start_date_after = pd.Timestamp('2026-01-01', tz = None)
+    start_date_after = pd.Timestamp('2025-11-01', tz = None)
     end_date_after = pd.Timestamp('2026-01-31', tz = None)
 
     reference = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
@@ -164,15 +164,9 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
     print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
 
 
-
-
-
-
-
-
-
-
-#Difference_in_Difference(data_mNP_NO1,data_uNP_NO1,data_rest_NO1, 'NO1')
+Difference_in_Difference(data_mNP_NO1,data_uNP_NO1,data_rest_NO1, 'NO1')
+Difference_in_Difference(data_mNP_NO2,data_uNP_NO2,data_rest_NO2, 'NO2')
+Difference_in_Difference(data_mNP_NO5,data_uNP_NO5,data_rest_NO5, 'NO5')
 
 
 

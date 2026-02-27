@@ -172,6 +172,62 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     print(res)
 
+    # -------- Utregning --------- #
+    print('----------- PanelOLS -----------------')
+    beta3 = res.params["C(entity, Treatment(reference='Uten Norgespris'))[T.Med Norgespris]:C(period)[T.Treatment]"]
+    DiD = (np.exp(beta3) - 1) * 100
+
+    ci_low, ci_high = res.conf_int().loc["C(entity, Treatment(reference='Uten Norgespris'))[T.Med Norgespris]:C(period)[T.Treatment]"]
+    DiD_low = (np.exp(ci_low) - 1) * 100
+    DiD_high = (np.exp(ci_high) - 1) * 100
+
+    print(f'DiD prosent for {price_area}: {DiD:.2f}%')
+    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
+
+    # -------- Figur ---------- #
+    #df_before = df[df['Period'] == 'Reference'].copy()
+    df_plot = df[df['Period'].isin(['Reference', 'Rest'])].copy()
+    df_plot = df_plot[df_plot['entity'].isin(['Uten Norgespris', 'Med Norgespris'])]
+
+    df_plot = df_plot.dropna(subset=['Temp24'])
+    group_means = df_plot.groupby('entity')['kWh/Metering_point'].mean()
+
+    df_plot['rel_consumption'] = df_plot.apply(
+        lambda r: r['kWh/Metering_point'] / group_means.loc[r['entity']],
+        axis=1
+    )
+
+    # Plot
+    plt.figure(figsize=(9, 6))
+
+    colors = {
+        'Uten Norgespris': '#1f77b4',
+        'Med Norgespris': '#d62728'
+    }
+    df_plot['entity'] = df_plot['entity'].cat.remove_unused_categories()
+    df_plot['temp_bin'] = (df_plot['Temp24'] / 0.5).round() * 0.5
+
+    for grp, sub in df_plot.groupby('entity'):
+        trend = sub.groupby('temp_bin')['rel_consumption'].mean().reset_index()
+        trend = trend.sort_values('temp_bin')
+        plt.plot(
+            trend['temp_bin'], trend['rel_consumption'],
+            color=colors.get(grp, 'gray'), linewidth=2,
+            label=f'{grp}'
+        )
+
+    plt.axhline(1.0, linestyle='--', color='gray', alpha=0.7)
+    plt.xlabel('Temperatur [°C]')
+    plt.ylabel('Gjennomsnits forbruk [kWh/målepunkt]')
+    plt.title(f'Temperaturfølsomhet før Norgespris – {price_area}')
+    plt.grid(True, alpha=0.25)
+    plt.legend()
+
+    plt.tight_layout()
+    plt.show()
+
 
 
 Difference_in_Difference_temp(data_mNP_NO1,data_uNP_NO1,data_rest_NO1,'NO1',Temp_Oslo)
+Difference_in_Difference_temp(data_mNP_NO2,data_uNP_NO2,data_rest_NO2,'NO2',Temp_Stavanger)
+Difference_in_Difference_temp(data_mNP_NO5,data_uNP_NO5,data_rest_NO5,'NO5',Temp_Bergen)
