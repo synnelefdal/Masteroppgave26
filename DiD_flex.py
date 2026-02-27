@@ -194,21 +194,10 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, price_area):
 def plot_dognprofil(results_df, price_area):
     hours = results_df['Hour']
     DiD = results_df['DiD']
-    ci_low = results_df['CI_low']
-    ci_high = results_df['CI_high']
 
     plt.figure(figsize=(12, 6))
 
     plt.plot(hours, DiD, label='DiD', color='royalblue', linewidth=2)
-
-    # ------- KI ------ #
-    '''plt.fill_between(
-        hours,
-        ci_low,
-        ci_high,
-        color='royalblue',
-        label='95% CI'
-    )'''
 
     plt.axhline(0, color='black', linewidth=1, linestyle='--')
 
