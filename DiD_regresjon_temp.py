@@ -189,6 +189,11 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     df_plot = df[df['Period'].isin(['Reference', 'Rest'])].copy()
     df_plot = df_plot[df_plot['entity'].isin(['Uten Norgespris', 'Med Norgespris'])]
 
+    remove_oct = (df_plot['Date'] >= pd.to_datetime('2025-10-01')) & \
+                      (df_plot['Date'] <= pd.to_datetime('2025-10-31'))
+
+    df_plot = df_plot[~remove_oct]
+
     df_plot = df_plot.dropna(subset=['Temp24'])
     group_means = df_plot.groupby('entity')['kWh/Metering_point'].mean()
 
