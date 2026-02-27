@@ -320,7 +320,6 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
 
 #Difference_in_Difference(data_mNP_NO1,data_uNP_NO1,data_rest_NO1, 'NO1')
-#Difference_in_Difference
 Difference_in_Difference_temp(data_mNP_NO1,data_uNP_NO1,data_rest_NO1,'NO1',Temp_Oslo)
 
 
