@@ -158,9 +158,11 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     panel_df = df.set_index(['entity', 'time'], drop=False).sort_index()
 
     model = PanelOLS.from_formula(
-        'log_y ~ 1 + C(entity)*C(period) '
-                '+ C(entity):Temp24 +C(entity):I(Temp24**2) '
-                '+ C(entity):I(Temp24**3) '
+        'log_y ~ 1 + C(entity, Treatment(reference="Uten Norgespris"))*C(period) '
+                '+  Temp24 + I(Temp24**2) + I(Temp24**3)'
+                '+ C(entity, Treatment(reference="Uten Norgespris")):Temp24 '
+                '+ C(entity, Treatment(reference="Uten Norgespris")):I(Temp24**2) '
+                '+ C(entity, Treatment(reference="Uten Norgespris")):I(Temp24**3) '
                 '+ TimeEffects',
         data=panel_df,
         drop_absorbed=True
