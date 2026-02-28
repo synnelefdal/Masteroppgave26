@@ -1,5 +1,7 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
+
 
 data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep= ';')
 data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep= ';')
@@ -10,114 +12,38 @@ data_uNP_NO2 = pd.read_csv('All_Demand_Data/NO2_uNP.csv', sep= ';')
 data_mNP_NO5 = pd.read_csv('All_Demand_Data/NO5_mNP.csv', sep= ';')
 data_uNP_NO5 = pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep= ';')
 
+def plot_timer(data_mNP, data_uNP, price_area):
 
-timestamp_col = "timestamp"
-consumption_col = "consumption"
+    def prep(df):
+        df = df.copy()
 
-data_mNP_NO1[timestamp_col] = pd.to_datetime(data_mNP_NO1[timestamp_col])
-data_uNP_NO1[timestamp_col] = pd.to_datetime(data_uNP_NO1[timestamp_col])
+        start_dato = '2024-11-01'
+        slutt_dato = '2025-01-31'
 
-data_mNP_NO2[timestamp_col] = pd.to_datetime(data_mNP_NO2[timestamp_col])
-data_uNP_NO2[timestamp_col] = pd.to_datetime(data_uNP_NO2[timestamp_col])
+        df['start_time_utc'] = pd.to_datetime((df['start_time_utc']), utc=True)
+        df = df[(df['start_time_utc'] >= start_dato) & (df['start_time_utc'] <= slutt_dato)]
 
-data_mNP_NO5[timestamp_col] = pd.to_datetime(data_mNP_NO5[timestamp_col])
-data_uNP_NO5[timestamp_col] = pd.to_datetime(data_uNP_NO5[timestamp_col])
+        df['Hour'] = df['start_time_utc'].dt.hour
+        df['kWh/metering_point'] = df['consumption_kwh'] / df['metering_point_count']
+        return df
 
+    df_mNP = prep(data_mNP)
+    df_uNP = prep(data_uNP)
 
-norgespris_vinter_start = "2025-11-01"
-norgespris_vinter_slutt = "2026-01-31"
+    mNP_prof = df_mNP.groupby('Hour')['kWh/metering_point'].mean()
+    uNP_prof = df_uNP.groupby('Hour')['kWh/metering_point'].mean()
 
-forrige_vinter_start = "2024-11-01"
-forrige_vinter_slutt = "2025-01-31"
+    plt.figure(figsize=(10,5))
+    plt.plot(mNP_prof.index, mNP_prof.values, marker = 'o', label = 'With Norgespris')
+    plt.plot(uNP_prof.index, uNP_prof.values, marker = 'o', label = 'Without Norgespris')
 
-# -------- NO1 --------- #
-data_mNP_NO1 = data_mNP_NO1[(data_mNP_NO1[timestamp_col] >= norgespris_vinter_start) &
-                            (data_mNP_NO1[timestamp_col] <= norgespris_vinter_slutt)]
-data_uNP_NO1 = data_uNP_NO1[(data_uNP_NO1[timestamp_col] >= norgespris_vinter_start) &
-                            (data_uNP_NO1[timestamp_col] <= norgespris_vinter_slutt)]
-
-data_mNP_NO1 = data_mNP_NO1[(data_mNP_NO1[timestamp_col] >= forrige_vinter_start) &
-                            (data_mNP_NO1[timestamp_col] <= forrige_vinter_slutt)]
-data_uNP_NO1 = data_uNP_NO1[(data_uNP_NO1[timestamp_col] >= forrige_vinter_start) &
-                            (data_uNP_NO1[timestamp_col] <= forrige_vinter_slutt)]
-
-data_mNP_NO1 = data_mNP_NO1[(data_mNP_NO1[timestamp_col] >= norgespris_vinter_start) &
-                            (data_mNP_NO1[timestamp_col] <= norgespris_vinter_slutt)]
-data_uNP_NO1 = data_uNP_NO1[(data_uNP_NO1[timestamp_col] >= norgespris_vinter_start) &
-                            (data_uNP_NO1[timestamp_col] <= norgespris_vinter_slutt)]
-
-data_mNP_NO1 = data_mNP_NO1[(data_mNP_NO1[timestamp_col] >= forrige_vinter_start) &
-                            (data_mNP_NO1[timestamp_col] <= forrige_vinter_slutt)]
-data_uNP_NO1 = data_uNP_NO1[(data_uNP_NO1[timestamp_col] >= forrige_vinter_start) &
-                            (data_uNP_NO1[timestamp_col] <= forrige_vinter_slutt)]
-
-# -------- NO2 --------- #
-data_mNP_NO2 = data_mNP_NO2[(data_mNP_NO2[timestamp_col] >= norgespris_vinter_start) &
-                            (data_mNP_NO2[timestamp_col] <= norgespris_vinter_slutt)]
-data_uNP_NO2 = data_uNP_NO2[(data_uNP_NO2[timestamp_col] >= norgespris_vinter_start) &
-                            (data_uNP_NO2[timestamp_col] <= norgespris_vinter_slutt)]
-
-data_mNP_NO2 = data_mNP_NO2[(data_mNP_NO2[timestamp_col] >= forrige_vinter_start) &
-                            (data_mNP_NO2[timestamp_col] <= forrige_vinter_slutt)]
-data_uNP_NO2 = data_uNP_NO2[(data_uNP_NO2[timestamp_col] >= forrige_vinter_start) &
-                            (data_uNP_NO2[timestamp_col] <= forrige_vinter_slutt)]
-
-data_mNP_NO2 = data_mNP_NO2[(data_mNP_NO2[timestamp_col] >= norgespris_vinter_start) &
-                            (data_mNP_NO2[timestamp_col] <= norgespris_vinter_slutt)]
-data_uNP_NO2 = data_uNP_NO2[(data_uNP_NO2[timestamp_col] >= norgespris_vinter_start) &
-                            (data_uNP_NO2[timestamp_col] <= norgespris_vinter_slutt)]
-
-data_mNP_NO2 = data_mNP_NO2[(data_mNP_NO2[timestamp_col] >= forrige_vinter_start) &
-                            (data_mNP_NO2[timestamp_col] <= forrige_vinter_slutt)]
-data_uNP_NO2 = data_uNP_NO2[(data_uNP_NO2[timestamp_col] >= forrige_vinter_start) &
-                            (data_uNP_NO2[timestamp_col] <= forrige_vinter_slutt)]
-
-# -------- NO5 --------- #
-data_mNP_NO5 = data_mNP_NO5[(data_mNP_NO5[timestamp_col] >= norgespris_vinter_start) &
-                            (data_mNP_NO5[timestamp_col] <= norgespris_vinter_slutt)]
-data_uNP_NO5 = data_uNP_NO5[(data_uNP_NO5[timestamp_col] >= norgespris_vinter_start) &
-                            (data_uNP_NO5[timestamp_col] <= norgespris_vinter_slutt)]
-
-data_mNP_NO5 = data_mNP_NO5[(data_mNP_NO5[timestamp_col] >= forrige_vinter_start) &
-                            (data_mNP_NO5[timestamp_col] <= forrige_vinter_slutt)]
-data_uNP_NO5 = data_uNP_NO5[(data_uNP_NO5[timestamp_col] >= forrige_vinter_start) &
-                            (data_uNP_NO5[timestamp_col] <= forrige_vinter_slutt)]
-
-data_mNP_NO5 = data_mNP_NO5[(data_mNP_NO5[timestamp_col] >= norgespris_vinter_start) &
-                            (data_mNP_NO5[timestamp_col] <= norgespris_vinter_slutt)]
-data_uNP_NO5 = data_uNP_NO5[(data_uNP_NO5[timestamp_col] >= norgespris_vinter_start) &
-                            (data_uNP_NO5[timestamp_col] <= norgespris_vinter_slutt)]
-
-data_mNP_NO5 = data_mNP_NO5[(data_mNP_NO5[timestamp_col] >= forrige_vinter_start) &
-                            (data_mNP_NO5[timestamp_col] <= forrige_vinter_slutt)]
-data_uNP_NO5 = data_uNP_NO5[(data_uNP_NO5[timestamp_col] >= forrige_vinter_start) &
-                            (data_uNP_NO5[timestamp_col] <= forrige_vinter_slutt)]
-
-
-
-def plot_profil(df_med, df_uten, title):
-    # Legg til time-of-day
-    df_med = df_med.copy()
-    df_uten = df_uten.copy()
-
-    df_med["hour"] = df_med[timestamp_col].dt.hour
-    df_uten["hour"] = df_uten[timestamp_col].dt.hour
-
-    # Beregn gjennomsnitt pr time
-    profil_med = df_med.groupby("hour")[consumption_col].mean()
-    profil_uten = df_uten.groupby("hour")[consumption_col].mean()
-
-    plt.figure(figsize=(10, 5))
-    plt.plot(profil_med.index, profil_med.values, label="Med Norgespris")
-    plt.plot(profil_uten.index, profil_uten.values, label="Uten Norgespris")
-
-    plt.title(title)
-    plt.xlabel("Time på døgnet")
-    plt.ylabel("Gjennomsnittlig forbruk (kWh)")
-    plt.grid(True)
+    plt.xlabel('Hour')
+    plt.ylabel('kWh/metering_point')
+    plt.title(f'Consumption - kWh per metering point for period {df_mNP['start_time_utc'].min().date()} to {df_mNP['start_time_utc'].max().date()} in {price_area}')
+    plt.xticks(range(24))
+    plt.grid(True, alpha = 0.3)
     plt.legend()
+    plt.tight_layout()
     plt.show()
 
-
-plot_profil(data_mNP_NO1, data_uNP_NO1, "Forbruksprofil – Norgespris-vinter")
-plot_profil(data_mNP_NO1, data_uNP_NO1, "Forbruksprofil – Forrige vinter")
+plot_timer(data_mNP_NO5, data_uNP_NO5, 'NO5')
