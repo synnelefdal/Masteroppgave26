@@ -146,7 +146,7 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
     )
 
     res = model.fit(cov_type='clustered', cluster_time=True)
-    #print(res.summary)
+    print(res.summary)
 
     #print(df.head(10))
 

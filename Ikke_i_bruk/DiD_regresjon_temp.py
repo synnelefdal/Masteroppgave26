@@ -127,10 +127,10 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     df = df[df['kWh/Metering_point'] > 0].copy()
     #print(df)
 
-    start_date_before = '2024-11-01'
+    start_date_before = '2025-01-01'
     end_date_before = '2025-01-31'
 
-    start_date_after = '2025-11-01'
+    start_date_after = '2026-01-01'
     end_date_after = '2026-01-31'
 
     before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)

@@ -17,8 +17,8 @@ def plot_timer(data_mNP, data_uNP, price_area):
     def prep(df):
         df = df.copy()
 
-        start_dato = '2024-11-01'
-        slutt_dato = '2025-01-31'
+        start_dato = '2025-11-01'
+        slutt_dato = '2026-01-31'
 
         df['start_time_utc'] = pd.to_datetime((df['start_time_utc']), utc=True)
         df = df[(df['start_time_utc'] >= start_dato) & (df['start_time_utc'] <= slutt_dato)]
