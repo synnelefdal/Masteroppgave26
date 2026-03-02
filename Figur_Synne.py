@@ -9,30 +9,31 @@ import row
 regions = ["NO1", "NO2", "NO5"]
 
 vindu = [
-    "3 Winter Months (Nov,Dec,Jan)",
     "November",
     "Desember",
-    "January"]
+    "January",
+    "3 Winter Months (Nov,Dec,Jan)"
+]
 
 values = [
-    [3.45, 4.51, 2.83],   # 3 vinter måneder
     [2.47, 3.76, 2.32],   # November
     [3.20, 4.79, 2.76],   # Desember
-    [4.63, 4.97, 3.40]    # January
+    [4.63, 4.97, 3.40],   # January
+    [3.45, 4.51, 2.83]    # 3 vinter måneder
 ]
 
 ci_high = [
-    [3.67, 4.71, 2.98],  # 3 vinter måneder
     [2.90, 4.14, 2.60],  # November
     [3.58, 5.10, 2.99],  # Desember
-    [4.97, 5.27, 3.65]   # January
+    [4.97, 5.27, 3.65],  # January
+    [3.67, 4.71, 2.98]   # 3 vinter måneder
 ]
 
 ci_low = [
-    [3.23, 4.32, 2.68],  # 3 vinter måneder
     [2.04, 3.38, 2.04],  # November
     [2.91, 4.48, 2.52],  # Desember
-    [4.29, 4.67, 3.14]   # January
+    [4.29, 4.67, 3.14],  # January
+    [3.23, 4.32, 2.68]   # 3 vinter måneder
 ]
 
 rows = []
@@ -142,6 +143,12 @@ def plot_errorbars_by_group(
     plt.tight_layout()
     plt.show()
 
+
+DiD["vindu"] = pd.Categorical(
+    DiD["vindu"],
+    categories=vindu,
+    ordered=True
+)
 
 plot_errorbars_by_group(
     DiD,
