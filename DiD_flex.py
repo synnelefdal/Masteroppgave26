@@ -191,20 +191,30 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, price_area):
     return results_df
 
     # --------- PLOTT DØGNPROFIL ---------- #
-def plot_dognprofil(results_df, price_area):
-    hours = results_df['Hour']
-    DiD = results_df['DiD']
+def plot_dognprofil(results_df_NO1, results_df_NO2, results_df_NO5):
+    # ---------- NO1 ---------- #
+    hours_NO1 = results_df_NO1['Hour']
+    DiD_NO1 = results_df_NO1['DiD']
+
+    # ---------- NO2 ---------- #
+    hours_NO2 = results_df_NO2['Hour']
+    DiD_NO2 = results_df_NO2['DiD']
+
+    # ---------- NO1 ---------- #
+    hours_NO5 = results_df_NO5['Hour']
+    DiD_NO5 = results_df_NO5['DiD']
 
     plt.figure(figsize=(12, 6))
 
-    plt.plot(hours, DiD, label='DiD', color='royalblue', linewidth=2)
+    plt.plot(hours_NO1, DiD_NO1, label='DiD - NO1', color='royalblue', linewidth=2)
+    plt.plot(hours_NO2, DiD_NO2, label='DiD - NO2', color='red', linewidth=2)
+    plt.plot(hours_NO5, DiD_NO5, label='DiD - NO5', color='green', linewidth=2)
 
-    plt.axhline(0, color='black', linewidth=1, linestyle='--')
 
     plt.xticks(range(0, 24))
     plt.xlabel("Hour")
-    plt.ylabel("Change in COnsumption (%)")
-    plt.title(f"Daily Profile for the DiD estimate – {price_area}")
+    plt.ylabel("Difference in Difference of Consumption Changes [%]")
+    plt.title(f"Daily Profile for the DiD Estimate for NO1, NO2, and NO5")
     plt.grid(alpha=0.3)
     plt.legend()
     plt.tight_layout()
@@ -215,12 +225,8 @@ def plot_dognprofil(results_df, price_area):
 
 
 
-#results_NO1 = Difference_in_Difference_Flex(data_mNP_NO1, data_uNP_NO1, data_rest_NO1, 'NO1')
-#plot_dognprofil(results_NO1, 'NO1')
-
-#results_NO2 = Difference_in_Difference_Flex(data_mNP_NO2, data_uNP_NO2, data_rest_NO2, 'NO2')
-#plot_dognprofil(results_NO2, 'NO2')
-
+results_NO1 = Difference_in_Difference_Flex(data_mNP_NO1, data_uNP_NO1, data_rest_NO1, 'NO1')
+results_NO2 = Difference_in_Difference_Flex(data_mNP_NO2, data_uNP_NO2, data_rest_NO2, 'NO2')
 results_NO5 = Difference_in_Difference_Flex(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, 'NO5')
-plot_dognprofil(results_NO5, 'NO5')
+plot_dognprofil(results_NO1, results_NO2, results_NO5)
 
