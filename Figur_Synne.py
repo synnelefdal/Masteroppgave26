@@ -4,36 +4,53 @@ import math
 import matplotlib.pyplot as plt
 import csv
 import row
+from pandapower.pf.no_numba import marker
 
 # --------- DiD ---------- #
 regions = ["NO1", "NO2", "NO5"]
 
 vindu = [
     "November",
+    "November w/Temp",
     "Desember",
+    "Desember w/Temp",
     "January",
-    "3 Winter Months (Nov,Dec,Jan)"
+    "January w/Temp",
+    "3 Winter Months (Nov,Dec,Jan)",
+    "3 Winter Months (Nov,Dec,Jan) w/Temp"
 ]
 
 values = [
     [2.47, 3.76, 2.32],   # November
+    [2.89, 3.59, 2.32],  # November med temp
     [3.20, 4.79, 2.76],   # Desember
+    [3.59, 4.59, 2.76],  # Desember med temp
     [4.63, 4.97, 3.40],   # January
-    [3.45, 4.51, 2.83]    # 3 vinter måneder
+    [3.97, 4.54, 2.72],  # January med temp
+    [3.45, 4.51, 2.83],   # 3 vinter måneder
+    [3.42, 4.18, 2.61]    # 3 vinter måneder med temp
 ]
 
 ci_high = [
     [2.90, 4.14, 2.60],  # November
+    [3.29, 3.98, 2.60],  # November med temp
     [3.58, 5.10, 2.99],  # Desember
+    [3.91, 4.91, 2.99],  # Desember med temp
     [4.97, 5.27, 3.65],  # January
-    [3.67, 4.71, 2.98]   # 3 vinter måneder
+    [4.29, 4.84, 2.97],  # January med temp
+    [3.67, 4.71, 2.98],  # 3 vinter måneder
+    [3.62, 4.39, 2.76]   # 3 vinter måneder med temp
 ]
 
 ci_low = [
     [2.04, 3.38, 2.04],  # November
+    [2.48, 3.20, 2.05],  # November med temp
     [2.91, 4.48, 2.52],  # Desember
+    [3.28, 4.28, 2.53],  # Desember med temp
     [4.29, 4.67, 3.14],  # January
-    [3.23, 4.32, 2.68]   # 3 vinter måneder
+    [3.66, 4.23, 2.48],  # January med temp
+    [3.23, 4.32, 2.68],  # 3 vinter måneder
+    [3.21, 3.98, 2.46]   # 3 vinter måneder med temp
 ]
 
 rows = []
@@ -52,37 +69,37 @@ DiD = pd.DataFrame(rows)
 
 # --------- DiD m/Temp ---------- #
 
-regions_temp = ["NO1", "NO2", "NO5"]
+#regions_temp = ["NO1", "NO2", "NO5"]
 
-vindu_temp = [
+'''vindu_temp = [
     "November w/Temp",
     "Desember w/Temp",
     "January w/Temp",
     "3 Winter Months (Nov,Dec,Jan) w/Temp"
-]
+]'''
 
-values_temp = [
+'''values_temp = [
     [2.89, 3.59, 2.32],   # November
     [3.59, 4.59, 2.76],   # Desember
     [3.97, 4.54, 2.72],   # January
     [3.42, 4.18, 2.61]    # 3 vinter måneder
-]
+]'''
 
-ci_high_temp = [
+'''ci_high_temp = [
     [3.29, 3.98, 2.60],  # November
     [3.91, 4.91, 2.99],  # Desember
     [4.29, 4.84, 2.97],  # January
     [3.62, 4.39, 2.76]   # 3 vinter måneder
-]
+]'''
 
-ci_low_temp = [
+'''ci_low_temp = [
     [2.48, 3.20, 2.05],  # November
     [3.28, 4.28, 2.53],  # Desember
     [3.66, 4.23, 2.48],  # January
     [3.21, 3.98, 2.46]   # 3 vinter måneder
-]
+]'''
 
-rows_temp = []
+'''rows_temp = []
 
 for i, win in enumerate(vindu_temp):
     for r in range(3):
@@ -94,93 +111,111 @@ for i, win in enumerate(vindu_temp):
             "ci_low": ci_low_temp[i][r]
         })
 
-DiD_temp = pd.DataFrame(rows_temp)
+DiD_temp = pd.DataFrame(rows_temp)'''
 
 
-def plot_errorbars_two_groups(
-    df1: pd.DataFrame,
-    df2: pd.DataFrame,
+
+def plot_errorbars_by_group(
+    df: pd.DataFrame,
     x="region",
     series="vindu",
     y="value",
     ylow="ci_low",
     yhigh="ci_high",
-    label1="DiD",
-    label2="DiD_temp",
     title="Estimert effekt med 95% KI",
     y_label="Endring relativt til baseline (%)",
     y_ref_lines=None,
+    annotate=None,
     palette="Set2",
     point_size=100,
-    x_order = None,
-    series_order = None
+    capsize=0.15
 ):
 
     import numpy as np
     import matplotlib.pyplot as plt
     import seaborn as sns
-    import pandas as pd
 
-    # --- KATEGORIER ---
-    cats = df1[x].cat.categories
-    ser  = df1[series].cat.categories
-
+    # Definér posisjoner
+    cats = df[x].cat.categories if isinstance(df[x].dtype, pd.CategoricalDtype) else sorted(df[x].unique())
+    ser  = df[series].cat.categories if isinstance(df[series].dtype, pd.CategoricalDtype) else sorted(df[series].unique())
     n_x, n_s = len(cats), len(ser)
 
     x_idx = np.arange(n_x)
     group_width = 0.7
-
-    # Nå har vi *TO* grupper → de skal side-om-side
-    offsets = [-0.15, 0.15]
+    step = group_width / (n_s if n_s > 1 else 1)
+    offsets = (np.arange(n_s) - (n_s - 1)/2) * step
 
     pal = sns.color_palette(palette, n_colors=n_s)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    # Figur
+    fig, ax = plt.subplots(figsize=(9, 5))
 
-    for i, df in enumerate([df1, df2]):
-        label = label1 if i == 0 else label2
-        offset = offsets[i]
+    base_names = [str(s).replace(" w/Temp", "") for s in ser]
+    unique_base = list(dict.fromkeys(base_names))
+    base_palette = sns.color_palette("Set2", n_colors=len(unique_base))
+    base_color_map = dict(zip(unique_base, base_palette))
 
-        for j, s in enumerate(ser):
-            sub = (
-                df[df[series] == s]
-                .set_index(x)
-                .reindex(cats)
-            )
+    for i, s in enumerate(ser):
+        sub = df[df[series] == s].set_index(x).reindex(cats)
+        xi = x_idx + offsets[i]
 
-            xi = x_idx + offset
+        # Errorbars
+        yval = sub[y].values
+        lo   = sub[ylow].values
+        hi   = sub[yhigh].values
+        err_low  = yval - lo
+        err_high = hi - yval
 
-            yval = sub[y].values
-            lo   = sub[ylow].values
-            hi   = sub[yhigh].values
-            err_low  = np.maximum(yval - lo, 0)
-            err_high = np.maximum(hi - yval, 0)
-            yerr = np.vstack([err_low, err_high])
+        # Ingen negative feil
+        err_low = np.maximum(err_low, 0)
+        err_high = np.maximum(err_high, 0)
+        yerr = np.vstack([err_low, err_high])
 
-            ax.errorbar(
-                xi, yval, yerr=yerr,
-                fmt="none", ecolor=pal[j], capsize=5, elinewidth=1.5
-            )
+        base = str(s).replace(" w/Temp", "")
+        color = base_color_map[base]
 
-            ax.scatter(
-                xi, yval, s=point_size,
-                color=pal[j], edgecolor="white", linewidth=0.8,
-                label=f"{label} – {s}" if i == 0 else None
-            )
+        ax.errorbar(
+            xi, yval, yerr=yerr,
+            fmt="none", ecolor=color, elinewidth=1.6, capsize=6
+        )
+
+        marker_style = "^" if "Temp" in str(s) else "o"
+        size = point_size * 1.4 if "Temp" in str(s) else point_size
+        edge_w = 1.5 if "Temp" in str(s) else 0.8
+
+        ax.scatter(
+            xi, yval, s=size,
+            color=color, edgecolor="white", linewidth=edge_w,
+            marker= marker_style,
+            zorder=3, label=str(s)
+        )
 
     ax.set_xticks(x_idx)
-    ax.set_xticklabels(cats, fontsize=14)
-    ax.set_ylabel(y_label, fontsize=14)
-    ax.set_title(title, fontsize=18)
+    ax.set_xticklabels(cats, fontsize=15)
+    ax.set_ylabel(y_label, fontsize= 15)
+    ax.set_title(title, fontsize = 17)
 
     if y_ref_lines is None:
         y_ref_lines = [0]
-    for ref in y_ref_lines:
-        ax.axhline(ref, color="gray", linestyle="--", linewidth=1, alpha=0.6)
 
+    for ref in y_ref_lines:
+        ax.axhline(ref, color="gray", linestyle="--", linewidth=0.9, alpha=0.6)
+
+    ax.margins(x=0.08)
+    ax.legend(loc="best", fontsize = 15)
     ax.grid(axis="y", color="0.9")
     sns.despine(ax=ax)
-    ax.legend(fontsize=12)
+
+    if annotate:
+        ax.annotate(
+            annotate.get("text",""),
+            xy=annotate.get("xy",(0,0)),
+            xytext=annotate.get("xytext",(0.2,0.2)),
+            textcoords="axes fraction" if annotate.get("axescoords", True) else "data",
+            arrowprops=dict(arrowstyle="->", color="0.3"),
+            fontsize=15
+        )
+
     plt.tight_layout()
     plt.show()
 
@@ -191,41 +226,10 @@ DiD["vindu"] = pd.Categorical(
     ordered=True
 )
 
-DiD["region"] = pd.Categorical(
-    DiD["region"],
-    categories=regions,
-    ordered=True
-)
-
-DiD_temp["vindu"] = pd.Categorical(
-    DiD_temp["vindu"],
-    categories=vindu_temp,
-    ordered=True
-)
-
-DiD_temp["region"] = pd.Categorical(
-    DiD_temp["region"],
-    categories=regions_temp,
-    ordered=True
-)
-
-
-region_order = ["NO1", "NO2", "NO5"]
-vindu_order = ["November", "Desember", "January", "3 Winter Months (Nov,Dec,Jan)"]
-
-
-plot_errorbars_two_groups(
+plot_errorbars_by_group(
     DiD,
-    DiD_temp,
-    x = 'region',
-    series='vindu',
-    x_order = region_order,
-    series_order=vindu_order,
-    title="Difference in Difference – begge datasett",
-    y_label="Δ Consumption (%)",
-    y_ref_lines=[0, 7],
-    label1="DiD",
-    label2="DiD_temp"
+    title="Difference in Difference",
+    y_label=" Δ Consumption in Percent[%]",
+    y_ref_lines=[0, 7]
+    #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}
 )
-
-
