@@ -50,6 +50,51 @@ for i, win in enumerate(vindu):
 
 DiD = pd.DataFrame(rows)
 
+# --------- DiD m/Temp ---------- #
+
+regions_temp = ["NO1", "NO2", "NO5"]
+
+vindu_temp = [
+    "November w/Temp",
+    "Desember w/Temp",
+    "January w/Temp",
+    "3 Winter Months (Nov,Dec,Jan) w/Temp"
+]
+
+values_temp = [
+    [2.89, 3.59, 2.32],   # November
+    [3.59, 4.59, 2.76],   # Desember
+    [3.97, 4.54, 2.72],   # January
+    [3.42, 4.18, 2.61]    # 3 vinter måneder
+]
+
+ci_high_temp = [
+    [3.29, 3.98, 2.60],  # November
+    [3.91, 4.91, 2.99],  # Desember
+    [4.29, 4.84, 2.97],  # January
+    [3.62, 4.39, 2.76]   # 3 vinter måneder
+]
+
+ci_low_temp = [
+    [2.48, 3.20, 2.05],  # November
+    [3.28, 4.28, 2.53],  # Desember
+    [3.66, 4.23, 2.48],  # January
+    [3.21, 3.98, 2.46]   # 3 vinter måneder
+]
+
+rows_temp = []
+
+for i, win in enumerate(vindu_temp):
+    for r in range(3):
+        rows_temp.append({
+            "region": regions_temp[r],
+            "vindu": win,
+            "value": values_temp[i][r],
+            "ci_high": ci_high_temp[i][r],
+            "ci_low": ci_low_temp[i][r]
+        })
+
+DiD_temp = pd.DataFrame(rows_temp)
 
 
 def plot_errorbars_by_group(
