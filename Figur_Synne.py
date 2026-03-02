@@ -191,9 +191,9 @@ def plot_errorbars_by_group(
         )
 
     ax.set_xticks(x_idx)
-    ax.set_xticklabels(cats, fontsize=15)
-    ax.set_ylabel(y_label, fontsize= 15)
-    ax.set_title(title, fontsize = 17)
+    ax.set_xticklabels(cats, fontsize=20)
+    ax.set_ylabel(y_label, fontsize= 20)
+    ax.set_title(title, fontsize = 20)
 
     if y_ref_lines is None:
         y_ref_lines = [0]
@@ -229,7 +229,7 @@ DiD["vindu"] = pd.Categorical(
 plot_errorbars_by_group(
     DiD,
     title="Difference in Difference",
-    y_label=" Δ Consumption in Percent[%]",
+    y_label=" Difference in Difference, Percent[%]",
     y_ref_lines=[0, 7]
     #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}
 )
