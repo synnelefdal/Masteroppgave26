@@ -186,7 +186,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     # -------- Figur ---------- #
     #df_before = df[df['Period'] == 'Reference'].copy()
-    '''df_plot = df[df['Period'].isin(['Reference', 'Rest'])].copy()
+    df_plot = df[df['Period'].isin(['Reference', 'Rest'])].copy()
     df_plot = df_plot[df_plot['entity'].isin(['Uten Norgespris', 'Med Norgespris'])]
 
     remove_oct = (df_plot['Date'] >= pd.to_datetime('2025-10-01')) & \
@@ -229,7 +229,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     plt.legend()
 
     plt.tight_layout()
-    plt.show()'''
+    plt.show()
 
 
 
