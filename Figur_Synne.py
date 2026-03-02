@@ -97,94 +97,90 @@ for i, win in enumerate(vindu_temp):
 DiD_temp = pd.DataFrame(rows_temp)
 
 
-def plot_errorbars_by_group(
-    df: pd.DataFrame,
+def plot_errorbars_two_groups(
+    df1: pd.DataFrame,
+    df2: pd.DataFrame,
     x="region",
     series="vindu",
     y="value",
     ylow="ci_low",
     yhigh="ci_high",
+    label1="DiD",
+    label2="DiD_temp",
     title="Estimert effekt med 95% KI",
     y_label="Endring relativt til baseline (%)",
     y_ref_lines=None,
-    annotate=None,
     palette="Set2",
     point_size=100,
-    capsize=0.15
+    x_order = None,
+    series_order = None
 ):
 
     import numpy as np
     import matplotlib.pyplot as plt
     import seaborn as sns
+    import pandas as pd
 
-    # Definér posisjoner
-    cats = df[x].cat.categories if isinstance(df[x].dtype, pd.CategoricalDtype) else sorted(df[x].unique())
-    ser  = df[series].cat.categories if isinstance(df[series].dtype, pd.CategoricalDtype) else sorted(df[series].unique())
+    # --- KATEGORIER ---
+    cats = df1[x].cat.categories
+    ser  = df1[series].cat.categories
+
     n_x, n_s = len(cats), len(ser)
 
     x_idx = np.arange(n_x)
     group_width = 0.7
-    step = group_width / (n_s if n_s > 1 else 1)
-    offsets = (np.arange(n_s) - (n_s - 1)/2) * step
+
+    # Nå har vi *TO* grupper → de skal side-om-side
+    offsets = [-0.15, 0.15]
 
     pal = sns.color_palette(palette, n_colors=n_s)
 
-    # Figur
-    fig, ax = plt.subplots(figsize=(9, 5))
+    fig, ax = plt.subplots(figsize=(10, 6))
 
-    for i, s in enumerate(ser):
-        sub = df[df[series] == s].set_index(x).reindex(cats)
-        xi = x_idx + offsets[i]
+    for i, df in enumerate([df1, df2]):
+        label = label1 if i == 0 else label2
+        offset = offsets[i]
 
-        # Errorbars
-        yval = sub[y].values
-        lo   = sub[ylow].values
-        hi   = sub[yhigh].values
-        err_low  = yval - lo
-        err_high = hi - yval
+        for j, s in enumerate(ser):
+            sub = (
+                df[df[series] == s]
+                .set_index(x)
+                .reindex(cats)
+            )
 
-        # Ingen negative feil
-        err_low = np.maximum(err_low, 0)
-        err_high = np.maximum(err_high, 0)
-        yerr = np.vstack([err_low, err_high])
+            xi = x_idx + offset
 
-        ax.errorbar(
-            xi, yval, yerr=yerr,
-            fmt="none", ecolor=pal[i], elinewidth=1.6, capsize=6
-        )
+            yval = sub[y].values
+            lo   = sub[ylow].values
+            hi   = sub[yhigh].values
+            err_low  = np.maximum(yval - lo, 0)
+            err_high = np.maximum(hi - yval, 0)
+            yerr = np.vstack([err_low, err_high])
 
-        ax.scatter(
-            xi, yval, s=point_size,
-            color=pal[i], edgecolor="white", linewidth=0.8,
-            zorder=3, label=str(s)
-        )
+            ax.errorbar(
+                xi, yval, yerr=yerr,
+                fmt="none", ecolor=pal[j], capsize=5, elinewidth=1.5
+            )
+
+            ax.scatter(
+                xi, yval, s=point_size,
+                color=pal[j], edgecolor="white", linewidth=0.8,
+                label=f"{label} – {s}" if i == 0 else None
+            )
 
     ax.set_xticks(x_idx)
-    ax.set_xticklabels(cats, fontsize=15)
-    ax.set_ylabel(y_label, fontsize= 15)
-    ax.set_title(title, fontsize = 17)
+    ax.set_xticklabels(cats, fontsize=14)
+    ax.set_ylabel(y_label, fontsize=14)
+    ax.set_title(title, fontsize=18)
 
     if y_ref_lines is None:
         y_ref_lines = [0]
-
     for ref in y_ref_lines:
-        ax.axhline(ref, color="gray", linestyle="--", linewidth=0.9, alpha=0.6)
+        ax.axhline(ref, color="gray", linestyle="--", linewidth=1, alpha=0.6)
 
-    ax.margins(x=0.08)
-    ax.legend(loc="best", fontsize = 15)
     ax.grid(axis="y", color="0.9")
     sns.despine(ax=ax)
-
-    if annotate:
-        ax.annotate(
-            annotate.get("text",""),
-            xy=annotate.get("xy",(0,0)),
-            xytext=annotate.get("xytext",(0.2,0.2)),
-            textcoords="axes fraction" if annotate.get("axescoords", True) else "data",
-            arrowprops=dict(arrowstyle="->", color="0.3"),
-            fontsize=15
-        )
-
+    ax.legend(fontsize=12)
     plt.tight_layout()
     plt.show()
 
@@ -195,11 +191,41 @@ DiD["vindu"] = pd.Categorical(
     ordered=True
 )
 
-plot_errorbars_by_group(
-    DiD,
-    title="Difference in Difference",
-    y_label=" Δ Consumption in Percent[%]",
-    y_ref_lines=[0, 7]
-    #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}
+DiD["region"] = pd.Categorical(
+    DiD["region"],
+    categories=regions,
+    ordered=True
 )
+
+DiD_temp["vindu"] = pd.Categorical(
+    DiD_temp["vindu"],
+    categories=vindu_temp,
+    ordered=True
+)
+
+DiD_temp["region"] = pd.Categorical(
+    DiD_temp["region"],
+    categories=regions_temp,
+    ordered=True
+)
+
+
+region_order = ["NO1", "NO2", "NO5"]
+vindu_order = ["November", "Desember", "January", "3 Winter Months (Nov,Dec,Jan)"]
+
+
+plot_errorbars_two_groups(
+    DiD,
+    DiD_temp,
+    x = 'region',
+    series='vindu',
+    x_order = region_order,
+    series_order=vindu_order,
+    title="Difference in Difference – begge datasett",
+    y_label="Δ Consumption (%)",
+    y_ref_lines=[0, 7],
+    label1="DiD",
+    label2="DiD_temp"
+)
+
 
