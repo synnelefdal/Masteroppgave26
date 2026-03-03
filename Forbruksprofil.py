@@ -70,16 +70,16 @@ def plot_timer(data_mNP, data_uNP, data_resten, price_area):
     plt.plot(mNP_prof_tre.index, mNP_prof_tre.values, marker='o', label= 'With Norgespris 25/26')
     plt.plot(uNP_prof_tre.index, uNP_prof_tre.values, marker='o', label= 'Without Norgespris 25/26')
 
-    plt.xlabel('Hour')
-    plt.ylabel('kWh/metering_point')
-    plt.title(f'Consumption - kWh per metering point in {price_area}')
+    plt.xlabel('Hour', fontsize=20)
+    plt.ylabel('kWh/metering_point', fontsize=20)
+    plt.title(f'Consumption - kWh per metering point in {price_area}', fontsize=20)
     plt.xticks(range(24))
     plt.grid(True, alpha = 0.3)
-    plt.legend()
+    plt.legend(fontsize=20)
     plt.tight_layout()
     plt.show()
 
-#plot_timer(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, 'NO5')
+plot_timer(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, 'NO5')
 
 
 def print_gjennomsnitt(data_mNP, data_uNP, data_resten, price_area):

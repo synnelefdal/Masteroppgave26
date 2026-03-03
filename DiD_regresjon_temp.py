@@ -186,7 +186,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     # -------- Figur ---------- #
     #df_before = df[df['Period'] == 'Reference'].copy()
-    df_plot = df[df['Period'].isin(['Reference', 'Rest'])].copy()
+    '''df_plot = df[df['Period'].isin(['Reference', 'Rest'])].copy()
     df_plot = df_plot[df_plot['entity'].isin(['Uten Norgespris', 'Med Norgespris'])]
 
     remove_oct = (df_plot['Date'] >= pd.to_datetime('2025-10-01')) & \
@@ -229,7 +229,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     plt.legend()
 
     plt.tight_layout()
-    plt.show()
+    plt.show()'''
 
     return panel_df
 
@@ -312,11 +312,11 @@ def plot_temp_all_zones(datasets):
         )'''
 
     plt.axhline(1.0, linestyle='--', color='gray', alpha=0.7)
-    plt.xlabel('Temperature [°C]')
-    plt.ylabel('Average Consumption [kWh/metering point]')
-    plt.title('Temperature Sensitivity Before Norway Price – NO1, NO2, NO5')
+    plt.xlabel('Temperature [°C]', fontsize=20)
+    plt.ylabel('Average Consumption [kWh/metering point]',  fontsize=20)
+    plt.title('Temperature Sensitivity Before Norway Price – NO1, NO2, NO5',  fontsize=20)
     plt.grid(True, alpha=0.25)
-    plt.legend()
+    plt.legend(fontsize = 20)
     plt.tight_layout()
     plt.show()
 
