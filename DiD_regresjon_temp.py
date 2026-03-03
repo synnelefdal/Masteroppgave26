@@ -251,6 +251,13 @@ def plot_temp_all_zones(datasets):
         df_plot = df[df['Period'].isin(['Reference', 'Rest'])].copy()
         df_plot = df_plot[df_plot['entity'].isin(['Uten Norgespris', 'Med Norgespris'])]
 
+        translation_map = {
+            'Med Norgespris': 'With Norway Price',
+            'Uten Norgespris': 'Without Norway Price'
+        }
+
+        df_plot['entity'] = df_plot['entity'].map(translation_map)
+
         df_plot['entity'] = df_plot['entity'].astype('category')
         df_plot['entity'] = df_plot['entity'].cat.remove_unused_categories()
 
@@ -272,8 +279,8 @@ def plot_temp_all_zones(datasets):
         df_plot['temp_bin'] = (df_plot['Temp24'] / 0.5).round() * 0.5
 
         entity_linestyle = {
-            "Uten Norgespris": "--",
-            "Med Norgespris": "-"
+            "Without Norway Price": "--",
+            "With Norway Price": "-"
         }
 
         # --- Beregn trend per sone ---
@@ -305,9 +312,9 @@ def plot_temp_all_zones(datasets):
         )'''
 
     plt.axhline(1.0, linestyle='--', color='gray', alpha=0.7)
-    plt.xlabel('Temperatur [°C]')
-    plt.ylabel('Relativt forbruk [kWh/målepunkt]')
-    plt.title('Temperaturfølsomhet før Norgespris – NO1, NO2, NO5')
+    plt.xlabel('Temperature [°C]')
+    plt.ylabel('Average Consumption [kWh/metering point]')
+    plt.title('Temperature Sensitivity Before Norway Price – NO1, NO2, NO5')
     plt.grid(True, alpha=0.25)
     plt.legend()
     plt.tight_layout()
