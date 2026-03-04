@@ -371,25 +371,34 @@ def plot_dognprofil(results_df_NO1, results_df_NO1_temp,
     hours_NO1 = results_df_NO1['Hour']
     DiD_NO1 = results_df_NO1['DiD']
     DiD_NO1_temp = results_df_NO1_temp['DiD_temp']
+    ci_low_temp_NO1 = results_df_NO1_temp['CI_low_temp']
+    ci_high_temp_NO1 = results_df_NO1_temp['CI_high_temp']
 
     # ---------- NO2 ---------- #
     hours_NO2 = results_df_NO2['Hour']
     DiD_NO2 = results_df_NO2['DiD']
     DiD_NO2_temp = results_df_NO2_temp['DiD_temp']
+    ci_low_temp_NO2 = results_df_NO2_temp['CI_low_temp']
+    ci_high_temp_NO2 = results_df_NO2_temp['CI_high_temp']
 
     # ---------- NO1 ---------- #
     hours_NO5 = results_df_NO5['Hour']
     DiD_NO5 = results_df_NO5['DiD']
     DiD_NO5_temp = results_df_NO5_temp['DiD_temp']
+    ci_low_temp_NO5 = results_df_NO5_temp['CI_low_temp']
+    ci_high_temp_NO5 = results_df_NO5_temp['CI_high_temp']
 
     plt.figure(figsize=(12, 6))
 
-    plt.plot(hours_NO1, DiD_NO1, label='DiD - NO1', color='royalblue', linewidth=2, linestyle = '--')
+    plt.plot(hours_NO1, DiD_NO1, label='DiD - NO1', color='royalblue', linewidth=2, linestyle = 'dotted')
     plt.plot(hours_NO1, DiD_NO1_temp, label='DiD w/Temp- NO1', color='royalblue', linewidth=2)
-    plt.plot(hours_NO2, DiD_NO2, label='DiD - NO2', color='red', linewidth=2, linestyle = '--')
+    plt.fill_between(hours_NO1, ci_low_temp_NO1, ci_high_temp_NO1, color = 'royalblue', alpha=0.1)
+    plt.plot(hours_NO2, DiD_NO2, label='DiD - NO2', color='red', linewidth=2, linestyle = 'dotted')
     plt.plot(hours_NO2, DiD_NO2_temp, label='DiD w/Temp- NO2', color='red', linewidth=2)
-    plt.plot(hours_NO5, DiD_NO5, label='DiD - NO5', color='green', linewidth=2, linestyle = '--')
+    plt.fill_between(hours_NO2, ci_low_temp_NO2, ci_high_temp_NO2, color='red', alpha=0.1)
+    plt.plot(hours_NO5, DiD_NO5, label='DiD - NO5', color='green', linewidth=2, linestyle = 'dotted')
     plt.plot(hours_NO5, DiD_NO5_temp, label='DiD w/Temp- NO5', color='green', linewidth=2)
+    plt.fill_between(hours_NO5, ci_low_temp_NO5, ci_high_temp_NO5, color='green', alpha=0.1)
 
 
     plt.xticks(range(0, 24))
