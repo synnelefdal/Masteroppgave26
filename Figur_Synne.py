@@ -16,8 +16,8 @@ vindu = [
     "Desember w/Temp",
     "January",
     "January w/Temp",
-    "3 Winter Months (Nov,Dec,Jan)",
-    "3 Winter Months (Nov,Dec,Jan) w/Temp"
+    "Winter months (Nov,Dec,Jan)",
+    "Winter months (Nov,Dec,Jan) w/Temp"
 ]
 
 values = [
@@ -122,7 +122,7 @@ def plot_errorbars_by_group(
     y="value",
     ylow="ci_low",
     yhigh="ci_high",
-    title="Estimert effekt med 95% KI",
+    #title="Estimert effekt med 95% KI",
     y_label="Endring relativt til baseline (%)",
     y_ref_lines=None,
     annotate=None,
@@ -187,13 +187,13 @@ def plot_errorbars_by_group(
             xi, yval, s=size,
             color=color, edgecolor="white", linewidth=edge_w,
             marker= marker_style,
-            zorder=3, label=str(s)
+            zorder=3, label=str(s), alpha = 1
         )
 
     ax.set_xticks(x_idx)
     ax.set_xticklabels(cats, fontsize=20)
     ax.set_ylabel(y_label, fontsize= 20)
-    ax.set_title(title, fontsize = 20)
+    #ax.set_title(title, fontsize = 20)
 
     if y_ref_lines is None:
         y_ref_lines = [0]
@@ -217,6 +217,8 @@ def plot_errorbars_by_group(
         )
 
     plt.tight_layout()
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
     plt.show()
 
 
@@ -228,7 +230,7 @@ DiD["vindu"] = pd.Categorical(
 
 plot_errorbars_by_group(
     DiD,
-    title="Difference in Difference",
+    #title="Difference in Difference",
     y_label=" Difference in Difference, Percent[%]",
     y_ref_lines=[0, 7]
     #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}

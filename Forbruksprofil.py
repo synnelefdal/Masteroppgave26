@@ -72,8 +72,10 @@ def plot_timer(data_mNP, data_uNP, data_resten, price_area):
 
     plt.xlabel('Hour', fontsize=20)
     plt.ylabel('kWh/metering_point', fontsize=20)
-    plt.title(f'Consumption - kWh per metering point in {price_area}', fontsize=20)
+    #plt.title(f'Consumption - kWh per metering point in {price_area}', fontsize=20)
     plt.xticks(range(24))
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
     plt.grid(True, alpha = 0.3)
     plt.legend(fontsize=20)
     plt.tight_layout()
