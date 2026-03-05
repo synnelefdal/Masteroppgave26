@@ -152,7 +152,7 @@ def plot_errorbars_by_group(
 
     base_names = [str(s).replace(" w/Temp", "") for s in ser]
     unique_base = list(dict.fromkeys(base_names))
-    base_palette = sns.color_palette("Set2", n_colors=len(unique_base))
+    base_palette = sns.color_palette("tab10", n_colors=len(unique_base))
     base_color_map = dict(zip(unique_base, base_palette))
 
     for i, s in enumerate(ser):
