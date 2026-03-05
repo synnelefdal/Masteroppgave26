@@ -312,9 +312,11 @@ def plot_temp_all_zones(datasets):
         )'''
 
     plt.axhline(1.0, linestyle='--', color='gray', alpha=0.7)
-    plt.xlabel('Temperature [°C]', fontsize=20)
-    plt.ylabel('Average Consumption [kWh/metering point]',  fontsize=20)
-    plt.title('Temperature Sensitivity Before Norway Price – NO1, NO2, NO5',  fontsize=20)
+    plt.xlabel('Outdoor temperature [°C]', fontsize=25)
+    plt.ylabel('Average consumption [kWh/household]',  fontsize=25)
+    #plt.title('Temperature Sensitivity Before Norway Price – NO1, NO2, NO5',  fontsize=20)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
     plt.grid(True, alpha=0.25)
     plt.legend(fontsize = 20)
     plt.tight_layout()
