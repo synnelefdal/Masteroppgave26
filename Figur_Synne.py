@@ -217,8 +217,8 @@ def plot_errorbars_by_group(
         )
 
     plt.tight_layout()
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
+    plt.xticks(fontsize=25)
+    plt.yticks(fontsize=25)
     plt.show()
 
 

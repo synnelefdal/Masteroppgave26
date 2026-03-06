@@ -402,12 +402,12 @@ def plot_dognprofil(results_df_NO1, results_df_NO1_temp,
 
 
     plt.xticks(range(0, 24))
-    plt.xlabel("Hour", fontsize=20)
+    plt.xlabel("Hour", fontsize=25)
     plt.ylabel("Difference in Difference of Consumption Changes [%]", fontsize=20)
     #plt.title(f"Daily Profile for the DiD Estimate for NO1, NO2, and NO5", fontsize=20)
     plt.grid(alpha=0.3)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
+    plt.xticks(fontsize=25)
+    plt.yticks(fontsize=25)
     plt.legend(fontsize=20)
     plt.tight_layout()
     plt.show()
