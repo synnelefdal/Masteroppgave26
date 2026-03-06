@@ -202,7 +202,7 @@ def plot_errorbars_by_group(
         ax.axhline(ref, color="gray", linestyle="--", linewidth=0.9, alpha=0.6)
 
     ax.margins(x=0.08)
-    ax.legend(loc="best", fontsize = 15)
+    ax.legend(loc="best", fontsize = 18) #originalt 15
     ax.grid(axis="y", color="0.9")
     sns.despine(ax=ax)
 
@@ -213,7 +213,7 @@ def plot_errorbars_by_group(
             xytext=annotate.get("xytext",(0.2,0.2)),
             textcoords="axes fraction" if annotate.get("axescoords", True) else "data",
             arrowprops=dict(arrowstyle="->", color="0.3"),
-            fontsize=15
+            fontsize=20   #originalt 15
         )
 
     plt.tight_layout()
