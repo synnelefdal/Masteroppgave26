@@ -8,6 +8,9 @@ from linearmodels.panel.utility import AbsorbingEffectWarning
 from matplotlib.patches import FancyArrowPatch
 from linearmodels.panel import PanelOLS
 
+from sklearn.linear_model import LinearRegression
+
+
 
 data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', skiprows= [1, 2, 3], sep=';')
 data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', skiprows= [1, 2, 3], sep=';')
@@ -170,7 +173,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     res = model.fit(cov_type='clustered', cluster_time=True)
 
-    #print(res)
+    print(res)
 
     # -------- Utregning --------- #
     print('----------- PanelOLS -----------------')
@@ -288,6 +291,15 @@ def plot_temp_all_zones(datasets):
             trend = (
                 sub.groupby('temp_bin')['rel_consumption'].mean().reset_index().sort_values('temp_bin')
             )
+
+            X = trend['temp_bin'].values.reshape(-1, 1)
+            y = trend['rel_consumption'].values
+
+            model = LinearRegression().fit(X, y)
+            slope = model.coef_[0]
+
+            print(f"{zone_name} – {entity_name}: Temperatursensitivitet = {slope:.4f}")
+
             plt.plot(
                 trend['temp_bin'],
                 trend['rel_consumption'],
