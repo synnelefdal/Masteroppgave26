@@ -24,8 +24,8 @@ def plot_timer(data_mNP, data_uNP, data_resten, price_area):
     def prep_ref(df):
         df = df.copy()
 
-        start_dato = '2024-11-01'
-        slutt_dato = '2025-01-31'
+        start_dato = '2026-01-06'
+        slutt_dato = '2026-01-06'
 
         df['start_time_utc'] = pd.to_datetime((df['start_time_utc']), utc=True)
         df = df[(df['start_time_utc'] >= start_dato) & (df['start_time_utc'] <= slutt_dato)]
@@ -46,8 +46,8 @@ def plot_timer(data_mNP, data_uNP, data_resten, price_area):
     def prep_tre(df):
         df = df.copy()
 
-        start_dato = '2025-11-01'
-        slutt_dato = '2026-01-31'
+        start_dato = '2026-01-06'
+        slutt_dato = '2026-01-06'
 
         df['start_time_utc'] = pd.to_datetime((df['start_time_utc']), utc=True)
         df = df[(df['start_time_utc'] >= start_dato) & (df['start_time_utc'] <= slutt_dato)]
@@ -81,7 +81,9 @@ def plot_timer(data_mNP, data_uNP, data_resten, price_area):
     plt.tight_layout()
     plt.show()
 
-plot_timer(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, 'NO5')
+#plot_timer(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, 'NO5')
+plot_timer(data_mNP_NO1, data_uNP_NO1, data_rest_NO1, 'NO1')
+#plot_timer(data_mNP_NO2, data_uNP_NO2, data_rest_NO2, 'NO2')
 
 
 def print_gjennomsnitt(data_mNP, data_uNP, data_resten, price_area):
@@ -91,8 +93,8 @@ def print_gjennomsnitt(data_mNP, data_uNP, data_resten, price_area):
     df_uNP = data_uNP.copy()
     df_resten = data_resten.copy()
 
-    start_dato = '2023-10-01'
-    slutt_dato = '2026-01-31'
+    start_dato = '2026-01-07'
+    slutt_dato = '2026-01-07'
 
     df_mNP['start_time_utc'] = pd.to_datetime((df_mNP['start_time_utc']), utc=True)
     df_mNP = df_mNP[(df_mNP['start_time_utc'] >= start_dato) & (df_mNP['start_time_utc'] <= slutt_dato)]
