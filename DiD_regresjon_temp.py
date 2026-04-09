@@ -130,11 +130,11 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     df = df[df['kWh/Metering_point'] > 0].copy()
     #print(df)
 
-    start_date_before = '2025-01-01'
-    end_date_before = '2025-01-31'
+    start_date_before = '2024-12-01'
+    end_date_before = '2024-12-31'
 
-    start_date_after = '2026-01-01'
-    end_date_after = '2026-01-31'
+    start_date_after = '2025-12-01'
+    end_date_after = '2025-12-31'
 
     before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
     after_ref = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
@@ -174,6 +174,30 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     res = model.fit(cov_type='clustered', cluster_time=True)
 
     print(res)
+
+    # ---- Finne differansen i temp mellom reference og treatment perioder --- #
+
+    df_temp_analysis = df.dropna(subset=['Temp24']).copy()
+
+    temp_summary = (
+        df_temp_analysis
+        .groupby(['Period', 'Month'])['Temp24']
+        .mean()
+        .reset_index()
+    )
+
+    temp_summary = temp_summary[temp_summary['Period'].isin(['Reference', 'Treatment'])]
+
+    temp_pivot = (
+        temp_summary
+        .pivot(index='Month', columns='Period', values='Temp24')
+        .reset_index()
+    )
+
+    temp_pivot['Delta_Temp'] = temp_pivot['Treatment'] - temp_pivot['Reference']
+
+    print("\n--- Average temperature by month and period ---")
+    print(temp_pivot)
 
     # -------- Utregning --------- #
     print('----------- PanelOLS -----------------')
@@ -339,11 +363,9 @@ data_NO2 = Difference_in_Difference_temp(data_mNP_NO2,data_uNP_NO2,data_rest_NO2
 data_NO5 = Difference_in_Difference_temp(data_mNP_NO5,data_uNP_NO5,data_rest_NO5,'NO5',Temp_Bergen)
 
 
-print(type(data_NO1))
-print(type(data_NO2))
-print(type(data_NO5))
-
-
+#print(type(data_NO1))
+#print(type(data_NO2))
+#print(type(data_NO5))
 
 plot_temp_all_zones([
     ("NO1", data_NO1),

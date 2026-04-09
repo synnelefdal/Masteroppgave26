@@ -15,7 +15,7 @@ vindu = [
     "Desember",
     "Desember w/Temp",
     "January",
-    "January w/Temp",
+    "January w/Temp, Delta Temp",
     "Winter months (Nov,Dec,Jan)",
     "Winter months (Nov,Dec,Jan) w/Temp"
 ]
