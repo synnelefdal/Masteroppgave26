@@ -230,11 +230,11 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
     df = df[df['kWh/Metering_point'] > 0].copy()
     #print(df)
 
-    start_date_before = '2025-01-07'
-    end_date_before = '2025-01-07'
+    start_date_before = '2025-01-01'
+    end_date_before = '2025-01-31'
 
-    start_date_after = '2026-01-07'
-    end_date_after = '2026-01-07'
+    start_date_after = '2026-01-01'
+    end_date_after = '2026-01-31'
 
     before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
     after_ref = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
@@ -346,7 +346,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
     results_df = pd.DataFrame(results).sort_values('Hour').reset_index(drop=True)
     results_df_temp = pd.DataFrame(results_temp).sort_values('Hour').reset_index(drop=True)
 
-    print('----------- DiD per time -----------------')
+    print('----------- DiD per time uten temp -----------------')
     for _, r in results_df.iterrows():
         if pd.isna(r['DiD']):
             print(f"Time {int(r['Hour']):02d}")
@@ -354,6 +354,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
             print(
                 f"Time {int(r['Hour']):02d}: DiD = {r['DiD']:.2f}%  | KI [{r['CI_low']:.2f}%, {r['CI_high']:.2f}%]")
 
+    print('----------- DiD per time med temp -----------------')
     for _, r in results_df_temp.iterrows():
         if pd.isna(r['DiD_temp']):
             print(f"Time {int(r['Hour']):02d}")
@@ -420,6 +421,7 @@ def plot_dognprofil(results_df_NO1, results_df_NO1_temp,
 results_NO1, results_NO1_temp = Difference_in_Difference_Flex(data_mNP_NO1, data_uNP_NO1, data_rest_NO1, Temp_Oslo, 'NO1')
 results_NO2, results_NO2_temp = Difference_in_Difference_Flex(data_mNP_NO2, data_uNP_NO2, data_rest_NO2, Temp_Stavanger, 'NO2')
 results_NO5, results_NO5_temp = Difference_in_Difference_Flex(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, Temp_Bergen, 'NO5')
+
 plot_dognprofil(results_NO1, results_NO1_temp,
                 results_NO2, results_NO2_temp,
                 results_NO5, results_NO5_temp)
