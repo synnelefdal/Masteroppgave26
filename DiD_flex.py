@@ -233,8 +233,8 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
     start_date_before = '2025-01-01'
     end_date_before = '2025-01-31'
 
-    start_date_after = '2026-01-01'
-    end_date_after = '2026-01-31'
+    start_date_after = '2026-01-07'
+    end_date_after = '2026-01-08'
 
     before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
     after_ref = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
@@ -257,7 +257,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
     df['period'] = pd.Categorical(df['Period'],
                                   categories=['Reference', 'Treatment', 'Rest'],  # Reference = Reference
                                   ordered=True)
-    df['log_y'] = np.log(df['kWh/Metering_point'])
+    df['log_y'] = df['kWh/Metering_point']    # ------- HER MÅ NP.LOG LEGGES TIL FOR Å FÅ PROSENT IGJEN ----------
 
     results = []
     results_temp = []
@@ -310,15 +310,15 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
         beta3 = res.params[key]
         ci_low, ci_high = res.conf_int().loc[key]
-        DiD = (np.exp(beta3)-1)*100
-        CI_low = (np.exp(ci_low)-1)*100
-        CI_high = (np.exp(ci_high)-1)*100
+        #DiD = (np.exp(beta3)-1)*100
+        #CI_low = (np.exp(ci_low)-1)*100
+        #CI_high = (np.exp(ci_high)-1)*100      --------- DISSE MÅ TILBAKE NÅR PROSENT SKA TEBAKE ----------
 
         results.append({
             'Hour': h,
-            'DiD': DiD,
-            'CI_low': CI_low,
-            'CI_high': CI_high
+            'DiD': beta3,
+            'CI_low': ci_low,
+            'CI_high': ci_high
         })
 
         if key_temp not in res_temp.params.index:
@@ -332,15 +332,15 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
         beta3_temp = res_temp.params[key]
         ci_low_temp, ci_high_temp = res_temp.conf_int().loc[key]
-        DiD_temp = (np.exp(beta3_temp)-1)*100
-        CI_low_temp = (np.exp(ci_low_temp)-1)*100
-        CI_high_temp = (np.exp(ci_high_temp)-1)*100
+        #DiD_temp = (np.exp(beta3_temp)-1)*100
+        #CI_low_temp = (np.exp(ci_low_temp)-1)*100 ------- disse må tilbake når prosent ska tebake -------
+        #CI_high_temp = (np.exp(ci_high_temp)-1)*100
 
         results_temp.append({
             'Hour': h,
-            'DiD_temp': DiD_temp,
-            'CI_low_temp': CI_low_temp,
-            'CI_high_temp': CI_high_temp
+            'DiD_temp': beta3_temp,
+            'CI_low_temp': ci_low_temp,
+            'CI_high_temp': ci_high_temp
         })
 
     results_df = pd.DataFrame(results).sort_values('Hour').reset_index(drop=True)
@@ -363,6 +363,8 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
                 f"Time {int(r['Hour']):02d}: DiD = {r['DiD_temp']:.2f}%  | KI [{r['CI_low_temp']:.2f}%, {r['CI_high_temp']:.2f}%]")
 
     return results_df, results_df_temp
+
+
 
     # --------- PLOTT DØGNPROFIL ---------- #
 def plot_dognprofil(results_df_NO1, results_df_NO1_temp,
