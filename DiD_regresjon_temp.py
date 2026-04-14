@@ -310,7 +310,7 @@ def plot_temp_all_zones(datasets):
             "With Norway Price": "-"
         }
 
-        '''# --- Beregn trend per sone ---
+        # --- Beregn trend per sone ---
         for entity_name, sub in df_plot.groupby('entity'):
             trend = (
                 sub.groupby('temp_bin')['rel_consumption'].mean().reset_index().sort_values('temp_bin')
@@ -331,10 +331,9 @@ def plot_temp_all_zones(datasets):
                 linewidth=2,
                 color=colors.get(zone_name, 'gray'),
                 linestyle=entity_linestyle[entity_name]
-
             )
         #trend = df_plot.groupby('temp_bin')['rel_consumption'].mean().reset_index()
-        '''
+
 
         '''# --- Print data ---
         print(f"\n===== Temperaturdata for {zone_name} =====")
@@ -350,7 +349,7 @@ def plot_temp_all_zones(datasets):
 
     plt.axhline(1.0, linestyle='--', color='gray', alpha=0.7)
     plt.xlabel('Outdoor temperature [°C]', fontsize=25)
-    plt.ylabel('Average consumption [kWh/household]',  fontsize=25)
+    plt.ylabel('Normalised Consumption (Value/Average)',  fontsize=25)
     #plt.title('Temperature Sensitivity Before Norway Price – NO1, NO2, NO5',  fontsize=20)
     plt.xticks(fontsize=25)
     plt.yticks(fontsize=25)
