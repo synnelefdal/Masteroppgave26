@@ -116,7 +116,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     #Temp['Temp24^2'] = Temp['Temp24'] **2
     #Temp['Temp24^3'] = Temp['Temp24'] ** 3
 
-    df_temp = Temp[['Date', 'Hour', 'Temp24']]
+    df_temp = Temp[['Date', 'Hour', 'Lufttemperatur','Temp24']]
     #print(df_temp)
 
     # ------------ Dataframe ----------- #
@@ -293,7 +293,7 @@ def plot_temp_all_zones(datasets):
                      (df_plot['Date'] <= pd.to_datetime('2025-10-31'))
         df_plot = df_plot[~remove_oct]
 
-        df_plot = df_plot.dropna(subset=['Temp24'])
+        df_plot = df_plot.dropna(subset=['Lufttemperatur'])
 
         # --- Normalisering ---
         group_means = df_plot.groupby('entity')['kWh/Metering_point'].mean()
@@ -303,14 +303,14 @@ def plot_temp_all_zones(datasets):
         )
 
         # Temperatur-bin
-        df_plot['temp_bin'] = (df_plot['Temp24'] / 0.5).round() * 0.5
+        df_plot['temp_bin'] = (df_plot['Lufttemperatur'] / 0.5).round() * 0.5
 
         entity_linestyle = {
             "Without Norway Price": "--",
             "With Norway Price": "-"
         }
 
-        # --- Beregn trend per sone ---
+        '''# --- Beregn trend per sone ---
         for entity_name, sub in df_plot.groupby('entity'):
             trend = (
                 sub.groupby('temp_bin')['rel_consumption'].mean().reset_index().sort_values('temp_bin')
@@ -334,6 +334,7 @@ def plot_temp_all_zones(datasets):
 
             )
         #trend = df_plot.groupby('temp_bin')['rel_consumption'].mean().reset_index()
+        '''
 
         '''# --- Print data ---
         print(f"\n===== Temperaturdata for {zone_name} =====")
