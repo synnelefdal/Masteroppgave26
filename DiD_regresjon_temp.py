@@ -128,7 +128,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     df = pd.merge(df, df_temp, on = ['Date', 'Hour'], how = 'left')
 
     df = df[df['kWh/Metering_point'] > 0].copy()
-    #print(df)
+    print(df.columns)
 
     start_date_before = '2024-12-01'
     end_date_before = '2024-12-31'
