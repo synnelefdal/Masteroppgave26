@@ -24,8 +24,8 @@ def plot_timer(data_mNP, data_uNP, data_resten, price_area):
     def prep_ref(df):
         df = df.copy()
 
-        start_dato = '2026-01-06'
-        slutt_dato = '2026-01-07'
+        start_dato = '2026-01-07'
+        slutt_dato = '2026-01-08'
 
         df['start_time_utc'] = pd.to_datetime((df['start_time_utc']), utc=True)
         df = df[(df['start_time_utc'] >= start_dato) & (df['start_time_utc'] <= slutt_dato)]
@@ -46,8 +46,8 @@ def plot_timer(data_mNP, data_uNP, data_resten, price_area):
     def prep_tre(df):
         df = df.copy()
 
-        start_dato = '2026-01-06'
-        slutt_dato = '2026-01-06'
+        start_dato = '2026-01-07'
+        slutt_dato = '2026-01-08'
 
         df['start_time_utc'] = pd.to_datetime((df['start_time_utc']), utc=True)
         df = df[(df['start_time_utc'] >= start_dato) & (df['start_time_utc'] <= slutt_dato)]
@@ -81,9 +81,9 @@ def plot_timer(data_mNP, data_uNP, data_resten, price_area):
     plt.tight_layout()
     plt.show()
 
-#plot_timer(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, 'NO5')
-#plot_timer(data_mNP_NO1, data_uNP_NO1, data_rest_NO1, 'NO1')
-#plot_timer(data_mNP_NO2, data_uNP_NO2, data_rest_NO2, 'NO2')
+plot_timer(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, 'NO5')
+plot_timer(data_mNP_NO1, data_uNP_NO1, data_rest_NO1, 'NO1')
+plot_timer(data_mNP_NO2, data_uNP_NO2, data_rest_NO2, 'NO2')
 
 
 def print_gjennomsnitt(data_mNP, data_uNP, data_resten, price_area):
@@ -94,7 +94,7 @@ def print_gjennomsnitt(data_mNP, data_uNP, data_resten, price_area):
     df_resten = data_resten.copy()
 
     start_dato = '2026-01-07'
-    slutt_dato = '2026-01-07'
+    slutt_dato = '2026-01-08'
 
     df_mNP['start_time_utc'] = pd.to_datetime((df_mNP['start_time_utc']), utc=True)
     df_mNP = df_mNP[(df_mNP['start_time_utc'] >= start_dato) & (df_mNP['start_time_utc'] <= slutt_dato)]
@@ -258,6 +258,165 @@ def plot_area(area_name, m, u, r):
 
 # --- GENERER PLOTT ---
 
-plot_area("NO1", NO1_m, NO1_u, NO1_r)
-plot_area("NO2", NO2_m, NO2_u, NO2_r)
-plot_area("NO5", NO5_m, NO5_u, NO5_r)
+#plot_area("NO1", NO1_m, NO1_u, NO1_r)
+#plot_area("NO2", NO2_m, NO2_u, NO2_r)
+#plot_area("NO5", NO5_m, NO5_u, NO5_r)
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# --- FUNKSJON: leser fil og beregner forbruk per husholdning ---
+def load_and_prepare_monthly(path):
+    df = pd.read_csv(path, sep=';')
+
+    # konverter tid til datetime
+    df['start_time_utc'] = pd.to_datetime(df['start_time_utc'])
+
+    # forbruk per husholdning
+    df['cons_per_house'] = df['consumption_kwh'] / df['metering_point_count']
+
+    # månedlig gjennomsnitt
+    df_monthly = df.groupby(df['start_time_utc'].dt.to_period('M'))['cons_per_house'].mean()
+
+    # konverter PeriodIndex → datetime for plotting
+    df_monthly.index = df_monthly.index.to_timestamp()
+
+    return df_monthly
+
+
+# --- LAST INN DATA FOR ALLE OMRÅDER ---
+
+# NO1
+NO1_m = load_and_prepare_monthly('All_Demand_Data/NO1_mNP.csv')
+NO1_u = load_and_prepare_monthly('All_Demand_Data/NO1_uNP.csv')
+NO1_r = load_and_prepare_monthly('All_Demand_Data/NO1_resten.csv')
+
+# NO2
+NO2_m = load_and_prepare_monthly('All_Demand_Data/NO2_mNP.csv')
+NO2_u = load_and_prepare_monthly('All_Demand_Data/NO2_uNP.csv')
+NO2_r = load_and_prepare_monthly('All_Demand_Data/NO2_resten.csv')
+
+# NO5
+NO5_m = load_and_prepare_monthly('All_Demand_Data/NO5_mNP.csv')
+NO5_u = load_and_prepare_monthly('All_Demand_Data/NO5_uNP.csv')
+NO5_r = load_and_prepare_monthly('All_Demand_Data/NO5_resten.csv')
+
+
+# --- FUNKSJON: plotter ett område også med differanse ---
+def plot_area_monthly(area_name, m, u, r):
+    plt.figure(figsize=(14, 7))
+
+    # hovedkurver
+    plt.plot(m.index, m.values, label='mNP')
+    plt.plot(u.index, u.values, label='uNP')
+    plt.plot(r.index, r.values, label='resten')
+
+    # differanse mNP - uNP
+    diff = m.subtract(u, fill_value=float('nan'))
+
+    # prosentdifferanse
+    pct_diff = (diff / u) * 100
+
+    # plot differanse
+    plt.plot(diff.index, diff.values,
+             label='mNP - uNP (absolutt)', linewidth=2.5, linestyle='--')
+
+    # plot prosent-differanse
+    #plt.plot(pct_diff.index, pct_diff.values,
+             #label='mNP - uNP (%)', linewidth=2.5, linestyle=':', color='black')
+
+    plt.title(f"Månedlig forbruk per husholdning – {area_name}")
+    plt.xlabel("Måned")
+    plt.ylabel("kWh per husholdning / differanser")
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+
+# --- GENERER 3 FIGURER (NO1 / NO2 / NO5) ---
+
+#plot_area_monthly("NO1", NO1_m, NO1_u, NO1_r)
+#plot_area_monthly("NO2", NO2_m, NO2_u, NO2_r)
+#plot_area_monthly("NO5", NO5_m, NO5_u, NO5_r)
+
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# --- FUNKSJON: leser fil og beregner ÅRLIG forbruk per husholdning ---
+def load_and_prepare_yearly(path):
+    df = pd.read_csv(path, sep=';')
+
+    # konverter tid til datetime
+    df['start_time_utc'] = pd.to_datetime(df['start_time_utc'])
+
+    # forbruk per husholdning
+    df['cons_per_house'] = df['consumption_kwh'] / df['metering_point_count']
+
+    # yearly aggregation
+    df_yearly = df.groupby(df['start_time_utc'].dt.to_period('Y'))['cons_per_house'].mean()
+
+    # konverter PeriodIndex → datetime (1. januar hvert år) for plotting
+    df_yearly.index = df_yearly.index.to_timestamp()
+
+    return df_yearly
+
+
+# --- LAST INN DATA FOR ALLE OMRÅDER ---
+
+# NO1
+NO1_m = load_and_prepare_yearly('All_Demand_Data/NO1_mNP.csv')
+NO1_u = load_and_prepare_yearly('All_Demand_Data/NO1_uNP.csv')
+NO1_r = load_and_prepare_yearly('All_Demand_Data/NO1_resten.csv')
+
+# NO2
+NO2_m = load_and_prepare_yearly('All_Demand_Data/NO2_mNP.csv')
+NO2_u = load_and_prepare_yearly('All_Demand_Data/NO2_uNP.csv')
+NO2_r = load_and_prepare_yearly('All_Demand_Data/NO2_resten.csv')
+
+# NO5
+NO5_m = load_and_prepare_yearly('All_Demand_Data/NO5_mNP.csv')
+NO5_u = load_and_prepare_yearly('All_Demand_Data/NO5_uNP.csv')
+NO5_r = load_and_prepare_yearly('All_Demand_Data/NO5_resten.csv')
+
+
+# --- FUNKSJON: plotter ett område med differanser ---
+def plot_area_yearly(area_name, m, u, r):
+    plt.figure(figsize=(14, 7))
+
+    # hovedkurver
+    plt.plot(m.index, m.values, label='mNP')
+    plt.plot(u.index, u.values, label='uNP')
+    plt.plot(r.index, r.values, label='resten')
+
+    # absolutt differanse mNP - uNP
+    diff = m.subtract(u, fill_value=float('nan'))
+
+    # prosentdifferanse
+    pct_diff = (diff / u) * 100
+
+    # legg på differanse
+    plt.plot(diff.index, diff.values,
+             label='mNP - uNP (absolutt)', linewidth=2.5, linestyle='--')
+
+    # legg på prosentdiff
+    #plt.plot(pct_diff.index, pct_diff.values,
+             #label='mNP - uNP (%)', linewidth=2.5, linestyle=':', color='black')
+
+    plt.title(f"Årlig forbruk per husholdning – {area_name}")
+    plt.xlabel("År")
+    plt.ylabel("kWh per husholdning / differanser")
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+
+# --- GENERER 3 FIGURER (NO1 / NO2 / NO5) ---
+
+#plot_area_yearly("NO1", NO1_m, NO1_u, NO1_r)
+#plot_area_yearly("NO2", NO2_m, NO2_u, NO2_r)
+#plot_area_yearly("NO5", NO5_m, NO5_u, NO5_r)

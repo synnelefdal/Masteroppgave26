@@ -15,7 +15,7 @@ vindu = [
     "Desember",
     "Desember w/Temp",
     "January",
-    "January w/Temp, Delta Temp",
+    "January w/Temp",
     "Winter months (Nov,Dec,Jan)",
     "Winter months (Nov,Dec,Jan) w/Temp"
 ]
@@ -52,6 +52,22 @@ ci_low = [
     [3.23, 4.32, 2.68],  # 3 vinter måneder
     [3.21, 3.98, 2.46]   # 3 vinter måneder med temp
 ]
+
+andre_yakse = [-3,-2,-1,0,1,2,3]
+
+'''temp_forskjeller = [[1.3,0.6,0.3],
+                    [1.3,0.8,0.6],
+                    [-3.2,-3.1,-3.4],
+                    [-0.6,-1.7,-2.5]]'''
+
+
+temp_forskjeller = [
+    [ 1.3,  0.6,  0.3],   # periode 1
+    [ 1.3,  0.8,  0.6],   # periode 2
+    [-3.2, -3.1, -3.4],  # periode 3
+    [-0.6, -1.7, -2.5]   # periode 4
+]
+
 
 rows = []
 
@@ -216,9 +232,47 @@ def plot_errorbars_by_group(
             fontsize=20   #originalt 15
         )
 
+    # ---- Andre y-akse: Temperaturpunkter for ALLE perioder ----
+    ax2 = ax.twinx()
+
+    temp_array = np.array(temp_forskjeller)  # shape (n_perioder, 3)
+
+    # Vi bruker samme ser og offsets som DiD-plottet
+    for i, s in enumerate(ser):
+
+        # hopp over perioder som ikke har temperaturdata
+        if i >= temp_array.shape[0]:
+            continue
+
+        # x-posisjonene er IDENTISKE til DiD for denne perioden
+
+        xi = x_idx + offsets[i] + i*1.25*step
+
+        # temperaturverdier for NO1, NO2, NO5
+        temp_points = temp_array[i]
+
+        ax2.scatter(
+            xi,
+            temp_points,
+            marker="s",
+            s=50,
+            color="black",
+            edgecolor="white",
+            linewidth=1.2,
+            alpha=0.9,
+            zorder=4
+        )
+
+    from matplotlib.ticker import MultipleLocator
+    ax2.set_ylim(-3.5, 1.4)
+    ax2.yaxis.set_major_locator(MultipleLocator(0.4))
+
+    ax2.set_ylabel("ΔTemperature Treatment/Reference (°C)", color="black", fontsize=20)
+    ax2.tick_params(axis="y", labelcolor="black")
+
     plt.tight_layout()
     plt.xticks(fontsize=25)
-    plt.yticks(fontsize=25)
+    plt.yticks(fontsize=15)
     plt.show()
 
 
