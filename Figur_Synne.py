@@ -211,6 +211,8 @@ def plot_errorbars_by_group(
     ax.set_xticks(x_idx)
     ax.set_xticklabels(cats, fontsize=20)
     ax.set_ylabel(y_label, fontsize= 20)
+    from matplotlib.ticker import MultipleLocator
+    ax.yaxis.set_major_locator(MultipleLocator(1))
     #ax.set_title(title, fontsize = 20)
 
     if y_ref_lines is None:
@@ -240,30 +242,39 @@ def plot_errorbars_by_group(
     temp_array = np.array(temp_forskjeller)  # shape (n_perioder, 3)
 
     # Vi bruker samme ser og offsets som DiD-plottet
+    temp_i = 0
     for i, s in enumerate(ser):
 
+        if " w/Temp" in str(s):
+            continue
+
         # hopp over perioder som ikke har temperaturdata
-        if i >= temp_array.shape[0]:
+        if temp_i >= temp_array.shape[0]:
             continue
 
         # x-posisjonene er IDENTISKE til DiD for denne perioden
 
-        xi = x_idx + offsets[i] + i*1.25*step
+        xi = x_idx + offsets[i] #+ i*1.25*step
 
         # temperaturverdier for NO1, NO2, NO5
-        temp_points = temp_array[i]
+        temp_points = temp_array[temp_i]
+
+        base = str(s)
+        temp_color = base_color_map[base]
 
         ax2.scatter(
             xi,
             temp_points,
             marker="s",
             s=50,
-            color="black",
+            color=temp_color,
             edgecolor="white",
             linewidth=1.2,
             alpha=0.9,
             zorder=4
         )
+
+        temp_i += 1
 
     from matplotlib.ticker import MultipleLocator
     #ax2.set_ylim(-3.5, 1.4)
@@ -276,8 +287,47 @@ def plot_errorbars_by_group(
     ax2.tick_params(axis="y", labelcolor="black")
 
     plt.tight_layout()
-    plt.xticks(fontsize=25)
-    plt.yticks(fontsize=15)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+
+    ax.tick_params(axis="y", labelsize=20)
+    ax2.tick_params(axis="y", labelsize=20)
+
+    from matplotlib.lines import Line2D
+
+# ---- EGEN LEGEND FOR TEMPERATUR (FIRKANTER) ----
+    temp_legend_elements = [
+        Line2D([0], [0], marker='s', color='w',
+            markerfacecolor=base_color_map["November"],
+            markersize=10,
+            label="Temperature diff. – November"),
+
+        Line2D([0], [0], marker='s', color='w',
+            markerfacecolor= base_color_map["December"],
+            markersize=10,
+            label="Temperature diff. – December"),
+
+        Line2D([0], [0], marker='s', color='w',
+            markerfacecolor=base_color_map["January"],
+            markersize=10,
+            label="Temperature diff. – January"),
+
+        Line2D([0], [0], marker='s', color='w',
+            markerfacecolor=base_color_map["Winter months (Nov,Dec,Jan)"],
+            markersize=10,
+            label="Temperature diff. – Winter months")
+            ]
+
+    temp_legend = ax2.legend(
+        handles=temp_legend_elements,
+        loc="upper right",
+        fontsize=17,
+        framealpha=0.3,
+        frameon=True
+    )
+
+    ax2.add_artist(temp_legend)
+
     plt.show()
 
 
