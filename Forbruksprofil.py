@@ -24,8 +24,8 @@ def plot_timer(data_mNP, data_uNP, data_resten, price_area):
     def prep_ref(df):
         df = df.copy()
 
-        start_dato = '2026-01-07'
-        slutt_dato = '2026-01-08'
+        start_dato = '2025-01-01'
+        slutt_dato = '2025-01-31'
 
         df['start_time_utc'] = pd.to_datetime((df['start_time_utc']), utc=True)
         df = df[(df['start_time_utc'] >= start_dato) & (df['start_time_utc'] <= slutt_dato)]
@@ -46,8 +46,8 @@ def plot_timer(data_mNP, data_uNP, data_resten, price_area):
     def prep_tre(df):
         df = df.copy()
 
-        start_dato = '2026-01-07'
-        slutt_dato = '2026-01-08'
+        start_dato = '2026-01-01'
+        slutt_dato = '2026-01-31'
 
         df['start_time_utc'] = pd.to_datetime((df['start_time_utc']), utc=True)
         df = df[(df['start_time_utc'] >= start_dato) & (df['start_time_utc'] <= slutt_dato)]
