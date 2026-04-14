@@ -12,8 +12,8 @@ regions = ["NO1", "NO2", "NO5"]
 vindu = [
     "November",
     "November w/Temp",
-    "Desember",
-    "Desember w/Temp",
+    "December",
+    "December w/Temp",
     "January",
     "January w/Temp",
     "Winter months (Nov,Dec,Jan)",
@@ -166,6 +166,8 @@ def plot_errorbars_by_group(
     # Figur
     fig, ax = plt.subplots(figsize=(9, 5))
 
+    ax.set_ylim(-3.5,7)
+
     base_names = [str(s).replace(" w/Temp", "") for s in ser]
     unique_base = list(dict.fromkeys(base_names))
     base_palette = sns.color_palette("tab10", n_colors=len(unique_base))
@@ -264,10 +266,13 @@ def plot_errorbars_by_group(
         )
 
     from matplotlib.ticker import MultipleLocator
-    ax2.set_ylim(-3.5, 1.4)
-    ax2.yaxis.set_major_locator(MultipleLocator(0.4))
+    #ax2.set_ylim(-3.5, 1.4)
+    #ax2.yaxis.set_major_locator(MultipleLocator(0.4))
+    ax2.set_ylim(ax.get_ylim())
+    ax2.yaxis.set_major_locator(MultipleLocator(1))
 
-    ax2.set_ylabel("ΔTemperature Treatment/Reference (°C)", color="black", fontsize=20)
+
+    ax2.set_ylabel("Difference in Temperature Treatment/Reference [°C]", color="black", fontsize=20)
     ax2.tick_params(axis="y", labelcolor="black")
 
     plt.tight_layout()
@@ -285,7 +290,7 @@ DiD["vindu"] = pd.Categorical(
 plot_errorbars_by_group(
     DiD,
     #title="Difference in Difference",
-    y_label=" Difference in Difference, Percent[%]",
+    y_label= "Change in Electricity Consumption, Percent[%]",
     y_ref_lines=[0, 7]
     #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}
 )
