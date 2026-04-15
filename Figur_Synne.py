@@ -267,7 +267,7 @@ def plot_errorbars_by_group(
             xi,
             temp_points,
             marker="s",
-            s=50,
+            s=100,
             color=temp_color,
             edgecolor="white",
             linewidth=1.2,
@@ -362,13 +362,13 @@ def plot_errorbars_by_group(
                color='black',
                linestyle='None',
             markersize=10,
-            label="Temperature Difference"),
+            label="Temperature difference"),
 
         Line2D([0], [0], marker='o',
             color='black',
             linestyle='None',
             markersize=10,
-            label='Without Temperature Correction'
+            label='DiD without temperature control'
         ),
         Line2D(
             [0], [0],
@@ -376,7 +376,7 @@ def plot_errorbars_by_group(
             color='black',
             linestyle='None',
             markersize=10,
-            label='With Temperature Correction'
+            label='DiD with temperature control'
         )
     ]
 
@@ -402,7 +402,7 @@ DiD["vindu"] = pd.Categorical(
 plot_errorbars_by_group(
     DiD,
     #title="Difference in Difference",
-    y_label= "Change in Electricity Consumption [%]",
+    y_label= "Change in electricity consumption [%]",
     y_ref_lines=[0, 7]
     #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}
 )
