@@ -210,6 +210,7 @@ def plot_errorbars_by_group(
 
     ax.set_xticks(x_idx)
     ax.set_xticklabels(cats, fontsize=20)
+    ax.tick_params(axis="x", pad=25)
     ax.set_ylabel(y_label, fontsize= 20)
     from matplotlib.ticker import MultipleLocator
     ax.yaxis.set_major_locator(MultipleLocator(1))
@@ -222,7 +223,7 @@ def plot_errorbars_by_group(
         ax.axhline(ref, color="gray", linestyle="--", linewidth=0.9, alpha=0.6)
 
     ax.margins(x=0.08)
-    ax.legend(loc="best", fontsize = 18) #originalt 15
+    #ax.legend(loc="best", fontsize = 18) #originalt 15
     ax.grid(axis="y", color="0.9")
     sns.despine(ax=ax)
 
@@ -283,8 +284,36 @@ def plot_errorbars_by_group(
     ax2.yaxis.set_major_locator(MultipleLocator(1))
 
 
-    ax2.set_ylabel("Difference in Temperature Treatment/Reference [°C]", color="black", fontsize=20)
+    ax2.set_ylabel("Difference in Temperature [°C]", color="black", fontsize=20)
     ax2.tick_params(axis="y", labelcolor="black")
+
+    # ---- EKSTRA X-ETIKETTER FOR MÅNEDER ----
+
+    month_labels = [
+        ("November", "Nov"),
+        ("December", "Dec"),
+        ("January", "Jan"),
+        ("Winter months (Nov,Dec,Jan)", "Winter")
+    ]
+
+    y_text = ax.get_ylim()[0] - 0.10
+
+    for r in range(len(x_idx)):  # loop over regioner: NO1, NO2, NO5
+        for base, short_label in month_labels:
+            # finn riktig offset for måneden
+            s_index = ser.get_loc(base)
+
+            x_pos = x_idx[r] + offsets[s_index]
+
+            ax.text(
+                x_pos,
+                y_text,
+                short_label,
+                ha="center",
+                va="top",
+                fontsize=18,
+                color=base_color_map[base]
+            )
 
     plt.tight_layout()
     plt.xticks(fontsize=20)
@@ -293,30 +322,63 @@ def plot_errorbars_by_group(
     ax.tick_params(axis="y", labelsize=20)
     ax2.tick_params(axis="y", labelsize=20)
 
+
+
+    # ---- SYMBOL-LEGEND (MODEL TYPE) ----
+    '''symbol_legend_elements = [
+        Line2D(
+            [0], [0],
+            marker='o',
+            color='black',
+            linestyle='None',
+            markersize=9,
+            label='Without Temperature Correction'
+        ),
+        Line2D(
+            [0], [0],
+            marker='^',
+            color='black',
+            linestyle='None',
+            markersize=9,
+            label='With Temperature Correction'
+        )
+    ]
+
+    symbol_legend = ax.legend(
+        handles=symbol_legend_elements,
+        loc="lower left",
+        fontsize=20,
+        frameon=True,
+        framealpha=0.5
+    )'''
+
+    #ax.add_artist(symbol_legend)
+
+    # ---- EGEN LEGEND FOR TEMPERATUR (FIRKANTER) ----
+
     from matplotlib.lines import Line2D
-
-# ---- EGEN LEGEND FOR TEMPERATUR (FIRKANTER) ----
     temp_legend_elements = [
-        Line2D([0], [0], marker='s', color='w',
-            markerfacecolor=base_color_map["November"],
+        Line2D([0], [0], marker='s',
+               color='black',
+               linestyle='None',
             markersize=10,
-            label="Temperature diff. – November"),
+            label="Temperature Difference"),
 
-        Line2D([0], [0], marker='s', color='w',
-            markerfacecolor= base_color_map["December"],
+        Line2D([0], [0], marker='o',
+            color='black',
+            linestyle='None',
             markersize=10,
-            label="Temperature diff. – December"),
-
-        Line2D([0], [0], marker='s', color='w',
-            markerfacecolor=base_color_map["January"],
+            label='Without Temperature Correction'
+        ),
+        Line2D(
+            [0], [0],
+            marker='^',
+            color='black',
+            linestyle='None',
             markersize=10,
-            label="Temperature diff. – January"),
-
-        Line2D([0], [0], marker='s', color='w',
-            markerfacecolor=base_color_map["Winter months (Nov,Dec,Jan)"],
-            markersize=10,
-            label="Temperature diff. – Winter months")
-            ]
+            label='With Temperature Correction'
+        )
+    ]
 
     temp_legend = ax2.legend(
         handles=temp_legend_elements,
@@ -340,7 +402,7 @@ DiD["vindu"] = pd.Categorical(
 plot_errorbars_by_group(
     DiD,
     #title="Difference in Difference",
-    y_label= "Change in Electricity Consumption, Percent[%]",
+    y_label= "Change in Electricity Consumption [%]",
     y_ref_lines=[0, 7]
     #annotate={"text": "3 mnd.", "xy": (0.72, 0.92), "axescoords": True}
 )
