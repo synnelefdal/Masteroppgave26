@@ -128,7 +128,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     df = pd.merge(df, df_temp, on = ['Date', 'Hour'], how = 'left')
 
     df = df[df['kWh/Metering_point'] > 0].copy()
-    print(df.columns)
+    #print(df.columns)
 
     start_date_before = '2024-10-01'
     end_date_before = '2024-10-31'
@@ -174,30 +174,6 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     res = model.fit(cov_type='clustered', cluster_time=True)
 
     print(res)
-
-    # ---- Finne differansen i temp mellom reference og treatment perioder --- #
-
-    df_temp_analysis = df.dropna(subset=['Temp24']).copy()
-
-    temp_summary = (
-        df_temp_analysis
-        .groupby(['Period', 'Month'])['Temp24']
-        .mean()
-        .reset_index()
-    )
-
-    temp_summary = temp_summary[temp_summary['Period'].isin(['Reference', 'Treatment'])]
-
-    temp_pivot = (
-        temp_summary
-        .pivot(index='Month', columns='Period', values='Temp24')
-        .reset_index()
-    )
-
-    temp_pivot['Delta_Temp'] = temp_pivot['Treatment'] - temp_pivot['Reference']
-
-    print("\n--- Average temperature by month and period ---")
-    print(temp_pivot)
 
     # -------- Utregning --------- #
     print('----------- PanelOLS -----------------')
@@ -260,115 +236,9 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     return panel_df
 
-def plot_temp_all_zones(datasets):
-
-    plt.figure(figsize=(10, 6))
-
-    colors = {
-        "NO1": "#1f77b4",
-        "NO2": "#2ca02c",
-        "NO5": "#d62728"
-    }
-
-    for zone_name, df in datasets:
-        df = df.copy()
-        df = df.reset_index(drop=True)
-
-        # --- Filtrering ---
-        df_plot = df[df['Period'].isin(['Reference', 'Rest'])].copy()
-        df_plot = df_plot[df_plot['entity'].isin(['Uten Norgespris', 'Med Norgespris'])]
-
-        translation_map = {
-            'Med Norgespris': 'With Norway Price',
-            'Uten Norgespris': 'Without Norway Price'
-        }
-
-        df_plot['entity'] = df_plot['entity'].map(translation_map)
-
-        df_plot['entity'] = df_plot['entity'].astype('category')
-        df_plot['entity'] = df_plot['entity'].cat.remove_unused_categories()
-
-        # Fjern oktober
-        remove_oct = (df_plot['Date'] >= pd.to_datetime('2025-10-01')) & \
-                     (df_plot['Date'] <= pd.to_datetime('2025-10-31'))
-        df_plot = df_plot[~remove_oct]
-
-        df_plot = df_plot.dropna(subset=['Lufttemperatur'])
-
-        # --- Normalisering ---
-        group_means = df_plot.groupby('entity')['kWh/Metering_point'].mean()
-        df_plot['rel_consumption'] = df_plot.apply(
-            lambda r: r['kWh/Metering_point'] / group_means.loc[r['entity']],
-            axis=1
-        )
-
-        # Temperatur-bin
-        df_plot['temp_bin'] = (df_plot['Lufttemperatur'] / 0.5).round() * 0.5
-
-        entity_linestyle = {
-            "Without Norway Price": "--",
-            "With Norway Price": "-"
-        }
-
-        # --- Beregn trend per sone ---
-        for entity_name, sub in df_plot.groupby('entity'):
-            trend = (
-                sub.groupby('temp_bin')['rel_consumption'].mean().reset_index().sort_values('temp_bin')
-            )
-
-            X = trend['temp_bin'].values.reshape(-1, 1)
-            y = trend['rel_consumption'].values
-
-            model = LinearRegression().fit(X, y)
-            slope = model.coef_[0]
-
-            print(f"{zone_name} – {entity_name}: Temperatursensitivitet = {slope:.4f}")
-
-            plt.plot(
-                trend['temp_bin'],
-                trend['rel_consumption'],
-                label=f"{zone_name} – {entity_name}",
-                linewidth=2,
-                color=colors.get(zone_name, 'gray'),
-                linestyle=entity_linestyle[entity_name]
-            )
-        #trend = df_plot.groupby('temp_bin')['rel_consumption'].mean().reset_index()
-
-
-        '''# --- Print data ---
-        print(f"\n===== Temperaturdata for {zone_name} =====")
-        print(trend)
-
-        # --- Plot ---
-        plt.plot(
-            trend['temp_bin'], trend['rel_consumption'],
-            label=zone_name,
-            linewidth=2,
-            color=colors.get(zone_name, 'gray')
-        )'''
-
-    plt.axhline(1.0, linestyle='--', color='gray', alpha=0.7)
-    plt.xlabel('Outdoor temperature [°C]', fontsize=25)
-    plt.ylabel('Normalised Consumption (Value/Average)',  fontsize=25)
-    #plt.title('Temperature Sensitivity Before Norway Price – NO1, NO2, NO5',  fontsize=20)
-    plt.xticks(fontsize=25)
-    plt.yticks(fontsize=25)
-    plt.grid(True, alpha=0.25)
-    plt.legend(fontsize = 20)
-    plt.tight_layout()
-    plt.show()
 
 data_NO1 = Difference_in_Difference_temp(data_mNP_NO1,data_uNP_NO1,data_rest_NO1,'NO1',Temp_Oslo)
 data_NO2 = Difference_in_Difference_temp(data_mNP_NO2,data_uNP_NO2,data_rest_NO2,'NO2',Temp_Stavanger)
 data_NO5 = Difference_in_Difference_temp(data_mNP_NO5,data_uNP_NO5,data_rest_NO5,'NO5',Temp_Bergen)
 
 
-#print(type(data_NO1))
-#print(type(data_NO2))
-#print(type(data_NO5))
-
-plot_temp_all_zones([
-    ("NO1", data_NO1),
-    ("NO2", data_NO2),
-    ("NO5", data_NO5)
-])
