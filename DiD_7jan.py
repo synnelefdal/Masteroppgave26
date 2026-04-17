@@ -13,8 +13,8 @@ from matplotlib.pyplot import xticks
 # =====================================================
 
 # --- REFERANSEPERIODE ---
-START_DATE_BEFORE = '2025-01-08' #08
-END_DATE_BEFORE   = '2025-01-09' #09
+START_DATE_BEFORE = '2025-01-06' #08
+END_DATE_BEFORE   = '2025-01-07' #09
 
 # --- BEHANDLINGSPERIODE ---
 START_DATE_AFTER  = '2026-01-07'
