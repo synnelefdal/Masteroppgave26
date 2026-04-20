@@ -130,14 +130,27 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     df = df[df['kWh/Metering_point'] > 0].copy()
     #print(df.columns)
 
-    start_date_before = '2024-10-01'
-    end_date_before = '2024-10-31'
+    df['Date'] = pd.to_datetime(df['Date'])
 
-    start_date_after = '2024-11-01'
-    end_date_after = '2025-09-30'
+    reference_start = pd.Timestamp('2024-10-01')
+    reference_end = pd.Timestamp('2024-10-31')
 
-    before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
-    after_ref = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
+    treat_start = pd.Timestamp('2024-11-01')
+    treat_end = pd.Timestamp('2025-09-30')
+
+    df['treat_day'] = np.nan
+    mask = (df['Date'] >= '2024-11-01') & (df['Date'] <= '2025-09-30')
+    df.loc[mask, 'treat_day'] = (
+            df.loc[mask, 'Date'] - pd.Timestamp('2024-11-01')
+    ).dt.days
+    df = df[
+        ((df['Date'] >= reference_start) & (df['Date'] <= reference_end)) |
+        ((df['Date'] >= treat_start) & (df['Date'] <= treat_end))
+        ].copy()
+
+
+    '''before_ref = (df['Date'] >= reference_start) & (df['Date'] <= reference_end)
+    after_ref = (df['Date'] >= treat_start) & (df['Date'] <= treat_end)
 
     df['Period'] = np.select([before_ref, after_ref],
                               ['Reference', 'Treatment'],
@@ -147,25 +160,23 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     df['Month'] = pd.Categorical(df['Month'],
                                  categories=['January', 'February', 'March', 'April', 'May', 'June',
                                              'July', 'August', 'September', 'October', 'November', 'December'],
-                                 ordered=True)
-
-    df['t_hour'] = ((df['time'] - pd.Timestamp('2024-10-01', tz = 'UTC'))/pd.Timedelta(hours = 1)).astype(int)
-
+                                 ordered=True)'''
 
     # --------- Model ------------ #
     df['entity'] = pd.Categorical(df['group_definition'],
                                   categories=['Uten Norgespris', 'Med Norgespris', 'Resten'],
                                   # Referanse = Uten Norgespris
                                   ordered=True)
-    df['period'] = pd.Categorical(df['Period'],
+    '''df['period'] = pd.Categorical(df['Period'],
                                   categories=['Reference', 'Treatment', 'Rest'],  # Reference = Reference
-                                  ordered=True)
+                                  ordered=True)'''
+
     df['log_y'] = np.log(df['kWh/Metering_point'])
     panel_df = df.set_index(['entity', 'time'], drop=False).sort_index()
 
     model = PanelOLS.from_formula(
-        'log_y ~ 1 + C(entity, Treatment(reference="Uten Norgespris"))*C(t_hour) '
-                '+  Temp24 + I(Temp24**2) + I(Temp24**3)'
+        'log_y ~ 1 + C(entity, Treatment(reference="Uten Norgespris"))*C(treat_day) '
+                '+ Temp24 + I(Temp24**2) + I(Temp24**3)'
                 '+ C(entity, Treatment(reference="Uten Norgespris")):Temp24 '
                 '+ C(entity, Treatment(reference="Uten Norgespris")):I(Temp24**2) '
                 '+ C(entity, Treatment(reference="Uten Norgespris")):I(Temp24**3) '
@@ -176,44 +187,66 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     res = model.fit(cov_type='clustered', cluster_time=True)
 
-    print(res)
+    #print(res)
 
-    # -------- Utregning --------- #
-    '''print('----------- PanelOLS -----------------')
-    beta3 = res.params["C(entity, Treatment(reference='Uten Norgespris'))[T.Med Norgespris]:C(period)[T.Treatment]"]
-    DiD = (np.exp(beta3) - 1) * 100
+    #print(res.params.head(20))
+    #print(res.params.tail(20))
+    #print(res.params.index)
 
-    ci_low, ci_high = res.conf_int().loc["C(entity, Treatment(reference='Uten Norgespris'))[T.Med Norgespris]:C(period)[T.Treatment]"]
-    DiD_low = (np.exp(ci_low) - 1) * 100
-    DiD_high = (np.exp(ci_high) - 1) * 100
+    # --------- PLOT ----------
 
-    print(f'DiD prosent for {price_area}: {DiD:.2f}%')
-    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')'''
+    params = res.params
+    #conf_int = res.conf_int()
+    mask = params.index.str.contains( r"\[T\.Med Norgespris\]:C\(treat_day\)")
 
-    effects = (
-        res.params
-        .filter(like="C(entity, Treatment(reference='Uten Norgespris'))[T.Med Norgespris]:C(t_hour)")
-        .reset_index()
+    effects = params[mask]
+    #conf = conf_int.loc[effects.index]
+
+    df_plot = pd.DataFrame({
+        'day': effects.index.str.extract(r'\[T\.(\d+)\.0\]')[0].astype(int),
+        'beta': effects.values
+    }).sort_values('day')
+
+    df_plot['date'] = (
+            pd.Timestamp('2024-11-01') +
+            pd.to_timedelta(df_plot['day'], unit='D')
     )
 
-    effects.columns = ['term', 'beta']
-    effects['t_hour'] = effects['term'].str.extract(r'\[T\.(\d+)\]').astype(int)
+    df_plot['pct'] = 100 * (np.exp(df_plot['beta']) - 1)
+    #df_plot['pct_low'] = 100 * (np.exp(df_plot['ci_low']) - 1)
+    #df_plot['pct_high'] = 100 * (np.exp(df_plot['ci_high']) - 1)
 
-    effects['pct_effect'] = (np.exp(effects['beta']) - 1) * 100
+    plt.figure(figsize=(13, 6))
 
-    # -------- Figur ---------- #
-    plt.figure(figsize=(10, 5))
-    plt.plot(effects['t_hour'], effects['pct_effect'], linewidth=1)
-    plt.axhline(0, linestyle='--', color='gray')
+    plt.plot(
+        df_plot['date'],
+        df_plot['pct'],
+        label='Estimated change in consumption relative to October 2024 for households with Norway price',
+        color='black',
+        linewidth = 1.5
+    )
 
-    plt.xlabel('Timer siden 1. oktober 2024')
-    plt.ylabel('Prosentvis endring i forbruk')
-    plt.title(f'Timevise DiD-estimater – {price_area}')
+    '''plt.fill_between(
+        df_plot['date'],
+        df_plot['pct_low'],
+        df_plot['pct_high'],
+        color='gray',
+        alpha=0.3,
+        label='95 % KI'
+    )'''
+
+    # Referanser
+    plt.axhline(0, color='red', linestyle='--', linewidth=1)
+    plt.axvline(pd.Timestamp('2024-11-01'), color='blue', linestyle=':', linewidth=1)
+
+    plt.xlabel('Date')
+    plt.ylabel('Change in consumption (%)')
+    plt.title('Daily DiD effect relative to October 2024')
+    plt.legend()
+    plt.grid(True)
+
     plt.tight_layout()
     plt.show()
-
-
-    return panel_df
 
 
 data_NO1 = Difference_in_Difference_temp(data_mNP_NO1,data_uNP_NO1,data_rest_NO1,'NO1',Temp_Oslo)
@@ -221,181 +254,3 @@ data_NO2 = Difference_in_Difference_temp(data_mNP_NO2,data_uNP_NO2,data_rest_NO2
 data_NO5 = Difference_in_Difference_temp(data_mNP_NO5,data_uNP_NO5,data_rest_NO5,'NO5',Temp_Bergen)
 
 
-def Difference_in_Difference_pretrend(data_mNP, data_uNP, data_rest, price_area, Temp):
-
-    # ===============================
-    # 1. DATAKLARGJØRING (UENDRET)
-    # ===============================
-
-    for df in [data_mNP, data_uNP, data_rest]:
-        df['start_time_utc'] = pd.to_datetime(
-            df['start_time_utc'],
-            format='%Y-%m-%d %H:%M:%S',
-            errors='coerce',
-            utc=True
-        )
-        df['Date'] = df['start_time_utc'].dt.date
-        df['Hour'] = df['start_time_utc'].dt.hour.astype(int)
-
-    def prep_group(data):
-        d = data[data['price_area'] == price_area].copy()
-        d['kWh/Metering_point'] = d['consumption_kwh'] / d['metering_point_count']
-        g = d.groupby(['Date', 'Hour', 'group_definition'])['kWh/Metering_point'].sum().reset_index()
-        g['Date'] = pd.to_datetime(g['Date'])
-        g['time'] = (g['Date'] + pd.to_timedelta(g['Hour'], unit='h')).dt.tz_localize('UTC')
-        return g
-
-    df_NP = prep_group(data_mNP)
-    df_uNP = prep_group(data_uNP)
-    df_resten = prep_group(data_rest)
-
-    df = pd.concat([df_NP, df_uNP, df_resten], ignore_index=True)
-
-    #print(df)
-
-    # ===============================
-    # 2. TEMPERATUR (UENDRET)
-    # ===============================
-
-    Temp['Date'] = pd.to_datetime(Temp['Date'])
-    Temp['Hour'] = Temp['Hour'].astype(float)
-    Temp['Temp24'] = Temp['Lufttemperatur'].rolling(window=24, min_periods=1).mean()
-
-    df = pd.merge(
-        df,
-        Temp[['Date', 'Hour', 'Temp24']],
-        on=['Date', 'Hour'],
-        how='left'
-    )
-
-    df = df[df['kWh/Metering_point'] > 0].copy()
-    df['log_y'] = np.log(df['kWh/Metering_point'])
-
-    #print(df)
-
-    # ======================================================
-    # 3. >>> NYTT <<< TIDSAVGRENSNING: KUN PRE-NORGESPRIS
-    # ======================================================
-
-    df = df[
-        (df['Date'] >= '2024-10-01') &
-        (df['Date'] <= '2025-09-30')
-    ].copy()
-
-    #print(df.columns)
-    #print(df)
-
-    # ======================================================
-    # 4. >>> NYTT <<< EVENT-TIME (TIMER SIDEN OKTOBER 2024)
-    # ======================================================
-
-    df['october'] = (
-            (df['Date'] >= '2024-10-01') &
-            (df['Date'] <= '2024-10-31')
-    )
-
-    post_ref_time = pd.Timestamp('2024-11-01 00:00:00', tz='UTC')
-
-    df['event_time'] = np.where(
-        df['time'] >= post_ref_time,
-        ((df['time'] - post_ref_time).dt.total_seconds() / 3600).astype(int),
-        np.nan
-    )
-
-
-    #print(df.columns)
-    #print(df)
-
-    # ======================================================
-    # 5. PANELSTRUKTUR (LITEN ENDRET)
-    # ======================================================
-    df = df[df['event_time'].notna()].copy()
-
-    df = df[df['group_definition'].isin(
-        ['Uten Norgespris', 'Med Norgespris']
-    )].copy()
-
-    df['entity'] = pd.Categorical(
-        df['group_definition'],
-        categories=['Uten Norgespris', 'Med Norgespris'],
-        ordered=True
-    )
-
-    df['event_time_cat'] = pd.Categorical(df['event_time'])
-
-    panel_df = df.set_index(['entity', 'time'], drop=False).sort_index()
-    #print(panel_df)
-
-    # ======================================================
-    # 6. >>> NYTT <<< EVENT-STUDY / PRE-TREND MODELL
-    # ======================================================
-
-    model = PanelOLS.from_formula(
-        'log_y ~ 1 + C(entity, Treatment(reference="Uten Norgespris")):C(event_time_cat) '
-        '+ Temp24 + I(Temp24**2) + I(Temp24**3)'
-        '+ C(entity, Treatment(reference="Uten Norgespris")):Temp24 '
-        '+ C(entity, Treatment(reference="Uten Norgespris")):I(Temp24**2) '
-        '+ C(entity, Treatment(reference="Uten Norgespris")):I(Temp24**3) ',
-        data=panel_df,
-        drop_absorbed=True
-    )
-
-    res = model.fit(cov_type='clustered', cluster_time=True)
-
-    print(res)
-
-    # ======================================================
-    # 7. >>> NYTT <<< HENT UT ~8000 PRE-ESTIMATER
-    # ======================================================
-
-    ci = res.conf_int()
-    results = []
-
-    for name, beta in res.params.items():
-        if "Med Norgespris" in name and "event_time_cat" in name:
-            hour = int(name.split(']')[-2].split('[')[-1])
-            results.append({
-                'event_time': hour,
-                'beta': beta,
-                'low': ci.loc[name][0],
-                'high': ci.loc[name][1]
-            })
-
-    df_event = pd.DataFrame(results).sort_values('event_time')
-
-    df_event['effect_pct'] = (np.exp(df_event['beta']) - 1) * 100
-    df_event['low_pct'] = (np.exp(df_event['low']) - 1) * 100
-    df_event['high_pct'] = (np.exp(df_event['high']) - 1) * 100
-
-    return df_event
-
-def plot(df_event):
-
-    plt.figure(figsize=(12, 6))
-
-    plt.plot(df_event['event_time'], df_event['effect_pct'], label='Estimert forskjell')
-    plt.fill_between(
-        df_event['event_time'],
-        df_event['low_pct'],
-        df_event['high_pct'],
-        alpha=0.3
-    )
-
-    plt.axhline(0, linestyle='--', color='black')
-    plt.axvline(0, linestyle=':', color='red', label='Referansemåned')
-
-    plt.xlabel('Timer siden oktober 2024')
-    plt.ylabel('Forskjell i forbruk (%)')
-    plt.title('Pre-trend / event study før Norgespris')
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
-
-
-'''result_NO1 = Difference_in_Difference_pretrend(data_mNP_NO1, data_uNP_NO1, data_rest_NO1, 'NO1', Temp_Oslo)
-result_NO2 = Difference_in_Difference_pretrend(data_mNP_NO2, data_uNP_NO2, data_rest_NO2, 'NO2', Temp_Stavanger)
-result_NO5 = Difference_in_Difference_pretrend(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, 'NO5', Temp_Bergen)
-
-plot(result_NO1)
-plot(result_NO2)
-plot(result_NO5)'''
