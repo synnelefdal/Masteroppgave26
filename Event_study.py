@@ -187,7 +187,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     res = model.fit(cov_type='clustered', cluster_time=True)
 
-    #print(res)
+    print(res)
 
     #print(res.params.head(20))
     #print(res.params.tail(20))

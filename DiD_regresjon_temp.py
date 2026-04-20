@@ -130,11 +130,11 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     df = df[df['kWh/Metering_point'] > 0].copy()
     print(df.columns)
 
-    start_date_before = '2024-10-01'
-    end_date_before = '2024-10-31'
+    start_date_before = '2023-10-01'
+    end_date_before = '2025-10-31'
 
-    start_date_after = '2024-11-01'
-    end_date_after = '2025-09-30'
+    start_date_after = '2025-11-01'
+    end_date_after = '2026-01-31'
 
     before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
     after_ref = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
@@ -168,7 +168,8 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
                 '+ C(entity, Treatment(reference="Uten Norgespris")):I(Temp24**3) '
                 '+ TimeEffects',
         data=panel_df,
-        drop_absorbed=True
+        drop_absorbed=True,
+        check_rank = False
     )
 
     res = model.fit(cov_type='clustered', cluster_time=True)
@@ -362,10 +363,6 @@ data_NO1 = Difference_in_Difference_temp(data_mNP_NO1,data_uNP_NO1,data_rest_NO1
 data_NO2 = Difference_in_Difference_temp(data_mNP_NO2,data_uNP_NO2,data_rest_NO2,'NO2',Temp_Stavanger)
 data_NO5 = Difference_in_Difference_temp(data_mNP_NO5,data_uNP_NO5,data_rest_NO5,'NO5',Temp_Bergen)
 
-
-#print(type(data_NO1))
-#print(type(data_NO2))
-#print(type(data_NO5))
 
 plot_temp_all_zones([
     ("NO1", data_NO1),
