@@ -230,11 +230,11 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
     df = df[df['kWh/Metering_point'] > 0].copy()
     #print(df)
 
-    start_date_before = '2025-01-01'
-    end_date_before = '2025-01-31'
+    start_date_before = '2024-10-01'
+    end_date_before = '2024-10-31'
 
-    start_date_after = '2026-01-07'
-    end_date_after = '2026-01-08'
+    start_date_after = '2024-11-01'
+    end_date_after = '2025-09-30'
 
     before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
     after_ref = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
