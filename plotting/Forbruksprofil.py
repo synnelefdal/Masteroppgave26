@@ -4,17 +4,17 @@ import matplotlib.pyplot as plt
 
 
 
-data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep= ';')
-data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep= ';')
-data_rest_NO1 = pd.read_csv('All_Demand_Data/NO1_resten.csv', sep= ';')
+data_mNP_NO1 = pd.read_csv('../All_Demand_Data/NO1_mNP.csv', sep=';')
+data_uNP_NO1 = pd.read_csv('../All_Demand_Data/NO1_uNP.csv', sep=';')
+data_rest_NO1 = pd.read_csv('../All_Demand_Data/NO1_resten.csv', sep=';')
 
-data_mNP_NO2 = pd.read_csv('All_Demand_Data/NO2_mNP.csv', sep= ';')
-data_uNP_NO2 = pd.read_csv('All_Demand_Data/NO2_uNP.csv', sep= ';')
-data_rest_NO2 = pd.read_csv('All_Demand_Data/NO2_resten.csv', sep= ';')
+data_mNP_NO2 = pd.read_csv('../All_Demand_Data/NO2_mNP.csv', sep=';')
+data_uNP_NO2 = pd.read_csv('../All_Demand_Data/NO2_uNP.csv', sep=';')
+data_rest_NO2 = pd.read_csv('../All_Demand_Data/NO2_resten.csv', sep=';')
 
-data_mNP_NO5 = pd.read_csv('All_Demand_Data/NO5_mNP.csv', sep= ';')
-data_uNP_NO5 = pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep= ';')
-data_rest_NO5 = pd.read_csv('All_Demand_Data/NO5_resten.csv', sep= ';')
+data_mNP_NO5 = pd.read_csv('../All_Demand_Data/NO5_mNP.csv', sep=';')
+data_uNP_NO5 = pd.read_csv('../All_Demand_Data/NO5_uNP.csv', sep=';')
+data_rest_NO5 = pd.read_csv('../All_Demand_Data/NO5_resten.csv', sep=';')
 
 
 def plot_timer(data_mNP, data_uNP, data_resten, price_area):
@@ -143,19 +143,19 @@ def load_and_prepare(path):
 # --- LES INN DATA ---
 
 # NO1
-NO1_m = load_and_prepare('All_Demand_Data/NO1_mNP.csv')
-NO1_u = load_and_prepare('All_Demand_Data/NO1_uNP.csv')
-NO1_r = load_and_prepare('All_Demand_Data/NO1_resten.csv')
+NO1_m = load_and_prepare('../All_Demand_Data/NO1_mNP.csv')
+NO1_u = load_and_prepare('../All_Demand_Data/NO1_uNP.csv')
+NO1_r = load_and_prepare('../All_Demand_Data/NO1_resten.csv')
 
 # NO2
-NO2_m = load_and_prepare('All_Demand_Data/NO2_mNP.csv')
-NO2_u = load_and_prepare('All_Demand_Data/NO2_uNP.csv')
-NO2_r = load_and_prepare('All_Demand_Data/NO2_resten.csv')
+NO2_m = load_and_prepare('../All_Demand_Data/NO2_mNP.csv')
+NO2_u = load_and_prepare('../All_Demand_Data/NO2_uNP.csv')
+NO2_r = load_and_prepare('../All_Demand_Data/NO2_resten.csv')
 
 # NO5
-NO5_m = load_and_prepare('All_Demand_Data/NO5_mNP.csv')
-NO5_u = load_and_prepare('All_Demand_Data/NO5_uNP.csv')
-NO5_r = load_and_prepare('All_Demand_Data/NO5_resten.csv')
+NO5_m = load_and_prepare('../All_Demand_Data/NO5_mNP.csv')
+NO5_u = load_and_prepare('../All_Demand_Data/NO5_uNP.csv')
+NO5_r = load_and_prepare('../All_Demand_Data/NO5_resten.csv')
 
 
 # --- FIGUR FOR NO1 ---
@@ -219,19 +219,19 @@ def load_and_prepare(path):
 # --- LES INN DATA ---
 
 # NO1
-NO1_m = load_and_prepare('All_Demand_Data/NO1_mNP.csv')
-NO1_u = load_and_prepare('All_Demand_Data/NO1_uNP.csv')
-NO1_r = load_and_prepare('All_Demand_Data/NO1_resten.csv')
+NO1_m = load_and_prepare('../All_Demand_Data/NO1_mNP.csv')
+NO1_u = load_and_prepare('../All_Demand_Data/NO1_uNP.csv')
+NO1_r = load_and_prepare('../All_Demand_Data/NO1_resten.csv')
 
 # NO2
-NO2_m = load_and_prepare('All_Demand_Data/NO2_mNP.csv')
-NO2_u = load_and_prepare('All_Demand_Data/NO2_uNP.csv')
-NO2_r = load_and_prepare('All_Demand_Data/NO2_resten.csv')
+NO2_m = load_and_prepare('../All_Demand_Data/NO2_mNP.csv')
+NO2_u = load_and_prepare('../All_Demand_Data/NO2_uNP.csv')
+NO2_r = load_and_prepare('../All_Demand_Data/NO2_resten.csv')
 
 # NO5
-NO5_m = load_and_prepare('All_Demand_Data/NO5_mNP.csv')
-NO5_u = load_and_prepare('All_Demand_Data/NO5_uNP.csv')
-NO5_r = load_and_prepare('All_Demand_Data/NO5_resten.csv')
+NO5_m = load_and_prepare('../All_Demand_Data/NO5_mNP.csv')
+NO5_u = load_and_prepare('../All_Demand_Data/NO5_uNP.csv')
+NO5_r = load_and_prepare('../All_Demand_Data/NO5_resten.csv')
 
 
 # --- FUNKSJON: plotter ett område ---
@@ -288,19 +288,19 @@ def load_and_prepare_monthly(path):
 # --- LAST INN DATA FOR ALLE OMRÅDER ---
 
 # NO1
-NO1_m = load_and_prepare_monthly('All_Demand_Data/NO1_mNP.csv')
-NO1_u = load_and_prepare_monthly('All_Demand_Data/NO1_uNP.csv')
-NO1_r = load_and_prepare_monthly('All_Demand_Data/NO1_resten.csv')
+NO1_m = load_and_prepare_monthly('../All_Demand_Data/NO1_mNP.csv')
+NO1_u = load_and_prepare_monthly('../All_Demand_Data/NO1_uNP.csv')
+NO1_r = load_and_prepare_monthly('../All_Demand_Data/NO1_resten.csv')
 
 # NO2
-NO2_m = load_and_prepare_monthly('All_Demand_Data/NO2_mNP.csv')
-NO2_u = load_and_prepare_monthly('All_Demand_Data/NO2_uNP.csv')
-NO2_r = load_and_prepare_monthly('All_Demand_Data/NO2_resten.csv')
+NO2_m = load_and_prepare_monthly('../All_Demand_Data/NO2_mNP.csv')
+NO2_u = load_and_prepare_monthly('../All_Demand_Data/NO2_uNP.csv')
+NO2_r = load_and_prepare_monthly('../All_Demand_Data/NO2_resten.csv')
 
 # NO5
-NO5_m = load_and_prepare_monthly('All_Demand_Data/NO5_mNP.csv')
-NO5_u = load_and_prepare_monthly('All_Demand_Data/NO5_uNP.csv')
-NO5_r = load_and_prepare_monthly('All_Demand_Data/NO5_resten.csv')
+NO5_m = load_and_prepare_monthly('../All_Demand_Data/NO5_mNP.csv')
+NO5_u = load_and_prepare_monthly('../All_Demand_Data/NO5_uNP.csv')
+NO5_r = load_and_prepare_monthly('../All_Demand_Data/NO5_resten.csv')
 
 
 # --- FUNKSJON: plotter ett område også med differanse ---
@@ -368,19 +368,19 @@ def load_and_prepare_yearly(path):
 # --- LAST INN DATA FOR ALLE OMRÅDER ---
 
 # NO1
-NO1_m = load_and_prepare_yearly('All_Demand_Data/NO1_mNP.csv')
-NO1_u = load_and_prepare_yearly('All_Demand_Data/NO1_uNP.csv')
-NO1_r = load_and_prepare_yearly('All_Demand_Data/NO1_resten.csv')
+NO1_m = load_and_prepare_yearly('../All_Demand_Data/NO1_mNP.csv')
+NO1_u = load_and_prepare_yearly('../All_Demand_Data/NO1_uNP.csv')
+NO1_r = load_and_prepare_yearly('../All_Demand_Data/NO1_resten.csv')
 
 # NO2
-NO2_m = load_and_prepare_yearly('All_Demand_Data/NO2_mNP.csv')
-NO2_u = load_and_prepare_yearly('All_Demand_Data/NO2_uNP.csv')
-NO2_r = load_and_prepare_yearly('All_Demand_Data/NO2_resten.csv')
+NO2_m = load_and_prepare_yearly('../All_Demand_Data/NO2_mNP.csv')
+NO2_u = load_and_prepare_yearly('../All_Demand_Data/NO2_uNP.csv')
+NO2_r = load_and_prepare_yearly('../All_Demand_Data/NO2_resten.csv')
 
 # NO5
-NO5_m = load_and_prepare_yearly('All_Demand_Data/NO5_mNP.csv')
-NO5_u = load_and_prepare_yearly('All_Demand_Data/NO5_uNP.csv')
-NO5_r = load_and_prepare_yearly('All_Demand_Data/NO5_resten.csv')
+NO5_m = load_and_prepare_yearly('../All_Demand_Data/NO5_mNP.csv')
+NO5_u = load_and_prepare_yearly('../All_Demand_Data/NO5_uNP.csv')
+NO5_r = load_and_prepare_yearly('../All_Demand_Data/NO5_resten.csv')
 
 
 # --- FUNKSJON: plotter ett område med differanser ---
