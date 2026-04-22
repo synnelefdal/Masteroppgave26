@@ -123,19 +123,17 @@ def plot_daglig_gjennomsnitt_prissone(
 )'''
 
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 
 def plot_full_analysis(data_mNP, data_uNP, data_resten, price_area):
 
     def prep(df):
         df = df.copy()
         df['start_time_utc'] = pd.to_datetime(df['start_time_utc'], utc=True)
+
+        #---- KUTT DATA ETTER SEPTEMBER 2025 ----
+        cutoff = pd.Timestamp("2025-10-01", tz="UTC")
+        df = df[df['start_time_utc'] <= cutoff]
+
         df['kWh/mp'] = df['consumption_kwh'] / df['metering_point_count']
         df['Date'] = df['start_time_utc'].dt.date
         df['Weekday'] = df['start_time_utc'].dt.dayofweek
@@ -144,21 +142,21 @@ def plot_full_analysis(data_mNP, data_uNP, data_resten, price_area):
 
     mNP = prep(data_mNP)
     uNP = prep(data_uNP)
-    rest = prep(data_resten)
+    #rest = prep(data_resten)
 
     groups = {
         "Med NP": mNP["kWh/mp"],
-        "Uten NP": uNP["kWh/mp"],
-        "Resten": rest["kWh/mp"]
+        "Uten NP": uNP["kWh/mp"]#,
+        #"Resten": rest["kWh/mp"]
     }
 
     colors = {
         "Med NP": "#4e79a7",
-        "Uten NP": "#f28e2b",
-        "Resten": "#59a14f"
+        "Uten NP": "#f28e2b"#,
+        #"Resten": "#59a14f"
     }
 
-    # -----------------------
+    ''''# -----------------------
     # 1) Boksplot + Histogram + ECDF + Load Duration Curve
     # -----------------------
 
@@ -212,7 +210,7 @@ def plot_full_analysis(data_mNP, data_uNP, data_resten, price_area):
 
     # Ukedagssnitt
     def weekday(df):
-        return df.groupby("Weekday")["kWh/mp"].mean()
+        return df.groupby("Weekday")["kWh/mp"].mean()'''
 
     # Månedssnitt
     def monthly(df):
@@ -221,7 +219,7 @@ def plot_full_analysis(data_mNP, data_uNP, data_resten, price_area):
         return m.rolling(2, center=True, min_periods=1).mean()
 
     # --- Daglig ---
-    plt.figure(figsize=(12,5))
+    '''plt.figure(figsize=(12,5))
     plt.title(f"Daglig gjennomsnitt – {price_area}", fontsize=18)
     for label, df in zip(groups.keys(), [mNP, uNP, rest]):
         plt.plot(daily(df).index, daily(df).values, linewidth=2.5, label=label, color=colors[label])
@@ -242,16 +240,35 @@ def plot_full_analysis(data_mNP, data_uNP, data_resten, price_area):
     plt.ylabel("kWh per målepunkt")
     plt.legend()
     plt.tight_layout()
-    plt.show()
+    plt.show()'''
+
+    TRANSLATIONS = {
+        "Med NP": "With Norway Price ",
+        "Uten NP": "Without Norway Price",
+        "Månedlig gjennomsnitt": "Monthly average",
+        "Daglig gjennomsnitt": "Daily average",
+        "Ukedagssnitt": "Weekday average",
+        "kWh per målepunkt": "kWh per metering point",
+        "Statistisk profil": "Statistical profile",
+        "Fordeling (KDE)": "Distribution (KDE)",
+        "Boksplot": "Box plot",
+        "Load Duration Curve": "Load duration curve",
+    }
+
+    def _(text):
+        return TRANSLATIONS.get(text, text)
 
     # --- Månedlig ---
     plt.figure(figsize=(12,5))
-    plt.title(f"Månedlig gjennomsnitt – {price_area}", fontsize=18)
-    for label, df in zip(groups.keys(), [mNP, uNP, rest]):
-        plt.plot(monthly(df).index, monthly(df).values, linewidth=2.5, label=label, color=colors[label])
+    #plt.title(f"Monthly Average – {price_area}", fontsize=18)
+    for label, df in zip(groups.keys(), [mNP, uNP]):
+        plt.plot(monthly(df).index, monthly(df).values, linewidth=2.5, label=_(label), color=colors[label])
+        plt.legend(fontsize = 20)
     plt.grid(alpha=0.3)
-    plt.ylabel("kWh per målepunkt")
-    plt.legend()
+    plt.ylabel("kWh per metering point", size = 25 )
+    plt.xlabel('Month', size = 25)
+    plt.xticks(fontsize = 20)
+    plt.yticks(fontsize = 20)
     plt.tight_layout()
     plt.show()
 
@@ -262,3 +279,6 @@ res_NO1 = plot_full_analysis(
     )
 #denne er veldig overkill tror eg
 
+plot_full_analysis(data_mNP_NO2, data_uNP_NO2, data_rest_NO2, 'NO2')
+
+plot_full_analysis(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, 'NO5')
