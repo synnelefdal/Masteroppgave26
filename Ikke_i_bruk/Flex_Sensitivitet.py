@@ -18,8 +18,8 @@ data = pd.read_csv('Forbruk_NO1_NO5.csv')
 price_NO1 = pd.read_csv('NO1_prices.csv')
 price_NO5 = pd.read_csv('NO5_prices.csv')
 
-Temp_Bergen = pd.read_csv('../Temp_Bergen.csv')
-Temp_Oslo = pd.read_csv('../Temp_Oslo.csv')
+Temp_Bergen = pd.read_csv('../Temperature_Files/Temp_Bergen.csv')
+Temp_Oslo = pd.read_csv('../Temperature_Files/Temp_Oslo.csv')
 
 def flex_sensitivitet(data, price_area, temp, price_data):
     # ------------------- Filterer for dato ---------- #

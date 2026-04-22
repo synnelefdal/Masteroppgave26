@@ -13,9 +13,9 @@ data_mNP_NO5 = pd.read_csv('All_Demand_Data/NO5_mNP.csv', skiprows= [1, 2, 3], s
 data_uNP_NO5 = pd.read_csv('All_Demand_Data/NO5_uNP.csv', skiprows= [1, 2, 3], sep=';')
 data_rest_NO5 = pd.read_csv('All_Demand_Data/NO5_resten.csv', skiprows= [1, 2, 3], sep =';')
 
-Temp_Bergen = pd.read_csv('Temp_Bergen.csv')
-Temp_Oslo = pd.read_csv('Temp_Oslo.csv')
-Temp_Stavanger = pd.read_csv('Temp_Stavanger.csv')
+Temp_Bergen = pd.read_csv('Temperature_Files/Temp_Bergen.csv')
+Temp_Oslo = pd.read_csv('Temperature_Files/Temp_Oslo.csv')
+Temp_Stavanger = pd.read_csv('Temperature_Files/Temp_Stavanger.csv')
 
 
 def Difference_in_Difference_temp_hourly(
