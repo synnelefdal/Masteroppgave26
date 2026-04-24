@@ -11,8 +11,8 @@ from matplotlib.pyplot import xticks
 # =============== GLOBALT DATO-VALG ===================
 # =====================================================
 
-START_DATE_BEFORE = '2025-01-01'
-END_DATE_BEFORE   = '2025-01-31'
+START_DATE_BEFORE = '2025-01-08'
+END_DATE_BEFORE   = '2025-01-09'
 
 START_DATE_AFTER  = '2026-01-07'
 END_DATE_AFTER    = '2026-01-08'
@@ -129,6 +129,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
         )
 
         res = model.fit(cov_type='clustered', cluster_time=True)
+
 
         key = "C(entity)[T.Med Norgespris]:C(period)[T.Treatment]"
 

@@ -93,8 +93,8 @@ def print_gjennomsnitt(data_mNP, data_uNP, data_resten, price_area):
     df_uNP = data_uNP.copy()
     df_resten = data_resten.copy()
 
-    start_dato = '2026-01-07'
-    slutt_dato = '2026-01-08'
+    start_dato = '2025-11-01'
+    slutt_dato = '2025-11-30'
 
     df_mNP['start_time_utc'] = pd.to_datetime((df_mNP['start_time_utc']), utc=True)
     df_mNP = df_mNP[(df_mNP['start_time_utc'] >= start_dato) & (df_mNP['start_time_utc'] <= slutt_dato)]
@@ -159,7 +159,7 @@ NO5_r = load_and_prepare('../All_Demand_Data/NO5_resten.csv')
 
 
 # --- FIGUR FOR NO1 ---
-plt.figure(figsize=(14, 7))
+'''plt.figure(figsize=(14, 7))
 plt.plot(NO1_m.index, NO1_m.values, label='mNP')
 plt.plot(NO1_u.index, NO1_u.values, label='uNP')
 plt.plot(NO1_r.index, NO1_r.values, label='resten')
@@ -195,7 +195,7 @@ plt.ylabel("Forbruk per husholdning (kWh)")
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
-plt.show()
+plt.show()'''
 
 
 import pandas as pd
