@@ -76,24 +76,24 @@ fig, axes = plt.subplots(
 )
 
 # Plot prissone 1
-axes[0].plot(dates, did_z1, label="NO1", color="blue")
-axes[0].plot(dates, did_z1_temp, label="NO1 w/Temp",color="green")
+#axes[0].plot(dates, did_z1, label="NO1", color="blue", marker = 'o', linestyle = 'None')
+axes[0].plot(dates, did_z1_temp, label="NO1 w/Temp",color="green", marker = 'o', linestyle = 'None')
 axes[0].set_title("DiD – NO1")
 axes[0].set_ylabel("Difference in Difference")
 axes[0].axvline(x = pd.Timestamp('2025-10-01'), color = 'red', linestyle = '--', linewidth = 2, alpha = 0.8)
 axes[0].grid(True)
 
 # Plot prissone 2
-axes[1].plot(dates, did_z2, label="NO2", color="blue")
-axes[1].plot(dates, did_z2_temp, label="NO2 w/Temp",color="green")
+#axes[1].plot(dates, did_z2, label="NO2", color="blue", marker = 'o', linestyle = 'None')
+axes[1].plot(dates, did_z2_temp, label="NO2 w/Temp",color="green", marker = 'o', linestyle = 'None')
 axes[1].set_title("DiD – NO2")
 axes[1].set_ylabel("Difference in Difference")
 axes[1].axvline(x = pd.Timestamp('2025-10-01'), color = 'red', linestyle = '--', linewidth = 2, alpha = 0.8)
 axes[1].grid(True)
 
 # Plot prissone 3
-axes[2].plot(dates, did_z5, label="NO5", color="blue")
-axes[2].plot(dates, did_z5_temp, label="NO5 w/Temp", color="green")
+#axes[2].plot(dates, did_z5, label="NO5", color="blue", marker = 'o', linestyle = 'None')
+axes[2].plot(dates, did_z5_temp, label="NO5 w/Temp", color="green", marker = 'o', linestyle = 'None')
 axes[2].set_title("DiD – NO5")
 axes[2].set_ylabel("Difference in Difference")
 axes[2].axvline(x = pd.Timestamp('2025-10-01'), color = 'red', linestyle = '--', linewidth = 2, alpha = 0.8)
@@ -106,13 +106,13 @@ axes[2].grid(True)
 from matplotlib.lines import Line2D
 
 temp_legend_elements = [
-    Line2D([0], [0], marker = 's',
+    Line2D([0], [0], marker = 'o',
            color='blue',
            linestyle='None',
            markersize=10,
            label="Without temperature correction"),
 
-    Line2D([0], [0], marker = 's',
+    Line2D([0], [0], marker = 'o',
            color='green',
            linestyle='None',
            markersize=10,
