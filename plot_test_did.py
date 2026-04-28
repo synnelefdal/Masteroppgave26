@@ -3,67 +3,72 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # --------------------------------------------------
-# 1. Lag månedlig tidsakse: jan 2024 – sep 2025
+# 1. Månedlig tidsakse: jan 2024 – sep 2025 (21 mnd)
 # --------------------------------------------------
 dates = pd.date_range(
     start="2024-01-01",
     end="2025-09-01",
-    freq="MS"   # Monthly Start
+    freq="MS"
 )
 
 # --------------------------------------------------
-# 2. Fyll inn månedlige DiD-verdier
-#    ÉN verdi per måned (totalt 21)
+# 2. Fyll inn DINE DiD-verdier her
+#    (21 tall i hver liste – én per måned)
 # --------------------------------------------------
-did_zone_1 = [
-    0.12, 0.15, 0.10, 0.08, 0.11, 0.14,
-    0.16, 0.18, 0.17, 0.19, 0.20, 0.22,  # 2024
-    0.21, 0.23, 0.25, 0.24, 0.26, 0.28,
-    0.30, 0.29, 0.31                    # 2025 jan–sep
+
+# ===== PRISSONE 1 =====
+did_z1 = [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+    # jan24, feb24, mar24, ..., sep25
 ]
 
-did_zone_2 = [
-    0.05, 0.07, 0.06, 0.04, 0.05, 0.08,
-    0.09, 0.10, 0.11, 0.12, 0.13, 0.14,
-    0.15, 0.16, 0.18, 0.17, 0.19, 0.20,
-    0.21, 0.22, 0.23
+did_z1_temp = [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+    # jan24, feb24, mar24, ..., sep25
 ]
 
-did_zone_3 = [
-    -0.02, -0.01, 0.00, 0.01, 0.03, 0.02,
-    0.04, 0.05, 0.06, 0.07, 0.06, 0.08,
-    0.09, 0.10, 0.11, 0.12, 0.13, 0.14,
-    0.15, 0.16, 0.17
+# ===== PRISSONE 2 =====
+did_z2 = [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+    # jan24, feb24, mar24, ..., sep25
+]
+
+did_z2_temp = [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+    # jan24, feb24, mar24, ..., sep25
+]
+
+# ===== PRISSONE 3 =====
+did_z3 = [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+    # jan24, feb24, mar24, ..., sep25
+]
+
+did_z3_temp = [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+    # jan24, feb24, mar24, ..., sep25
 ]
 
 # --------------------------------------------------
-# 3. Plot – tre grafer i samme vindu
+# 3. Plot: alle 6 serier i samme figur
 # --------------------------------------------------
-fig, axes = plt.subplots(
-    nrows=3,
-    ncols=1,
-    figsize=(14, 10),
-    sharex=True
-)
+plt.figure(figsize=(14, 7))
 
-axes[0].plot(dates, did_zone_1, marker="o")
-axes[0].set_title("DiD – Prissone 1")
-axes[0].set_ylabel("DiD")
-axes[0].grid(True)
+plt.plot(dates, did_z1, label="Sone 1", linewidth=2)
+plt.plot(dates, did_z1_temp, "--", label="Sone 1 (temp.korr)")
 
-axes[1].plot(dates, did_zone_2, marker="o")
-axes[1].set_title("DiD – Prissone 2")
-axes[1].set_ylabel("DiD")
-axes[1].grid(True)
+plt.plot(dates, did_z2, label="Sone 2", linewidth=2)
+plt.plot(dates, did_z2_temp, "--", label="Sone 2 (temp.korr)")
 
-axes[2].plot(dates, did_zone_3, marker="o")
-axes[2].set_title("DiD – Prissone 3")
-axes[2].set_ylabel("DiD")
-axes[2].set_xlabel("Måned")
-axes[2].grid(True)
+plt.plot(dates, did_z3, label="Sone 3", linewidth=2)
+plt.plot(dates, did_z3_temp, "--", label="Sone 3 (temp.korr)")
 
 # --------------------------------------------------
-# 4. Vis alt i ett vindu
+# 4. Aksen og utseende
+# --------------------------------------------------
+plt.axhline(0, color="black", linewidth=1)
+plt.xlabel("Måned")
+plt.ylabel("DiD-verdi")
+plt.title("Difference-in-Differences – månedlige estimater")
+plt.legend(ncol=2)
+plt.grid(True)
+
+# --------------------------------------------------
+# 5. Vis figuren
 # --------------------------------------------------
 plt.tight_layout()
 plt.show()
