@@ -6,13 +6,14 @@ import patsy
 from linearmodels.panel import PanelOLS
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import xticks
+from matplotlib.lines import Line2D
 
 # =====================================================
 # =============== GLOBALT DATO-VALG ===================
 # =====================================================
 
-START_DATE_BEFORE = '2025-01-08'
-END_DATE_BEFORE   = '2025-01-09'
+START_DATE_BEFORE = '2025-01-05'
+END_DATE_BEFORE   = '2025-01-06'
 
 START_DATE_AFTER  = '2026-01-07'
 END_DATE_AFTER    = '2026-01-08'
@@ -98,7 +99,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
         ordered=True
     )
 
-    df['log_y'] = np.log(df['kWh/Metering_point'])
+    df['log_y'] = df['kWh/Metering_point'] # her må np.log legges tilbake for prosent
 
     results = []
 
@@ -147,19 +148,54 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
         ci_low, ci_high = res.conf_int().loc[key]
         p_val = res.pvalues[key]          # <<< NY
 
-        DiD = (np.exp(beta) - 1) * 100
-        CI_low = (np.exp(ci_low) - 1) * 100
-        CI_high = (np.exp(ci_high) - 1) * 100
+        #DiD = (np.exp(beta) - 1) * 100
+        #CI_low = (np.exp(ci_low) - 1) * 100
+        #CI_high = (np.exp(ci_high) - 1) * 100      # DISSE MÅ TILBAKE FOR PROSENT
 
         results.append({
             'Hour': h,
-            'DiD_temp': DiD,
-            'CI_low_temp': CI_low,
-            'CI_high_temp': CI_high,
-            'p_value': p_val               # <<< NY
+            'DiD_temp': beta,
+            'CI_low_temp': ci_low,
+            'CI_high_temp': ci_high,
+            'p_value': p_val               # <<< NY      DISSE MÅ TILBAKE FOR PROSENT
         })
 
     return pd.DataFrame(results)
+
+
+def print_did_results(results_df, area_name, metering_point_count):
+    """
+    Printer DiD-resultater per time på en ryddig og lesbar måte.
+    Bruker samme tall som punktene og båndene i figuren.
+    """
+
+
+
+    print("")
+    print("=" * 65)
+    print(f" Difference-in-Differences med temperatur – {area_name}")
+    print("=" * 65)
+    print(
+        f"{'Time':>4} | {'DiD':>10} | {'Nedre KI':>10} | {'Øvre KI':>10} | {'Ganga med antall':>10}"
+    )
+    print("-" * 65)
+
+    for _, row in results_df.iterrows():
+        hour = int(row['Hour'])
+
+        if pd.isna(row['DiD_temp']):
+            print(f"{hour:02d}   |     NA     |     NA     |     NA")
+        else:
+            print(
+                f"{hour:02d}   | "
+                f"{row['DiD_temp']:>10.4f} | "
+                f"{row['CI_low_temp']:>10.4f} | "
+                f"{row['CI_high_temp']:>10.4f} | "
+                f"{row['DiD_temp'] * metering_point_count :>10.4f} "
+            )
+
+    print("=" * 65)
+
 
 
 # =====================================================
@@ -170,11 +206,13 @@ def plot_dognprofil(results_NO1, results_NO2, results_NO5):
 
     plt.figure(figsize=(12, 6))
 
+
     for res, color, label_ in zip(
         [results_NO1, results_NO2, results_NO5],
         ['royalblue', 'red', 'green'],
         ['NO1', 'NO2', 'NO5']
     ):
+        first_line = True  # <<< NY
         for h in range(23):   # <<< NY: plott time-for-time
             linestyle = '--' if res.loc[h, 'p_value'] > 0.05 else '-'
             plt.plot(
@@ -182,22 +220,26 @@ def plot_dognprofil(results_NO1, results_NO2, results_NO5):
                 res.loc[h:h+1, 'DiD_temp'],
                 color=color,
                 linestyle=linestyle,
-                linewidth=2
+                linewidth=2,
+                label=f'DiD w/temp – {label_}' if first_line else None
             )
+
+            first_line = False
 
         plt.fill_between(
             res['Hour'],
             res['CI_low_temp'],
             res['CI_high_temp'],
             color=color,
-            alpha=0.1,
-            label=f'DiD w/temp – {label_}'
-        )
+            alpha=0.1#,
+            #label=f'DiD w/temp – {label_}'
+            )
 
     plt.xticks(range(24))
     plt.xlabel("Hour", fontsize=20)
     plt.ylabel("Difference-in-Difference [%]", fontsize=20)
     plt.grid(alpha=0.3)
+    #plt.legend(handles=legend_handles, fontsize=18)
     plt.legend(fontsize=18)
     plt.tight_layout()
     plt.xticks(fontsize=16)
@@ -221,5 +263,11 @@ results_NO2 = Difference_in_Difference_Flex(
 results_NO5 = Difference_in_Difference_Flex(
     data_mNP_NO5, data_uNP_NO5, data_rest_NO5, Temp_Bergen, 'NO5'
 )
+
+
+print_did_results(results_NO1, "NO1", 307214)
+print_did_results(results_NO2, "NO2", 331860)
+print_did_results(results_NO5, "NO5", 73917)
+
 
 plot_dognprofil(results_NO1, results_NO2, results_NO5)

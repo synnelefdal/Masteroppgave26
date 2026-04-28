@@ -251,21 +251,21 @@ def plot_dognprofil(results_NO1, results_NO2, results_NO5):
 # ==================== KJØR ===========================
 # =====================================================
 
-'''results_NO1 = Difference_in_Difference_Flex(
+results_NO1 = Difference_in_Difference_Flex(
     data_mNP_NO1, data_uNP_NO1, data_rest_NO1, Temp_Oslo, 'NO1'
 )
 
 results_NO2 = Difference_in_Difference_Flex(
     data_mNP_NO2, data_uNP_NO2, data_rest_NO2, Temp_Stavanger, 'NO2'
-)'''
+)
 
 results_NO5 = Difference_in_Difference_Flex(
     data_mNP_NO5, data_uNP_NO5, data_rest_NO5, Temp_Bergen, 'NO5'
 )
 
-#print_did_results(results_NO1, "NO1", 307214)
-#print_did_results(results_NO2, "NO2",331860 )
-#print_did_results(results_NO5, "NO5", 73917)
+print_did_results(results_NO1, "NO1", 307214)
+print_did_results(results_NO2, "NO2", 331860)
+print_did_results(results_NO5, "NO5", 73917)
 
 
-#plot_dognprofil(results_NO1, results_NO2, results_NO5)
+plot_dognprofil(results_NO1, results_NO2, results_NO5)
