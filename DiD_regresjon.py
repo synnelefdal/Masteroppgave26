@@ -107,11 +107,11 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area):
     df = pd.concat([df_NP,df_uNP,df_resten],ignore_index=True)
     df = df[df['kWh/Metering_point'] > 0].copy()
 
-    start_date_before = pd.Timestamp('2024-09-01', tz=None)
-    end_date_before = pd.Timestamp('2024-09-30', tz = None)
+    start_date_before = pd.Timestamp('2025-01-01', tz=None)
+    end_date_before = pd.Timestamp('2025-01-31', tz = None)
 
-    start_date_after = pd.Timestamp('2025-09-01', tz = None)
-    end_date_after = pd.Timestamp('2025-09-30', tz = None)
+    start_date_after = pd.Timestamp('2026-01-01', tz = None)
+    end_date_after = pd.Timestamp('2026-01-31', tz = None)
 
     reference = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
     treatment = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)

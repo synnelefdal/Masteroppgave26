@@ -131,8 +131,17 @@ def plot_full_analysis(data_mNP, data_uNP, data_resten, price_area):
         df['start_time_utc'] = pd.to_datetime(df['start_time_utc'], utc=True)
 
         #---- KUTT DATA ETTER SEPTEMBER 2025 ----
-        cutoff = pd.Timestamp("2025-10-01", tz="UTC")
-        df = df[df['start_time_utc'] <= cutoff]
+        #cutoff = pd.Timestamp("2025-10-01", tz="UTC")
+        #df = df[df['start_time_utc'] <= cutoff]
+
+        # ---- KUTT DATA TIL ØNSKET PERIODE ----
+        start_cutoff = pd.Timestamp("2024-10-01", tz="UTC")
+        end_cutoff = pd.Timestamp("2024-11-01", tz="UTC")
+
+        df = df[
+            (df['start_time_utc'] >= start_cutoff) &
+            (df['start_time_utc'] <= end_cutoff)
+            ]
 
         df['kWh/mp'] = df['consumption_kwh'] / df['metering_point_count']
         df['Date'] = df['start_time_utc'].dt.date
