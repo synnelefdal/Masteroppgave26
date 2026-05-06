@@ -135,8 +135,8 @@ def plot_full_analysis(data_mNP, data_uNP, data_resten, price_area):
         #df = df[df['start_time_utc'] <= cutoff]
 
         # ---- KUTT DATA TIL ØNSKET PERIODE ----
-        start_cutoff = pd.Timestamp("2024-10-01", tz="UTC")
-        end_cutoff = pd.Timestamp("2024-11-01", tz="UTC")
+        start_cutoff = pd.Timestamp("2023-09-30", tz="UTC")
+        end_cutoff = pd.Timestamp("2025-10-01", tz="UTC")
 
         df = df[
             (df['start_time_utc'] >= start_cutoff) &
@@ -165,91 +165,12 @@ def plot_full_analysis(data_mNP, data_uNP, data_resten, price_area):
         #"Resten": "#59a14f"
     }
 
-    ''''# -----------------------
-    # 1) Boksplot + Histogram + ECDF + Load Duration Curve
-    # -----------------------
-
-    fig, axs = plt.subplots(2, 2, figsize=(14, 10))
-    fig.suptitle(f"Statistisk profil – {price_area}", fontsize=18)
-
-    # --- A) Boxplot ---
-    axs[0, 0].boxplot([g.dropna() for g in groups.values()],
-                      labels=groups.keys(),
-                      patch_artist=True)
-    axs[0, 0].set_title("Boksplot")
-    axs[0, 0].set_ylabel("kWh per målepunkt")
-    axs[0, 0].grid(alpha=0.3)
-
-    # --- B) Histogram/KDE ---
-    for label, s in groups.items():
-        s.dropna().plot(kind="kde", linewidth=2,
-                        color=colors[label], ax=axs[0, 1])
-    axs[0, 1].set_title("Fordeling (KDE)")
-    axs[0, 1].grid(alpha=0.3)
-
-    # --- C) ECDF ---
-    for label, s in groups.items():
-        x = np.sort(s.dropna())
-        y = np.linspace(0, 1, len(x))
-        axs[1, 0].plot(x, y, label=label, linewidth=2, color=colors[label])
-    axs[1, 0].set_title("ECDF (kumulativ fordeling)")
-    axs[1, 0].set_xlabel("kWh per målepunkt")
-    axs[1, 0].grid(alpha=0.3)
-    axs[1, 0].legend()
-
-    # --- D) Load Duration Curve ---
-    for label, s in groups.items():
-        sorted_vals = np.sort(s.dropna())[::-1]
-        axs[1, 1].plot(sorted_vals, linewidth=2, label=label, color=colors[label])
-    axs[1, 1].set_title("Load Duration Curve")
-    axs[1, 1].set_ylabel("kWh per målepunkt")
-    axs[1, 1].grid(alpha=0.3)
-    axs[1, 1].legend()
-
-    plt.tight_layout(rect=[0, 0, 1, 0.96])
-    plt.show()
-
-    # -----------------------
-    # 2) Daglig, ukedags- og månedlig profil (smooth)
-    # -----------------------
-
-    # Daglig snitt
-    def daily(df):
-        return df.groupby("Date")["kWh/mp"].mean().rolling(3, center=True, min_periods=1).mean()
-
-    # Ukedagssnitt
-    def weekday(df):
-        return df.groupby("Weekday")["kWh/mp"].mean()'''
-
     # Månedssnitt
     def monthly(df):
         m = df.groupby("Month")["kWh/mp"].mean()
         m.index = m.index.to_timestamp()  # pent i plot
         return m.rolling(2, center=True, min_periods=1).mean()
 
-    # --- Daglig ---
-    '''plt.figure(figsize=(12,5))
-    plt.title(f"Daglig gjennomsnitt – {price_area}", fontsize=18)
-    for label, df in zip(groups.keys(), [mNP, uNP, rest]):
-        plt.plot(daily(df).index, daily(df).values, linewidth=2.5, label=label, color=colors[label])
-    plt.grid(alpha=0.3)
-    plt.xticks(rotation=45)
-    plt.ylabel("kWh per målepunkt")
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
-
-    # --- Ukedag ---
-    plt.figure(figsize=(10,4))
-    plt.title(f"Ukedagssnitt – {price_area}", fontsize=18)
-    weekday_names = ["Man", "Tir", "Ons", "Tor", "Fre", "Lør", "Søn"]
-    for label, df in zip(groups.keys(), [mNP, uNP, rest]):
-        plt.plot(weekday_names, weekday(df).values, linewidth=2.5, label=label, color=colors[label])
-    plt.grid(alpha=0.3)
-    plt.ylabel("kWh per målepunkt")
-    plt.legend()
-    plt.tight_layout()
-    plt.show()'''
 
     TRANSLATIONS = {
         "Med NP": "With Norway Price ",
@@ -274,20 +195,90 @@ def plot_full_analysis(data_mNP, data_uNP, data_resten, price_area):
         plt.plot(monthly(df).index, monthly(df).values, linewidth=2.5, label=_(label), color=colors[label])
         plt.legend(fontsize = 20)
     plt.grid(alpha=0.3)
-    plt.ylabel("kWh per metering point", size = 25 )
+    plt.ylabel("Average kWh per household", size = 25 )
     plt.xlabel('Month', size = 25)
     plt.xticks(fontsize = 20)
     plt.yticks(fontsize = 20)
     plt.tight_layout()
     plt.show()
 
+def plot_normalisert_abs(data_mNP, data_uNP):
+    def prep(df):
+        df = df.copy()
+        df["start_time_utc"] = pd.to_datetime(df["start_time_utc"], utc=True)
 
-res_NO1 = plot_full_analysis(
-    data_mNP_NO1, data_uNP_NO1, data_rest_NO1,
-    price_area='NO1',
+        start_cutoff = pd.Timestamp("2023-09-30", tz="UTC")
+        end_cutoff = pd.Timestamp("2025-10-01", tz="UTC")
+
+        df = df[
+            (df["start_time_utc"] >= start_cutoff) &
+            (df["start_time_utc"] <= end_cutoff)
+            ]
+
+        df["kWh/mp"] = df["consumption_kwh"] / df["metering_point_count"]
+        df["Month"] = df["start_time_utc"].dt.to_period("M")
+
+        return df
+
+    mNP = prep(data_mNP)
+    uNP = prep(data_uNP)
+
+    def monthly(df):
+        m = df.groupby("Month")["kWh/mp"].mean()
+        m.index = m.index.to_timestamp()
+        return m.rolling(2, center=True, min_periods=1).mean()
+
+    def normalize(series):
+        return series / series.mean()
+
+    # ------- PLOT ------- #
+
+    colors = {
+        "With Norway Price": "#4e79a7",
+        "Without Norway Price": "#f28e2b"
+    }
+
+    plt.figure(figsize=(12, 5))
+
+    series_mNP = normalize(monthly(mNP))
+    series_uNP = normalize(monthly(uNP))
+
+    plt.plot(
+        series_mNP.index,
+        series_mNP.values,
+        linewidth=2.5,
+        label="With Norway Price",
+        color=colors["With Norway Price"]
     )
-#denne er veldig overkill tror eg
 
+    plt.plot(
+        series_uNP.index,
+        series_uNP.values,
+        linewidth=2.5,
+        label="Without Norway Price",
+        color=colors["Without Norway Price"]
+    )
+
+    # Referanselinje
+    plt.axhline(1.0, color="black", linestyle="--", linewidth=1, alpha=0.6)
+
+    plt.grid(alpha=0.3)
+    plt.ylabel("Normalized kWh per household", fontsize=25)
+    plt.xlabel("Month", fontsize=25)
+
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.legend(fontsize=20)
+
+    plt.tight_layout()
+    plt.show()
+
+
+
+plot_full_analysis(data_mNP_NO1, data_uNP_NO1, data_rest_NO1,'NO1')
 plot_full_analysis(data_mNP_NO2, data_uNP_NO2, data_rest_NO2, 'NO2')
-
 plot_full_analysis(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, 'NO5')
+
+plot_normalisert_abs(data_mNP_NO1, data_uNP_NO1)
+plot_normalisert_abs(data_mNP_NO2, data_uNP_NO2)
+plot_normalisert_abs(data_mNP_NO5, data_uNP_NO5)
