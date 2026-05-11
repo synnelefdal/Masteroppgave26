@@ -143,7 +143,7 @@ def plot_errorbars_by_group(
     y_ref_lines=None,
     annotate=None,
     palette="Set2",
-    point_size=100,
+    point_size=180,
     capsize=0.15
 ):
 
@@ -209,9 +209,9 @@ def plot_errorbars_by_group(
         )
 
     ax.set_xticks(x_idx)
-    ax.set_xticklabels(cats, fontsize=20)
+    ax.set_xticklabels(cats, fontsize=25)
     ax.tick_params(axis="x", pad=25)
-    ax.set_ylabel(y_label, fontsize= 20)
+    ax.set_ylabel(y_label, fontsize= 25)
     from matplotlib.ticker import MultipleLocator
     ax.yaxis.set_major_locator(MultipleLocator(1))
     #ax.set_title(title, fontsize = 20)
@@ -234,7 +234,7 @@ def plot_errorbars_by_group(
             xytext=annotate.get("xytext",(0.2,0.2)),
             textcoords="axes fraction" if annotate.get("axescoords", True) else "data",
             arrowprops=dict(arrowstyle="->", color="0.3"),
-            fontsize=20   #originalt 15
+            fontsize=25   #originalt 15
         )
 
     # ---- Andre y-akse: Temperaturpunkter for ALLE perioder ----
@@ -284,7 +284,7 @@ def plot_errorbars_by_group(
     ax2.yaxis.set_major_locator(MultipleLocator(1))
 
 
-    ax2.set_ylabel("Difference in Temperature [°C]", color="black", fontsize=20)
+    ax2.set_ylabel("Difference in Temperature [°C]", color="black", fontsize=25)
     ax2.tick_params(axis="y", labelcolor="black")
 
     # ---- EKSTRA X-ETIKETTER FOR MÅNEDER ----
@@ -311,16 +311,16 @@ def plot_errorbars_by_group(
                 short_label,
                 ha="center",
                 va="top",
-                fontsize=18,
+                fontsize=20,
                 color=base_color_map[base]
             )
 
     plt.tight_layout()
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
+    plt.xticks(fontsize=25)
+    plt.yticks(fontsize=25)
 
-    ax.tick_params(axis="y", labelsize=20)
-    ax2.tick_params(axis="y", labelsize=20)
+    ax.tick_params(axis="y", labelsize=25)
+    ax2.tick_params(axis="y", labelsize=25)
 
 
 
@@ -383,7 +383,7 @@ def plot_errorbars_by_group(
     temp_legend = ax2.legend(
         handles=temp_legend_elements,
         loc="upper right",
-        fontsize=17,
+        fontsize=19,
         framealpha=0.3,
         frameon=True
     )
