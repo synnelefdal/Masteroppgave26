@@ -6,6 +6,11 @@ import statsmodels.api as sm
 import patsy
 from linearmodels.panel import PanelOLS
 import matplotlib.pyplot as plt
+import time
+
+start = time.time()
+
+# Koden du vil måle
 
 
 data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep= ';')
@@ -424,10 +429,18 @@ results_NO1, results_NO1_temp = Difference_in_Difference_Flex(data_mNP_NO1, data
 results_NO2, results_NO2_temp = Difference_in_Difference_Flex(data_mNP_NO2, data_uNP_NO2, data_rest_NO2, Temp_Stavanger, 'NO2')
 results_NO5, results_NO5_temp = Difference_in_Difference_Flex(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, Temp_Bergen, 'NO5')
 
+
+
+
+
+
+for i in range(1_000_000):
+    pass
+
+end = time.time()
+
+print(f"Kjøretid: {end - start:.4f} sekunder")
+
 plot_dognprofil(results_NO1, results_NO1_temp,
                 results_NO2, results_NO2_temp,
                 results_NO5, results_NO5_temp)
-
-
-
-
