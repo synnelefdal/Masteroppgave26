@@ -1,16 +1,25 @@
 import pandas as pd
+from pathlib import Path
 
 # --- KONFIGURASJON ---
-input_fil = "ntnu_norgespris_mba sortert.csv"
-output_fil = "NO5_resten.csv"
+#input_fil = "ntnu_norgespris_mba sortert.csv"
+input_fil = '/Users/synnelefdal/Desktop/ntnu_norgespris_mba.csv'
 
-kolonne1 = "group_definition"
+output_fil = "NO5_NP_april.csv"
+
+kolonne1 = "norgespris_group"
 kolonne2 = "price_area"
-verdi1 = "Resten"
+verdi1 = "Norgespris April"
 verdi2 = "NO5"
 
 # Bruk sep=';' for semikolonseparert
-df = pd.read_csv(input_fil, sep=";", dtype=str)  # dtype=str for å unngå NaN-problemer
+
+df = pd.read_csv(input_fil, sep=",", dtype=str)  # dtype=str for å unngå NaN-problemer
+
+#print(df.head())
+#df.columns = df.columns.str.strip()
+
+#print(df.columns.tolist())
 # Fyll NaN med tom streng og strip whitespace
 df = df.fillna("").applymap(lambda s: s.strip() if isinstance(s, str) else s)
 
