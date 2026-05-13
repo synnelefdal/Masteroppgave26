@@ -13,28 +13,47 @@ start = time.time()
 # Koden du vil måle
 
 
-data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep= ';')
-data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep= ';')
-data_rest_NO1 = pd.read_csv('All_Demand_Data/NO1_resten.csv', sep = ';')
+# ------------------ ALLE CSV FILER MED FORBRUKSDATA --------------------------------
 
 data_NO1_uNP = pd.read_csv('NY_All_Demand_Data/NO1_uNP.csv', sep= ';')
 data_NO1_NPoct = pd.read_csv('NY_All_Demand_Data/NO1_NP_oct.csv', sep= ';')
-data_No1_NPnov = pd.read_csv('NY_All_Demand_Data/NO1_NP_nov.csv', sep= ';')
+data_NO1_NPnov = pd.read_csv('NY_All_Demand_Data/NO1_NP_nov.csv', sep= ';')
+data_NO1_NPdec = pd.read_csv('NY_All_Demand_Data/NO1_NP_dec.csv', sep= ';')
+data_NO1_NPjan = pd.read_csv('NY_All_Demand_Data/NO1_NP_jan.csv', sep= ';')
+data_NO1_NPfeb = pd.read_csv('NY_All_Demand_Data/NO1_NP_feb.csv', sep= ';')
+data_NO1_NPmars = pd.read_csv('NY_All_Demand_Data/NO1_NP_mars.csv', sep= ';')
+data_NO1_NPapril = pd.read_csv('NY_All_Demand_Data/NO1_NP_april.csv', sep= ';')
 
-data_mNP_NO2 = pd.read_csv('All_Demand_Data/NO2_mNP.csv', sep= ';')
-data_uNP_NO2 = pd.read_csv('All_Demand_Data/NO2_uNP.csv', sep= ';')
-data_rest_NO2 = pd.read_csv('All_Demand_Data/NO2_resten.csv', sep = ';')
 
-data_mNP_NO5 = pd.read_csv('All_Demand_Data/NO5_mNP.csv', sep= ';')
-data_uNP_NO5 = pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep= ';')
-data_rest_NO5 = pd.read_csv('All_Demand_Data/NO5_resten.csv', sep = ';')
+data_NO2_uNP = pd.read_csv('NY_All_Demand_Data/NO2_uNP.csv', sep= ';')
+data_NO2_NPoct = pd.read_csv('NY_All_Demand_Data/NO2_NP_oct.csv', sep= ';')
+data_NO2_NPnov = pd.read_csv('NY_All_Demand_Data/NO2_NP_nov.csv', sep= ';')
+data_NO2_NPdec = pd.read_csv('NY_All_Demand_Data/NO2_NP_dec.csv', sep= ';')
+data_NO2_NPjan = pd.read_csv('NY_All_Demand_Data/NO2_NP_jan.csv', sep= ';')
+data_NO2_NPfeb = pd.read_csv('NY_All_Demand_Data/NO2_NP_feb.csv', sep= ';')
+data_NO2_NPmars = pd.read_csv('NY_All_Demand_Data/NO2_NP_mars.csv', sep= ';')
+data_NO2_NPapril = pd.read_csv('NY_All_Demand_Data/NO2_NP_april.csv', sep= ';')
+
+
+data_NO5_uNP = pd.read_csv('NY_All_Demand_Data/NO5_uNP.csv', sep= ';')
+data_NO5_NPoct = pd.read_csv('NY_All_Demand_Data/NO5_NP_oct.csv', sep= ';')
+data_NO5_NPnov = pd.read_csv('NY_All_Demand_Data/NO5_NP_nov.csv', sep= ';')
+data_NO5_NPdec = pd.read_csv('NY_All_Demand_Data/NO5_NP_dec.csv', sep= ';')
+data_NO5_NPjan = pd.read_csv('NY_All_Demand_Data/NO5_NP_jan.csv', sep= ';')
+data_NO5_NPfeb = pd.read_csv('NY_All_Demand_Data/NO5_NP_feb.csv', sep= ';')
+data_NO5_NPmars = pd.read_csv('NY_All_Demand_Data/NO5_NP_mars.csv', sep= ';')
+data_NO5_NPapril = pd.read_csv('NY_All_Demand_Data/NO5_NP_april.csv', sep= ';')
+
+
+# -------------Temperatur data for alle prissoner ----------------------------
 
 Temp_Bergen = pd.read_csv('Temperature_Files/Temp_Bergen.csv')
 Temp_Oslo = pd.read_csv('Temperature_Files/Temp_Oslo.csv')
 Temp_Stavanger = pd.read_csv('Temperature_Files/Temp_Stavanger.csv')
 
+# ------------------------ START PÅ KODE, DONT TOUCH --------------------------------
 
-def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_area):
+def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_area,start_date_before, end_date_before, start_date_after, end_date_after):
 
     # ----------- Norgespris gruppen -------------- #
     '''data_mNP['start_time_utc'] = pd.to_datetime(data_mNP['start_time_utc'],
@@ -150,12 +169,20 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
     data_mNP['Date'] = data_mNP['start_time_utc'].dt.date
     data_mNP['Hour'] = data_mNP['start_time_utc'].dt.hour.astype(int)
+    data_mNP['group_definition'] = "Med Norgespris"
     data_demand_NP = data_mNP[data_mNP['price_area'] == price_area].copy()
 
+    #print(data_mNP)
+
+
     data_demand_NP['kWh/Metering_point'] = data_demand_NP['consumption_kwh'] / data_demand_NP['metering_point_count']
-    total_demand_NP = data_demand_NP.groupby(['Date', 'Hour', 'norgespris_group'])[
+
+
+    total_demand_NP = data_demand_NP.groupby(['Date', 'Hour', 'norgespris_group', 'group_definition'])[
         'kWh/Metering_point'].sum().reset_index()
 
+    #print(total_demand_NP)
+    #print('kommer hit ')
     total_demand_NP['Date'] = pd.to_datetime(total_demand_NP['Date'], errors='coerce')
 
     total_demand_NP['time'] = (
@@ -167,6 +194,8 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
     # print(total_demand_NP)
 
+
+
     # -------------- Ikke Norgespris gruppen ---------- #
     data_uNP['start_time_utc'] = pd.to_datetime(data_uNP['start_time_utc'],
                                                 format='%Y-%m-%d %H:%M:%S',
@@ -175,10 +204,11 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
     data_uNP['Date'] = data_uNP['start_time_utc'].dt.date
     data_uNP['Hour'] = data_uNP['start_time_utc'].dt.hour.astype(int)
+    data_uNP['group_definition'] = "Uten Norgespris"
     data_demand_uNP = data_uNP[data_uNP['price_area'] == price_area].copy()
 
     data_demand_uNP['kWh/Metering_point'] = data_demand_uNP['consumption_kwh'] / data_demand_uNP['metering_point_count']
-    total_demand_uNP = data_demand_uNP.groupby(['Date', 'Hour', 'norgespris_group'])[
+    total_demand_uNP = data_demand_uNP.groupby(['Date', 'Hour', 'norgespris_group', 'group_definition'])[
         'kWh/Metering_point'].sum().reset_index()
 
     total_demand_uNP['Date'] = pd.to_datetime(total_demand_uNP['Date'], errors='coerce')
@@ -200,11 +230,12 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
     data_resten['Date'] = data_resten['start_time_utc'].dt.date
     data_resten['Hour'] = data_resten['start_time_utc'].dt.hour.astype(int)
+    data_resten['group_definition'] = "Resten"
     data_demand_resten = data_resten[data_resten['price_area'] == price_area].copy()
 
     data_demand_resten['kWh/Metering_point'] = data_demand_resten['consumption_kwh'] / data_demand_resten[
         'metering_point_count']
-    total_demand_resten = data_demand_resten.groupby(['Date', 'Hour', 'norgespris_group'])[
+    total_demand_resten = data_demand_resten.groupby(['Date', 'Hour', 'norgespris_group', 'group_definition'])[
         'kWh/Metering_point'].sum().reset_index()
 
     total_demand_resten['Date'] = pd.to_datetime(total_demand_resten['Date'], errors='coerce')
@@ -233,17 +264,19 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
     df_uNP = pd.DataFrame(total_demand_uNP)
     df_resten = pd.DataFrame(total_demand_resten)
 
+    print(df_uNP)
+
     df = pd.concat([df_NP, df_uNP, df_resten], ignore_index=True)
     df = pd.merge(df, df_temp, on = ['Date', 'Hour'], how = 'left')
 
     df = df[df['kWh/Metering_point'] > 0].copy()
     #print(df)
 
-    start_date_before = '2024-11-01'
-    end_date_before = '2024-11-30'
+    #start_date_before = '2024-11-01'
+    #end_date_before = '2024-11-30'
 
-    start_date_after = '2025-11-01'
-    end_date_after = '2025-11-30'
+    #start_date_after = '2025-11-01'
+    #end_date_after = '2025-11-30'
 
     before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
     after_ref = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
@@ -259,8 +292,8 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
                                  ordered=True)
 
     # --------- Model ------------ #
-    df['entity'] = pd.Categorical(df['norgespris_group'],
-                                  categories=['Uten Norgespris', 'Med Norgespris', 'Resten'],
+    df['entity'] = pd.Categorical(df['group_definition'],
+                                  categories = ['Uten Norgespris','Med Norgespris', 'Resten'],
                                   # Referanse = Uten Norgespris
                                   ordered=True)
     df['period'] = pd.Categorical(df['Period'],
@@ -288,6 +321,8 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
         'np.log(log_y) ~ 1 + C(entity)*C(period) + TimeEffects',
             data = panel_df,
             drop_absorbed=True
+            #check_rank=False
+
         )
 
         model_temp = PanelOLS.from_formula(
@@ -299,6 +334,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
                 '+ TimeEffects',
             data = panel_df,
             drop_absorbed=True
+            #check_rank=False
         )
 
         res = model.fit(cov_type='clustered', cluster_time=True)
@@ -425,15 +461,37 @@ def plot_dognprofil(results_df_NO1, results_df_NO1_temp,
     plt.show()
 
 
+#------------------------- BESTEMMELSE AV HVILKE MND SOM ER MED OG UTEN NORGESPRIS ------------------------------------
 
 
-#data_rest_NO1 = np.concatenate(data_NO1_NPoct, data november )
-#data_rest_NO2 =
-#data_rest_NO5 =
+#BACKUP N01: data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec,data_NO1_NPjan,data_NO1_NPfeb,data_NO1_NPmars,data_NO1_NPapril
+#BACKUP N02: data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec,data_NO2_NPjan,data_NO2_NPfeb,data_NO2_NPmars,data_NO2_NPapril
+#BACKUP N05: data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec,data_NO5_NPjan,data_NO5_NPfeb,data_NO5_NPmars,data_NO5_NPapril
 
-results_NO1, results_NO1_temp = Difference_in_Difference_Flex(data_NO1_NPoct, data_NO1_uNP, data_No1_NPnov, Temp_Oslo, 'NO1')
-#results_NO2, results_NO2_temp = Difference_in_Difference_Flex(data_mNP_NO2, data_uNP_NO2, data_rest_NO2, Temp_Stavanger, 'NO2')
-#results_NO5, results_NO5_temp = Difference_in_Difference_Flex(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, Temp_Bergen, 'NO5')
+
+# ------------------------- ENDRE PARAMETER MELLOM HER FOR Å ENDRE ANALYSE -----------------------------
+
+start_date_before = '2025-01-01'
+end_date_before = '2025-01-31'
+
+start_date_after = '2026-01-01'
+end_date_after = '2026-01-31'
+
+
+data_NO1_mNP = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec,data_NO1_NPjan], ignore_index=True)
+data_NO2_mNP = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec,data_NO2_NPjan], ignore_index=True)
+data_NO5_mNP = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec,data_NO5_NPjan], ignore_index=True)
+
+data_NO1_rest = pd.concat([data_NO1_NPfeb,data_NO1_NPmars,data_NO1_NPapril], ignore_index=True)
+data_NO2_rest = pd.concat([data_NO2_NPfeb,data_NO2_NPmars,data_NO2_NPapril], ignore_index=True)
+data_NO5_rest = pd.concat([data_NO5_NPfeb,data_NO5_NPmars,data_NO5_NPapril], ignore_index=True)
+
+
+# ----------------------------------------- STOPP AV ENDRING HER, DONT TOUCH -----------------------------------
+
+results_NO1, results_NO1_temp = Difference_in_Difference_Flex(data_NO1_mNP, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
+results_NO2, results_NO2_temp = Difference_in_Difference_Flex(data_NO2_mNP, data_NO2_uNP, data_NO2_rest, Temp_Stavanger, 'NO2', start_date_before, end_date_before, start_date_after, end_date_after)
+results_NO5, results_NO5_temp = Difference_in_Difference_Flex(data_NO5_mNP, data_NO5_uNP, data_NO5_rest, Temp_Bergen, 'NO5', start_date_before, end_date_before, start_date_after, end_date_after)
 
 
 
@@ -447,6 +505,6 @@ end = time.time()
 
 print(f"Kjøretid: {end - start:.4f} sekunder")
 
-#plot_dognprofil(results_NO1, results_NO1_temp,
-             #   results_NO2, results_NO2_temp,
-              #  results_NO5, results_NO5_temp)
+plot_dognprofil(results_NO1, results_NO1_temp,
+               results_NO2, results_NO2_temp,
+                results_NO5, results_NO5_temp)
