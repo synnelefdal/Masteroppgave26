@@ -56,9 +56,9 @@ data_mNP_NO5 = pd.read_csv('All_Demand_Data/NO5_mNP.csv', skiprows= [1, 2, 3], s
 data_uNP_NO5 = pd.read_csv('All_Demand_Data/NO5_uNP.csv', skiprows= [1, 2, 3], sep=';')
 data_rest_NO5 = pd.read_csv('All_Demand_Data/NO5_resten.csv', skiprows= [1, 2, 3], sep =';')'''
 
-Temp_Bergen = pd.read_csv('Temperature_Files/Temp_Bergen.csv')
-Temp_Oslo = pd.read_csv('Temperature_Files/Temp_Oslo.csv')
-Temp_Stavanger = pd.read_csv('Temperature_Files/Temp_Stavanger.csv')
+Temp_Bergen = pd.read_csv('Temperature_Files/bergen_converted.csv')
+Temp_Oslo = pd.read_csv('Temperature_Files/oslo_converted.csv')
+Temp_Stavanger = pd.read_csv('Temperature_Files/stavanger_converted.csv')
 
 # ------------------------------- MODELL 2 M/TEMP ------------------------------- #
 
@@ -249,12 +249,6 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
 
     return panel_df
-
-
-
-'''data_NO1 = Difference_in_Difference_temp(data_mNP_NO1,data_uNP_NO1,data_rest_NO1,'NO1',Temp_Oslo)
-data_NO2 = Difference_in_Difference_temp(data_mNP_NO2,data_uNP_NO2,data_rest_NO2,'NO2',Temp_Stavanger)
-data_NO5 = Difference_in_Difference_temp(data_mNP_NO5,data_uNP_NO5,data_rest_NO5,'NO5',Temp_Bergen)'''
 
 
 

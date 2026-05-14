@@ -47,9 +47,9 @@ data_NO5_NPapril = pd.read_csv('NY_All_Demand_Data/NO5_NP_april.csv', sep= ';')
 
 # -------------Temperatur data for alle prissoner ----------------------------
 
-Temp_Bergen = pd.read_csv('Temperature_Files/Temp_Bergen.csv')
-Temp_Oslo = pd.read_csv('Temperature_Files/Temp_Oslo.csv')
-Temp_Stavanger = pd.read_csv('Temperature_Files/Temp_Stavanger.csv')
+Temp_Bergen = pd.read_csv('Temperature_Files/bergen_converted.csv')
+Temp_Oslo = pd.read_csv('Temperature_Files/oslo_converted.csv')
+Temp_Stavanger = pd.read_csv('Temperature_Files/stavanger_converted.csv')
 
 # ------------------------ START PÅ KODE, DONT TOUCH --------------------------------
 
@@ -180,6 +180,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
     total_demand_NP = data_demand_NP.groupby(['Date', 'Hour', 'norgespris_group', 'group_definition'])[
         'kWh/Metering_point'].sum().reset_index()
+
 
     #print(total_demand_NP)
     #print('kommer hit ')
@@ -471,25 +472,26 @@ def plot_dognprofil(results_df_NO1, results_df_NO1_temp,
 
 # ------------------------- ENDRE PARAMETER MELLOM HER FOR Å ENDRE ANALYSE -----------------------------
 
-start_date_before = '2025-01-01'
-end_date_before = '2025-01-31'
+start_date_before = '2025-03-01'
+end_date_before = '2025-03-31'
 
-start_date_after = '2026-01-01'
-end_date_after = '2026-01-31'
+start_date_after = '2026-03-01'
+end_date_after = '2026-03-31'
 
 
-data_NO1_mNP = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec,data_NO1_NPjan], ignore_index=True)
-data_NO2_mNP = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec,data_NO2_NPjan], ignore_index=True)
-data_NO5_mNP = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec,data_NO5_NPjan], ignore_index=True)
+data_NO1_mNP = pd.concat( [data_NO1_NPfeb,data_NO1_NPmars, data_NO1_NPapril], ignore_index=True)
+data_NO2_mNP = pd.concat([data_NO2_NPfeb,data_NO2_NPmars,data_NO2_NPapril], ignore_index=True)
+data_NO5_mNP = pd.concat( [data_NO5_NPfeb,data_NO5_NPmars,data_NO5_NPapril], ignore_index=True)
 
-data_NO1_rest = pd.concat([data_NO1_NPfeb,data_NO1_NPmars,data_NO1_NPapril], ignore_index=True)
-data_NO2_rest = pd.concat([data_NO2_NPfeb,data_NO2_NPmars,data_NO2_NPapril], ignore_index=True)
-data_NO5_rest = pd.concat([data_NO5_NPfeb,data_NO5_NPmars,data_NO5_NPapril], ignore_index=True)
+data_NO1_rest = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec, data_NO1_NPjan], ignore_index=True)
+data_NO2_rest = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan] , ignore_index=True)
+data_NO5_rest = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan], ignore_index=True)
 
 
 # ----------------------------------------- STOPP AV ENDRING HER, DONT TOUCH -----------------------------------
 
 results_NO1, results_NO1_temp = Difference_in_Difference_Flex(data_NO1_mNP, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
+#results_NO1_1, results_NO1_temp_1 = Difference_in_Difference_Flex(data_NO1_NPapril, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
 results_NO2, results_NO2_temp = Difference_in_Difference_Flex(data_NO2_mNP, data_NO2_uNP, data_NO2_rest, Temp_Stavanger, 'NO2', start_date_before, end_date_before, start_date_after, end_date_after)
 results_NO5, results_NO5_temp = Difference_in_Difference_Flex(data_NO5_mNP, data_NO5_uNP, data_NO5_rest, Temp_Bergen, 'NO5', start_date_before, end_date_before, start_date_after, end_date_after)
 
