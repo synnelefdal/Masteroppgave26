@@ -1,4 +1,5 @@
 from cProfile import label
+
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -6,15 +7,16 @@ import patsy
 from linearmodels.panel import PanelOLS
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import xticks
-from matplotlib.lines import Line2D
 
 # =====================================================
 # =============== GLOBALT DATO-VALG ===================
 # =====================================================
 
-START_DATE_BEFORE = '2025-01-05'
-END_DATE_BEFORE   = '2025-01-06'
+# --- REFERANSEPERIODE ---
+START_DATE_BEFORE = '2025-01-05' #08
+END_DATE_BEFORE   = '2025-01-06' #09
 
+# --- BEHANDLINGSPERIODE ---
 START_DATE_AFTER  = '2026-01-07'
 END_DATE_AFTER    = '2026-01-08'
 
@@ -23,21 +25,21 @@ END_DATE_AFTER    = '2026-01-08'
 # ==================== DATA ===========================
 # =====================================================
 
-data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep=';')
-data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep=';')
-data_rest_NO1 = pd.read_csv('All_Demand_Data/NO1_resten.csv', sep=';')
+data_mNP_NO1 = pd.read_csv('../All_Demand_Data/NO1_mNP.csv', sep=';')
+data_uNP_NO1 = pd.read_csv('../All_Demand_Data/NO1_uNP.csv', sep=';')
+data_rest_NO1 = pd.read_csv('../All_Demand_Data/NO1_resten.csv', sep=';')
 
-data_mNP_NO2 = pd.read_csv('All_Demand_Data/NO2_mNP.csv', sep=';')
-data_uNP_NO2 = pd.read_csv('All_Demand_Data/NO2_uNP.csv', sep=';')
-data_rest_NO2 = pd.read_csv('All_Demand_Data/NO2_resten.csv', sep=';')
+data_mNP_NO2 = pd.read_csv('../All_Demand_Data/NO2_mNP.csv', sep=';')
+data_uNP_NO2 = pd.read_csv('../All_Demand_Data/NO2_uNP.csv', sep=';')
+data_rest_NO2 = pd.read_csv('../All_Demand_Data/NO2_resten.csv', sep=';')
 
-data_mNP_NO5 = pd.read_csv('All_Demand_Data/NO5_mNP.csv', sep=';')
-data_uNP_NO5 = pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep=';')
-data_rest_NO5 = pd.read_csv('All_Demand_Data/NO5_resten.csv', sep=';')
+data_mNP_NO5 = pd.read_csv('../All_Demand_Data/NO5_mNP.csv', sep=';')
+data_uNP_NO5 = pd.read_csv('../All_Demand_Data/NO5_uNP.csv', sep=';')
+data_rest_NO5 = pd.read_csv('../All_Demand_Data/NO5_resten.csv', sep=';')
 
-Temp_Bergen = pd.read_csv('Temperature_Files/Temp_Bergen.csv')
-Temp_Oslo = pd.read_csv('Temperature_Files/Temp_Oslo.csv')
-Temp_Stavanger = pd.read_csv('Temperature_Files/Temp_Stavanger.csv')
+Temp_Bergen = pd.read_csv('../Temperature_Files/Temp_Bergen.csv')
+Temp_Oslo = pd.read_csv('../Temperature_Files/Temp_Oslo.csv')
+Temp_Stavanger = pd.read_csv('../Temperature_Files/Temp_Stavanger.csv')
 
 
 # =====================================================
@@ -46,8 +48,17 @@ Temp_Stavanger = pd.read_csv('Temperature_Files/Temp_Stavanger.csv')
 
 def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_area):
 
+    # =================================================
+    # ========= DiD MED TEMPERATUR ====================
+    # =================================================
+
+    # ----------- Last og klargjør etterspørsel --------
     for d in [data_mNP, data_uNP, data_resten]:
-        d['start_time_utc'] = pd.to_datetime(d['start_time_utc'], errors='coerce', utc=True)
+        d['start_time_utc'] = pd.to_datetime(
+            d['start_time_utc'],
+            errors='coerce',
+            utc=True
+        )
         d['Date'] = d['start_time_utc'].dt.date
         d['Hour'] = d['start_time_utc'].dt.hour.astype(int)
 
@@ -72,12 +83,14 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
     df = df[df['kWh/Metering_point'] > 0].copy()
 
+    # ----------- Temperatur --------------------------
     Temp['Date'] = pd.to_datetime(Temp['Date'])
     Temp['Hour'] = Temp['Hour'].astype(int)
     Temp['Temp24'] = Temp['Lufttemperatur'].rolling(24, min_periods=1).mean()
 
     df = pd.merge(df, Temp[['Date', 'Hour', 'Temp24']], on=['Date', 'Hour'], how='left')
 
+    # ----------- Perioder ----------------------------
     before = (df['Date'] >= START_DATE_BEFORE) & (df['Date'] <= END_DATE_BEFORE)
     after  = (df['Date'] >= START_DATE_AFTER)  & (df['Date'] <= END_DATE_AFTER)
 
@@ -99,8 +112,9 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
         ordered=True
     )
 
-    df['log_y'] = df['kWh/Metering_point'] # her må np.log legges tilbake for prosent
+    df['log_y'] = np.log(df['kWh/Metering_point'])   #------- HER PÅ NP.LOG LEGGES TIL FOR PROSENT -------
 
+    # ----------- Estimer per time --------------------
     results = []
 
     for h in range(24):
@@ -111,8 +125,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
                 'Hour': h,
                 'DiD_temp': np.nan,
                 'CI_low_temp': np.nan,
-                'CI_high_temp': np.nan,
-                'p_value': np.nan          # <<< NY
+                'CI_high_temp': np.nan
             })
             continue
 
@@ -131,6 +144,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
         res = model.fit(cov_type='clustered', cluster_time=True)
 
+        print(res)
 
         key = "C(entity)[T.Med Norgespris]:C(period)[T.Treatment]"
 
@@ -139,29 +153,31 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
                 'Hour': h,
                 'DiD_temp': np.nan,
                 'CI_low_temp': np.nan,
-                'CI_high_temp': np.nan,
-                'p_value': np.nan          # <<< NY
+                'CI_high_temp': np.nan
             })
             continue
 
         beta = res.params[key]
         ci_low, ci_high = res.conf_int().loc[key]
-        p_val = res.pvalues[key]          # <<< NY
+        DiD = (np.exp(beta)-1)*100
+        CI_low = (np.exp(ci_low)-1)*100
+        CI_high = (np.exp(ci_high)-1)*100      #--------- DISSE MÅ TILBAKE NÅR PROSENT SKA TEBAKE ----------
 
-        #DiD = (np.exp(beta) - 1) * 100
-        #CI_low = (np.exp(ci_low) - 1) * 100
-        #CI_high = (np.exp(ci_high) - 1) * 100      # DISSE MÅ TILBAKE FOR PROSENT
+
 
         results.append({
             'Hour': h,
-            'DiD_temp': beta,
-            'CI_low_temp': ci_low,
-            'CI_high_temp': ci_high,
-            'p_value': p_val               # <<< NY      DISSE MÅ TILBAKE FOR PROSENT
+            'DiD_temp': DiD,
+            'CI_low_temp': CI_low,
+            'CI_high_temp': CI_high
         })
 
     return pd.DataFrame(results)
 
+
+# =====================================================
+# ==================== PLOT ===========================
+# =====================================================
 
 def print_did_results(results_df, area_name, metering_point_count):
     """
@@ -198,13 +214,12 @@ def print_did_results(results_df, area_name, metering_point_count):
 
 
 
-# =====================================================
-# ==================== PLOT ===========================
-# =====================================================
+
 
 def plot_dognprofil(results_NO1, results_NO2, results_NO5):
 
     plt.figure(figsize=(12, 6))
+
 
 
     for res, color, label_ in zip(
@@ -212,37 +227,22 @@ def plot_dognprofil(results_NO1, results_NO2, results_NO5):
         ['royalblue', 'red', 'green'],
         ['NO1', 'NO2', 'NO5']
     ):
-        first_line = True  # <<< NY
-        for h in range(23):   # <<< NY: plott time-for-time
-            linestyle = '--' if res.loc[h, 'p_value'] > 0.05 else '-'
-            plt.plot(
-                res.loc[h:h+1, 'Hour'],
-                res.loc[h:h+1, 'DiD_temp'],
-                color=color,
-                linestyle=linestyle,
-                linewidth=2,
-                label=f'DiD w/temp – {label_}' if first_line else None
-            )
-
-            first_line = False
-
+        plt.plot(res['Hour'], res['DiD_temp'], label=f'DiD w/temp – {label_}', color=color, linewidth=2)
         plt.fill_between(
             res['Hour'],
             res['CI_low_temp'],
             res['CI_high_temp'],
             color=color,
-            alpha=0.1#,
-            #label=f'DiD w/temp – {label_}'
-            )
+            alpha=0.1
+        )
 
     plt.xticks(range(24))
     plt.xlabel("Hour", fontsize=20)
     plt.ylabel("Difference-in-Difference [%]", fontsize=20)
     plt.grid(alpha=0.3)
-    #plt.legend(handles=legend_handles, fontsize=18)
-    plt.legend(fontsize=18)
+    plt.legend(fontsize=20)
     plt.tight_layout()
-    plt.xticks(fontsize=16)
+    plt.xticks(fontsize = 16)
     plt.yticks(fontsize=16)
     plt.show()
 
@@ -259,11 +259,9 @@ results_NO2 = Difference_in_Difference_Flex(
     data_mNP_NO2, data_uNP_NO2, data_rest_NO2, Temp_Stavanger, 'NO2'
 )
 
-
 results_NO5 = Difference_in_Difference_Flex(
     data_mNP_NO5, data_uNP_NO5, data_rest_NO5, Temp_Bergen, 'NO5'
 )
-
 
 print_did_results(results_NO1, "NO1", 307214)
 print_did_results(results_NO2, "NO2", 331860)
