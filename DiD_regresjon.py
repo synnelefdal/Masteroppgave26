@@ -193,20 +193,27 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_
 
 # ------------------------- ENDRE PARAMETER MELLOM HER FOR Å ENDRE ANALYSE -----------------------------
 
-start_date_before = '2025-01-01'
-end_date_before = '2025-01-31'
 
-start_date_after = '2026-01-01'
-end_date_after = '2026-01-31'
+#BACKUP N01: data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec,data_NO1_NPjan,data_NO1_NPfeb,data_NO1_NPmars,data_NO1_NPapril
+#BACKUP N02: data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec,data_NO2_NPjan,data_NO2_NPfeb,data_NO2_NPmars,data_NO2_NPapril
+#BACKUP N05: data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec,data_NO5_NPjan,data_NO5_NPfeb,data_NO5_NPmars,data_NO5_NPapril
 
 
-data_NO1_mNP = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec,data_NO1_NPjan], ignore_index=True)
-data_NO2_mNP = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec,data_NO2_NPjan], ignore_index=True)
-data_NO5_mNP = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec,data_NO5_NPjan], ignore_index=True)
+start_date_before = '2024-10-01'
+end_date_before = '2024-10-31'
 
-data_NO1_rest = pd.concat([data_NO1_NPfeb,data_NO1_NPmars,data_NO1_NPapril], ignore_index=True)
-data_NO2_rest = pd.concat([data_NO2_NPfeb,data_NO2_NPmars,data_NO2_NPapril], ignore_index=True)
-data_NO5_rest = pd.concat([data_NO5_NPfeb,data_NO5_NPmars,data_NO5_NPapril], ignore_index=True)
+
+start_date_after = '2025-10-01'
+end_date_after = '2025-10-31'
+
+
+data_NO1_mNP = pd.concat([data_NO1_NPoct], ignore_index=True)
+data_NO2_mNP = pd.concat([data_NO2_NPoct], ignore_index=True)
+data_NO5_mNP = pd.concat([data_NO5_NPoct], ignore_index=True)
+
+data_NO1_rest = pd.concat([data_NO1_NPnov, data_NO1_NPdec, data_NO1_NPjan, data_NO1_NPfeb, data_NO1_NPmars, data_NO1_NPapril], ignore_index=True)
+data_NO2_rest = pd.concat([data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan, data_NO2_NPfeb, data_NO2_NPmars, data_NO2_NPapril], ignore_index=True)
+data_NO5_rest = pd.concat([data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan, data_NO5_NPfeb, data_NO5_NPmars, data_NO5_NPapril], ignore_index=True)
 
 
 # ----------------------------------------- STOPP AV ENDRING HER, DONT TOUCH -----------------------------------
