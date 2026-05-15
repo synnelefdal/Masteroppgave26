@@ -1,10 +1,5 @@
-import numpy as np
 import pandas as pd
-import math
-import matplotlib.pyplot as plt
-import csv
-import row
-from pandapower.pf.no_numba import marker
+
 
 # --------- DiD ---------- #
 regions = ["NO1", "NO2", "NO5"]
@@ -22,11 +17,11 @@ vindu = [
 
 values = [
     [2.47, 3.76, 2.32],   # November
-    [2.89, 3.59, 2.32],  # November med temp
+    [2.89, 3.59, 2.32],   # November med temp
     [3.20, 4.79, 2.76],   # Desember
-    [3.59, 4.59, 2.76],  # Desember med temp
+    [3.59, 4.59, 2.76],   # Desember med temp
     [4.63, 4.97, 3.40],   # January
-    [3.97, 4.54, 2.72],  # January med temp
+    [3.97, 4.54, 2.72],   # January med temp
     [3.45, 4.51, 2.83],   # 3 vinter måneder
     [3.42, 4.18, 2.61]    # 3 vinter måneder med temp
 ]
@@ -64,8 +59,8 @@ andre_yakse = [-3,-2,-1,0,1,2,3]
 temp_forskjeller = [
     [ 1.3,  0.6,  0.3],   # periode 1
     [ 1.3,  0.8,  0.6],   # periode 2
-    [-3.2, -3.1, -3.4],  # periode 3
-    [-0.6, -1.7, -2.5]   # periode 4
+    [-3.2, -3.1, -3.4],   # periode 3
+    [-0.6, -1.7, -2.5]    # periode 4
 ]
 
 
@@ -82,52 +77,6 @@ for i, win in enumerate(vindu):
         })
 
 DiD = pd.DataFrame(rows)
-
-# --------- DiD m/Temp ---------- #
-
-#regions_temp = ["NO1", "NO2", "NO5"]
-
-'''vindu_temp = [
-    "November w/Temp",
-    "Desember w/Temp",
-    "January w/Temp",
-    "3 Winter Months (Nov,Dec,Jan) w/Temp"
-]'''
-
-'''values_temp = [
-    [2.89, 3.59, 2.32],   # November
-    [3.59, 4.59, 2.76],   # Desember
-    [3.97, 4.54, 2.72],   # January
-    [3.42, 4.18, 2.61]    # 3 vinter måneder
-]'''
-
-'''ci_high_temp = [
-    [3.29, 3.98, 2.60],  # November
-    [3.91, 4.91, 2.99],  # Desember
-    [4.29, 4.84, 2.97],  # January
-    [3.62, 4.39, 2.76]   # 3 vinter måneder
-]'''
-
-'''ci_low_temp = [
-    [2.48, 3.20, 2.05],  # November
-    [3.28, 4.28, 2.53],  # Desember
-    [3.66, 4.23, 2.48],  # January
-    [3.21, 3.98, 2.46]   # 3 vinter måneder
-]'''
-
-'''rows_temp = []
-
-for i, win in enumerate(vindu_temp):
-    for r in range(3):
-        rows_temp.append({
-            "region": regions_temp[r],
-            "vindu": win,
-            "value": values_temp[i][r],
-            "ci_high": ci_high_temp[i][r],
-            "ci_low": ci_low_temp[i][r]
-        })
-
-DiD_temp = pd.DataFrame(rows_temp)'''
 
 
 
@@ -163,7 +112,7 @@ def plot_errorbars_by_group(
 
     pal = sns.color_palette(palette, n_colors=n_s)
 
-    # Figur
+    # ---- Figur ---- #
     fig, ax = plt.subplots(figsize=(9, 5))
 
     ax.set_ylim(-3.5,7)
@@ -177,14 +126,12 @@ def plot_errorbars_by_group(
         sub = df[df[series] == s].set_index(x).reindex(cats)
         xi = x_idx + offsets[i]
 
-        # Errorbars
         yval = sub[y].values
         lo   = sub[ylow].values
         hi   = sub[yhigh].values
         err_low  = yval - lo
         err_high = hi - yval
 
-        # Ingen negative feil
         err_low = np.maximum(err_low, 0)
         err_high = np.maximum(err_high, 0)
         yerr = np.vstack([err_low, err_high])
@@ -237,28 +184,25 @@ def plot_errorbars_by_group(
             fontsize=25   #originalt 15
         )
 
-    # ---- Andre y-akse: Temperaturpunkter for ALLE perioder ----
+    # ---- Andre y-akse: Temperaturpunkter for ALLE perioder ---- #
     ax2 = ax.twinx()
 
     temp_array = np.array(temp_forskjeller)  # shape (n_perioder, 3)
 
-    # Vi bruker samme ser og offsets som DiD-plottet
+    # --- Vi bruker samme ser og offsets som DiD-plottet --- #
     temp_i = 0
     for i, s in enumerate(ser):
 
         if " w/Temp" in str(s):
             continue
 
-        # hopp over perioder som ikke har temperaturdata
-        if temp_i >= temp_array.shape[0]:
+        if temp_i >= temp_array.shape[0]:  # Hopp over perioder som ikke har temperaturdata
             continue
 
-        # x-posisjonene er IDENTISKE til DiD for denne perioden
 
-        xi = x_idx + offsets[i] #+ i*1.25*step
+        xi = x_idx + offsets[i] #+ i*1.25*step     # X-posisjonene er IDENTISKE til DiD for denne perioden
 
-        # temperaturverdier for NO1, NO2, NO5
-        temp_points = temp_array[temp_i]
+        temp_points = temp_array[temp_i]    # Temperaturverdier for NO1, NO2, NO5
 
         base = str(s)
         temp_color = base_color_map[base]
@@ -287,7 +231,7 @@ def plot_errorbars_by_group(
     ax2.set_ylabel("Difference in Temperature [°C]", color="black", fontsize=25)
     ax2.tick_params(axis="y", labelcolor="black")
 
-    # ---- EKSTRA X-ETIKETTER FOR MÅNEDER ----
+    # ---- EKSTRA X-ETIKETTER FOR MÅNEDER ---- #
 
     month_labels = [
         ("November", "Nov"),
@@ -298,10 +242,10 @@ def plot_errorbars_by_group(
 
     y_text = ax.get_ylim()[0] - 0.10
 
-    for r in range(len(x_idx)):  # loop over regioner: NO1, NO2, NO5
+    for r in range(len(x_idx)):                # Loop over regioner: NO1, NO2, NO5
         for base, short_label in month_labels:
-            # finn riktig offset for måneden
-            s_index = ser.get_loc(base)
+
+            s_index = ser.get_loc(base)        # Finn riktig offset for måneden
 
             x_pos = x_idx[r] + offsets[s_index]
 
@@ -323,38 +267,9 @@ def plot_errorbars_by_group(
     ax2.tick_params(axis="y", labelsize=25)
 
 
-
-    # ---- SYMBOL-LEGEND (MODEL TYPE) ----
-    '''symbol_legend_elements = [
-        Line2D(
-            [0], [0],
-            marker='o',
-            color='black',
-            linestyle='None',
-            markersize=9,
-            label='Without Temperature Correction'
-        ),
-        Line2D(
-            [0], [0],
-            marker='^',
-            color='black',
-            linestyle='None',
-            markersize=9,
-            label='With Temperature Correction'
-        )
-    ]
-
-    symbol_legend = ax.legend(
-        handles=symbol_legend_elements,
-        loc="lower left",
-        fontsize=20,
-        frameon=True,
-        framealpha=0.5
-    )'''
-
     #ax.add_artist(symbol_legend)
 
-    # ---- EGEN LEGEND FOR TEMPERATUR (FIRKANTER) ----
+    # ---- TITTELBOKS ---- #
 
     from matplotlib.lines import Line2D
     temp_legend_elements = [

@@ -1,9 +1,8 @@
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 
 
-
+# -------------------------------- ALLE CSV FILER MED FORBRUKSDATA -------------------------------- #
 
 data_NO1_uNP = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO1_uNP.csv', sep= ';')
 data_NO1_NPoct = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO1_NP_oct.csv', sep= ';')
@@ -37,31 +36,27 @@ data_NO5_NPapril = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY
 
 def plot_daglig_gjennomsnitt(data_mNP, data_uNP, data_resten, price_area):
 
-    # --- Helper: Forbered data ---
+    # --- Forbered data --- #
     def prep(df):
         df = df.copy()
         df['start_time_utc'] = pd.to_datetime(df['start_time_utc'], utc=True)
 
-        # kWh per målepunkt
-        df['kWh/metering_point'] = df['consumption_kwh'] / df['metering_point_count']
+        df['kWh/metering_point'] = df['consumption_kwh'] / df['metering_point_count']            # kWh per målepunkt
 
-        # Lag dato-kolonne
-        df['Date'] = df['start_time_utc'].dt.date
+        df['Date'] = df['start_time_utc'].dt.date                                                # Lag dato-kolonne
 
-        # Daglig gjennomsnitt
-        dag = df.groupby('Date')['kWh/metering_point'].mean()
+        dag = df.groupby('Date')['kWh/metering_point'].mean()                                    # Daglig gjennomsnitt
 
-        # Liten smoothing: 3-dagers glidende gjennomsnitt
         dag_smooth = dag.rolling(window=3, center=True, min_periods=1).mean()
 
         return dag_smooth
 
-    # --- Beregn profiler ---
+    # --- Beregn profiler --- #
     dag_mNP = prep(data_mNP)
     dag_uNP = prep(data_uNP)
     dag_rest = prep(data_resten)
 
-    # --- Plot ---
+    # --- Plot --- #
     plt.figure(figsize=(12,6))
 
     plt.plot(dag_mNP.index, dag_mNP.values, label='With Norgespris', linewidth=2.5)
@@ -90,33 +85,27 @@ def plot_daglig_gjennomsnitt_prissone(
 ):
 
     def prep_total(df_mNP, df_uNP, df_rest):
-        # Kombiner alle tre datasettene
-        df = pd.concat([df_mNP, df_uNP, df_rest]).copy()
+        df = pd.concat([df_mNP, df_uNP, df_rest]).copy()                               # Kombiner alle tre datasettene
 
-        # Konverter tid
-        df['start_time_utc'] = pd.to_datetime(df['start_time_utc'], utc=True)
+        df['start_time_utc'] = pd.to_datetime(df['start_time_utc'], utc=True)          # Konverter tid
 
-        # kWh per målepunkt
-        df['kWh/metering_point'] = df['consumption_kwh'] / df['metering_point_count']
+        df['kWh/metering_point'] = df['consumption_kwh'] / df['metering_point_count']  # kWh per målepunkt
 
-        # Lag datokolonne
-        df['Date'] = df['start_time_utc'].dt.date
+        df['Date'] = df['start_time_utc'].dt.date                                      # Lag datokolonne
 
-        # Daglig gjennomsnitt for hele prissonen
-        dag = df.groupby('Date')['kWh/metering_point'].mean()
+        dag = df.groupby('Date')['kWh/metering_point'].mean()                          # Daglig gjennomsnitt for hele prissonen
 
-        # Smoothing (samme som forrige funksjon)
         dag_smooth = dag.rolling(window=3, center=True, min_periods=1).mean()
 
         return dag_smooth
 
 
-    # ---- Beregn for NO1, NO2, NO5 ----
+    # ---- Beregn for NO1, NO2, NO5 ---- #
     dag_NO1 = prep_total(data_NO1_mNP, data_NO1_uNP, data_NO1_rest)
     dag_NO2 = prep_total(data_NO2_mNP, data_NO2_uNP, data_NO2_rest)
     dag_NO5 = prep_total(data_NO5_mNP, data_NO5_uNP, data_NO5_rest)
 
-    # ---- Plot ----
+    # ---- Plot ---- #
     plt.figure(figsize=(12,6))
 
     plt.plot(dag_NO1.index, dag_NO1.values, linewidth=1.5, label='NO1')
@@ -147,11 +136,11 @@ def plot_full_analysis(data_mNP, data_uNP, data_resten, price_area):
         df = df.copy()
         df['start_time_utc'] = pd.to_datetime(df['start_time_utc'], utc=True)
 
-        #---- KUTT DATA ETTER SEPTEMBER 2025 ----
+        #---- KUTT DATA ETTER SEPTEMBER 2025 ---- #
         #cutoff = pd.Timestamp("2025-10-01", tz="UTC")
         #df = df[df['start_time_utc'] <= cutoff]
 
-        # ---- KUTT DATA TIL ØNSKET PERIODE ----
+        # ---- KUTT DATA TIL ØNSKET PERIODE ---- #
         start_cutoff = pd.Timestamp("2023-09-30", tz="UTC")
         end_cutoff = pd.Timestamp("2025-10-01", tz="UTC")
 
@@ -182,7 +171,6 @@ def plot_full_analysis(data_mNP, data_uNP, data_resten, price_area):
         #"Resten": "#59a14f"
     }
 
-    # Månedssnitt
     def monthly(df):
         m = df.groupby("Month")["kWh/mp"].mean()
         m.index = m.index.to_timestamp()  # pent i plot
@@ -205,7 +193,7 @@ def plot_full_analysis(data_mNP, data_uNP, data_resten, price_area):
     def _(text):
         return TRANSLATIONS.get(text, text)
 
-    # --- Månedlig ---
+    # --- Månedlig --- #
     plt.figure(figsize=(12,5))
     #plt.title(f"Monthly Average – {price_area}", fontsize=18)
     for label, df in zip(groups.keys(), [mNP, uNP]):
@@ -276,7 +264,7 @@ def plot_normalisert_abs(data_mNP, data_uNP):
         color=colors["Without Norway Price"]
     )
 
-    # Referanselinje
+    # ------- Referanselinje ------- #
     plt.axhline(1.0, color="black", linestyle="--", linewidth=1, alpha=0.6)
 
     plt.grid(alpha=0.3)
