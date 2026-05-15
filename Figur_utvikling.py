@@ -42,7 +42,7 @@ data = [Group_October_NO5, Group_November_NO5, Group_December_NO5, Group_January
 
 labels = ['Group October', 'Group November', 'Group December', 'Group January', 'Group February', 'Group March']
 
-# --------- PLOT --------- #
+# --------- PLOTTE FUNKSJON --------- #
 
 def plot(data):
 
@@ -50,7 +50,7 @@ def plot(data):
 
     colors = sns.color_palette("tab10", len(data))
 
-    # Litt horisontal spredning så punktene ikke ligger oppå hverandre
+    # Litt horisontal spredning så punktene ikkJe ligger oppå hverandre
     offsets = np.linspace(-0.2, 0.2, len(data))
 
     for i, liste in enumerate(data):
@@ -112,5 +112,5 @@ def plot(data):
     plt.show()
 
 
-# --------- KJØR --------- #
+# --------- KJØRING --------- #
 plot(data)

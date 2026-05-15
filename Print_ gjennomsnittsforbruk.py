@@ -1,6 +1,5 @@
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+
 
 # ------------------ ALLE CSV FILER MED FORBRUKSDATA --------------------------------
 
@@ -34,6 +33,7 @@ data_NO5_NPmars = pd.read_csv('NY_All_Demand_Data/NO5_NP_mars.csv', sep= ';')
 data_NO5_NPapril = pd.read_csv('NY_All_Demand_Data/NO5_NP_april.csv', sep= ';')
 
 
+# ---------- PRINTER GJENNOMSNITT TIL ALLE GRUPPER MAN VELGER UNDER ------------
 
 def print_gjennomsnitt(data_mNP, data_uNP, price_area):
 
@@ -57,6 +57,7 @@ def print_gjennomsnitt(data_mNP, data_uNP, price_area):
     df_uNP['kWh/metering_point'] = df_uNP['consumption_kwh'] / df_uNP['metering_point_count']
     print('Gjennomsnittsforbruk uten NP for area:', price_area, df_uNP['kWh/metering_point'].mean())
 
+#------------------ VELG GRUPPER HER ---------------------------
 
 data_mNP_NO1 = data_NO1_NPapril
 data_uNP_NO1 = data_NO1_uNP
@@ -66,6 +67,8 @@ data_uNP_NO2 = data_NO2_uNP
 
 data_mNP_NO5 = data_NO5_NPapril
 data_uNP_NO5 = data_NO5_uNP
+
+# ---------------------------DONT TOUCH ----------------------------
 
 print('NO1')
 print_gjennomsnitt(data_mNP_NO1, data_uNP_NO1, 'NO1')

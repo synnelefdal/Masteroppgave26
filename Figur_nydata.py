@@ -22,13 +22,15 @@ vindu = [
     "March w/Temp"
 ]
 
+# ----------------- FYLL INN VERDIER HER, VERDIER, KONFIDENSINTERVALL OG SÅ TEMP DIFF ---------------------
+
 values = [
     [2.65, 3.49, 2.16],   #oct
-    [2.57, 3.52, 2.09],          #oct med temp
+    [2.57, 3.52, 2.09],        #oct med temp
     [2.50, 3.79, 2.50],  #nov
     [2.86, 3.70, 2.50],  #nov m temp osvosv
-    [3.13, 4.57, 2.87],
-    [3.44, 4.57, 2.88],
+    [3.13, 4.57, 2.87],   #des
+    [3.44, 4.57, 2.88],    #des m temp
     [4.51, 4.85, 3.60],
     [3.90, 4.23, 2.99],
     [4.55, 4.82, 3.59],
@@ -76,7 +78,7 @@ temp_forskjeller = [
     [-0.466297, -0.195126, -0.154375]     #mars
 ]
 
-# --------- DATAFRAME ---------- #
+# ----------------------- DONT TOUCH HERFRAAAA,DATAFRAME ---------------------------------
 
 rows = []
 for i, win in enumerate(vindu):
@@ -91,7 +93,7 @@ for i, win in enumerate(vindu):
 
 df = pd.DataFrame(rows)
 
-# ✅ NY STRUKTUR (VIKTIGSTE DEL)
+
 
 df["temp"] = df["vindu"].str.contains("Temp")
 df["month"] = df["vindu"].str.replace(" w/Temp", "")
@@ -149,10 +151,8 @@ def plot(df):
                        edgecolor="white",
                        zorder=3)
 
-    # ---- X-akse (måneder) ----
+    # ---- X-akse (måneder OG NO125) ----
 
-
-    # Lag én label per punkt (NO1 NO2 NO5 repeteres for hver måned)
     xticks = []
     xtick_labels = []
 
@@ -165,16 +165,14 @@ def plot(df):
     ax.set_xticklabels(xtick_labels, fontsize=18)
     ax.set_ylabel("Change in Electricity Consumption [%]", color = 'black', fontsize=20)
 
-    # Farg x-labels etter region
+    # Fargeee
     for tick, label in zip(ax.get_xticklabels(), xtick_labels):
         tick.set_color(color_map[label])
 
     # ---- SUB-LABELS (NO1, NO2, NO5) ----
     y_text = ax.get_ylim()[0] - 1.2
 
-
-
-    # ---- MÅNEDER UNDER ----
+    # ---- MÅNEDER UNDER LENGER NED ----
     y_text = ax.get_ylim()[0] - 0.8
 
     for j, month in enumerate(months):
@@ -259,7 +257,7 @@ def plot(df):
 
 
 
-# --------- KJØR ---------- #
+# --------------- KJØH --------------- #
 
 plot(df)
 

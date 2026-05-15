@@ -1,17 +1,9 @@
 import numpy as np
 import pandas as pd
-import statsmodels.api as sm
-import patsy
-import statsmodels.formula.api as smf
-import matplotlib.pyplot as plt
-from linearmodels.panel.utility import AbsorbingEffectWarning
-from matplotlib.patches import FancyArrowPatch
 from linearmodels.panel import PanelOLS
 
-from sklearn.linear_model import LinearRegression
 
-
-# ------------------ ALLE CSV FILER MED FORBRUKSDATA --------------------------------
+# ------------------ ALLE CSV FILER MED FORBRUKSDATA, DONT TOUCH --------------------------------
 
 data_NO1_uNP = pd.read_csv('NY_All_Demand_Data/NO1_uNP.csv', sep= ';')
 data_NO1_NPoct = pd.read_csv('NY_All_Demand_Data/NO1_NP_oct.csv', sep= ';')
@@ -42,19 +34,6 @@ data_NO5_NPfeb = pd.read_csv('NY_All_Demand_Data/NO5_NP_feb.csv', sep= ';')
 data_NO5_NPmars = pd.read_csv('NY_All_Demand_Data/NO5_NP_mars.csv', sep= ';')
 data_NO5_NPapril = pd.read_csv('NY_All_Demand_Data/NO5_NP_april.csv', sep= ';')
 
-
-
-'''data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', skiprows= [1, 2, 3], sep=';')
-data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', skiprows= [1, 2, 3], sep=';')
-data_rest_NO1 = pd.read_csv('All_Demand_Data/NO1_resten.csv', skiprows= [1, 2, 3], sep =';')
-
-data_mNP_NO2 = pd.read_csv('All_Demand_Data/NO2_mNP.csv', skiprows= [1, 2, 3], sep=';')
-data_uNP_NO2 = pd.read_csv('All_Demand_Data/NO2_uNP.csv', skiprows= [1, 2, 3], sep=';')
-data_rest_NO2 = pd.read_csv('All_Demand_Data/NO2_resten.csv', skiprows= [1, 2, 3], sep =';')
-
-data_mNP_NO5 = pd.read_csv('All_Demand_Data/NO5_mNP.csv', skiprows= [1, 2, 3], sep=';')
-data_uNP_NO5 = pd.read_csv('All_Demand_Data/NO5_uNP.csv', skiprows= [1, 2, 3], sep=';')
-data_rest_NO5 = pd.read_csv('All_Demand_Data/NO5_resten.csv', skiprows= [1, 2, 3], sep =';')'''
 
 Temp_Bergen = pd.read_csv('Temperature_Files/bergen_converted.csv')
 Temp_Oslo = pd.read_csv('Temperature_Files/oslo_converted.csv')
@@ -165,11 +144,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     df = df[df['kWh/Metering_point'] > 0].copy()
     print(df.columns)
 
-    #start_date_before = '2025-01-01'
-    #end_date_before = '2025-01-31'
 
-    #start_date_after = '2026-01-01'
-    #end_date_after = '2026-01-31'
 
     before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
     after_ref = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
@@ -254,12 +229,12 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
 # ------------------------- ENDRE PARAMETER MELLOM HER FOR Å ENDRE ANALYSE -----------------------------
 
-
+#BACKUP FOR Å IKKJE MÅTTE SKRIVE ALLTID
 #BACKUP N01: data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec,data_NO1_NPjan,data_NO1_NPfeb,data_NO1_NPmars,data_NO1_NPapril
 #BACKUP N02: data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec,data_NO2_NPjan,data_NO2_NPfeb,data_NO2_NPmars,data_NO2_NPapril
 #BACKUP N05: data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec,data_NO5_NPjan,data_NO5_NPfeb,data_NO5_NPmars,data_NO5_NPapril
 
-
+#------------- VELG DATOER -----------------------
 
 start_date_before = '2025-03-01'
 end_date_before = '2025-03-31'
@@ -267,6 +242,7 @@ end_date_before = '2025-03-31'
 start_date_after = '2026-03-01'
 end_date_after = '2026-03-31'
 
+# -------------- VELG KA SOM E MED OG UTEN NORGESPRIS -----------------------------------
 
 data_NO1_mNP = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec,data_NO1_NPjan,data_NO1_NPfeb,data_NO1_NPmars], ignore_index=True)
 data_NO2_mNP = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec,data_NO2_NPjan,data_NO2_NPfeb,data_NO2_NPmars], ignore_index=True)
