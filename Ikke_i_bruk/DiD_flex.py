@@ -13,21 +13,21 @@ start = time.time()
 # Koden du vil måle
 
 
-data_mNP_NO1 = pd.read_csv('../All_Demand_Data/NO1_mNP.csv', sep=';')
-data_uNP_NO1 = pd.read_csv('../All_Demand_Data/NO1_uNP.csv', sep=';')
-data_rest_NO1 = pd.read_csv('../All_Demand_Data/NO1_resten.csv', sep =';')
+data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep=';')
+data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep=';')
+data_rest_NO1 = pd.read_csv('All_Demand_Data/NO1_resten.csv', sep =';')
 
 data_NO1_uNP = pd.read_csv('../NY_All_Demand_Data/NO1_uNP.csv', sep=';')
 data_NO1_NPoct = pd.read_csv('../NY_All_Demand_Data/NO1_NP_oct.csv', sep=';')
 data_No1_NPnov = pd.read_csv('../NY_All_Demand_Data/NO1_NP_nov.csv', sep=';')
 
-data_mNP_NO2 = pd.read_csv('../All_Demand_Data/NO2_mNP.csv', sep=';')
-data_uNP_NO2 = pd.read_csv('../All_Demand_Data/NO2_uNP.csv', sep=';')
-data_rest_NO2 = pd.read_csv('../All_Demand_Data/NO2_resten.csv', sep =';')
+data_mNP_NO2 = pd.read_csv('All_Demand_Data/NO2_mNP.csv', sep=';')
+data_uNP_NO2 = pd.read_csv('All_Demand_Data/NO2_uNP.csv', sep=';')
+data_rest_NO2 = pd.read_csv('All_Demand_Data/NO2_resten.csv', sep =';')
 
-data_mNP_NO5 = pd.read_csv('../All_Demand_Data/NO5_mNP.csv', sep=';')
-data_uNP_NO5 = pd.read_csv('../All_Demand_Data/NO5_uNP.csv', sep=';')
-data_rest_NO5 = pd.read_csv('../All_Demand_Data/NO5_resten.csv', sep =';')
+data_mNP_NO5 = pd.read_csv('All_Demand_Data/NO5_mNP.csv', sep=';')
+data_uNP_NO5 = pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep=';')
+data_rest_NO5 = pd.read_csv('All_Demand_Data/NO5_resten.csv', sep =';')
 
 Temp_Bergen = pd.read_csv('../Temperature_Files/Temp_Bergen.csv')
 Temp_Oslo = pd.read_csv('../Temperature_Files/Temp_Oslo.csv')

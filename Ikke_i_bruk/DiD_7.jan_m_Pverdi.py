@@ -23,17 +23,17 @@ END_DATE_AFTER    = '2026-01-08'
 # ==================== DATA ===========================
 # =====================================================
 
-data_mNP_NO1 = pd.read_csv('../All_Demand_Data/NO1_mNP.csv', sep=';')
-data_uNP_NO1 = pd.read_csv('../All_Demand_Data/NO1_uNP.csv', sep=';')
-data_rest_NO1 = pd.read_csv('../All_Demand_Data/NO1_resten.csv', sep=';')
+data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep=';')
+data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep=';')
+data_rest_NO1 = pd.read_csv('All_Demand_Data/NO1_resten.csv', sep=';')
 
-data_mNP_NO2 = pd.read_csv('../All_Demand_Data/NO2_mNP.csv', sep=';')
-data_uNP_NO2 = pd.read_csv('../All_Demand_Data/NO2_uNP.csv', sep=';')
-data_rest_NO2 = pd.read_csv('../All_Demand_Data/NO2_resten.csv', sep=';')
+data_mNP_NO2 = pd.read_csv('All_Demand_Data/NO2_mNP.csv', sep=';')
+data_uNP_NO2 = pd.read_csv('All_Demand_Data/NO2_uNP.csv', sep=';')
+data_rest_NO2 = pd.read_csv('All_Demand_Data/NO2_resten.csv', sep=';')
 
-data_mNP_NO5 = pd.read_csv('../All_Demand_Data/NO5_mNP.csv', sep=';')
-data_uNP_NO5 = pd.read_csv('../All_Demand_Data/NO5_uNP.csv', sep=';')
-data_rest_NO5 = pd.read_csv('../All_Demand_Data/NO5_resten.csv', sep=';')
+data_mNP_NO5 = pd.read_csv('All_Demand_Data/NO5_mNP.csv', sep=';')
+data_uNP_NO5 = pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep=';')
+data_rest_NO5 = pd.read_csv('All_Demand_Data/NO5_resten.csv', sep=';')
 
 Temp_Bergen = pd.read_csv('../Temperature_Files/Temp_Bergen.csv')
 Temp_Oslo = pd.read_csv('../Temperature_Files/Temp_Oslo.csv')

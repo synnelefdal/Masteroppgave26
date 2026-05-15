@@ -2,14 +2,14 @@ import pandas as pd
 import numpy as np
 from statsmodels.graphics.tukeyplot import results
 
-data_mNP_NO1 = pd.read_csv('../All_Demand_Data/NO1_mNP.csv', sep=';')
-data_uNP_NO1 = pd.read_csv('../All_Demand_Data/NO1_uNP.csv', sep=';')
+data_mNP_NO1 = pd.read_csv('All_Demand_Data/NO1_mNP.csv', sep=';')
+data_uNP_NO1 = pd.read_csv('All_Demand_Data/NO1_uNP.csv', sep=';')
 
-data_mNP_NO2 = pd.read_csv('../All_Demand_Data/NO2_mNP.csv', sep=';')
-data_uNP_NO2 = pd.read_csv('../All_Demand_Data/NO2_uNP.csv', sep=';')
+data_mNP_NO2 = pd.read_csv('All_Demand_Data/NO2_mNP.csv', sep=';')
+data_uNP_NO2 = pd.read_csv('All_Demand_Data/NO2_uNP.csv', sep=';')
 
-data_mNP_NO5 = pd.read_csv('../All_Demand_Data/NO5_mNP.csv', sep=';')
-data_uNP_NO5 = pd.read_csv('../All_Demand_Data/NO5_uNP.csv', sep=';')
+data_mNP_NO5 = pd.read_csv('All_Demand_Data/NO5_mNP.csv', sep=';')
+data_uNP_NO5 = pd.read_csv('All_Demand_Data/NO5_uNP.csv', sep=';')
 
 def prep_time(df, time_col='start_time_utc'):
     # Gjør tid kolonnen timezone-aware og lag hour/date
