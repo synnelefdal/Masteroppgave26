@@ -1,18 +1,11 @@
 import numpy as np
 import pandas as pd
-import statsmodels.api as sm
-import patsy
-import statsmodels.formula.api as smf
 import matplotlib.pyplot as plt
-from linearmodels.panel.utility import AbsorbingEffectWarning
-from matplotlib.patches import FancyArrowPatch
 from linearmodels.panel import PanelOLS
 
 from sklearn.linear_model import LinearRegression
 
-#/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data.csv
-
-# ------------------ ALLE CSV FILER MED FORBRUKSDATA --------------------------------
+# ------------------ ALLE CSV FILER MED FORBRUKSDATA gjennom min pc fordi d i aen mappe--------------------------------
 
 data_NO1_uNP = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO1_uNP.csv', sep= ';')
 data_NO1_NPoct = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO1_NP_oct.csv', sep= ';')
@@ -143,7 +136,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     #Temp['Temp24^3'] = Temp['Temp24'] ** 3
 
     df_temp = Temp[['Date', 'Hour', 'Lufttemperatur','Temp24']]
-    #print(df_temp)
+
 
     # ------------ Dataframe ----------- #
     df_NP = pd.DataFrame(total_demand_NP)
@@ -238,53 +231,6 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     print(f'DiD prosent for {price_area}: {DiD:.2f}%')
     print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
 
-    # -------- Figur ---------- #
-    #df_before = df[df['Period'] == 'Reference'].copy()
-    '''df_plot = df[df['Period'].isin(['Reference', 'Rest'])].copy()
-    df_plot = df_plot[df_plot['entity'].isin(['Uten Norgespris', 'Med Norgespris'])]
-
-    remove_oct = (df_plot['Date'] >= pd.to_datetime('2025-10-01')) & \
-                      (df_plot['Date'] <= pd.to_datetime('2025-10-31'))
-
-    df_plot = df_plot[~remove_oct]
-
-    df_plot = df_plot.dropna(subset=['Temp24'])
-    group_means = df_plot.groupby('entity')['kWh/Metering_point'].mean()
-
-    df_plot['rel_consumption'] = df_plot.apply(
-        lambda r: r['kWh/Metering_point'] / group_means.loc[r['entity']],
-        axis=1
-    )
-
-    # Plot
-    plt.figure(figsize=(9, 6))
-
-    colors = {
-        'Uten Norgespris': '#1f77b4',
-        'Med Norgespris': '#d62728'
-    }
-    df_plot['entity'] = df_plot['entity'].cat.remove_unused_categories()
-    df_plot['temp_bin'] = (df_plot['Temp24'] / 0.5).round() * 0.5
-
-    for grp, sub in df_plot.groupby('entity'):
-        trend = sub.groupby('temp_bin')['rel_consumption'].mean().reset_index()
-        trend = trend.sort_values('temp_bin')
-        plt.plot(
-            trend['temp_bin'], trend['rel_consumption'],
-            color=colors.get(grp, 'gray'), linewidth=2,
-            label=f'{grp}'
-        )
-
-    plt.axhline(1.0, linestyle='--', color='gray', alpha=0.7)
-    plt.xlabel('Temperatur [°C]')
-    plt.ylabel('Gjennomsnits forbruk [kWh/målepunkt]')
-    plt.title(f'Temperaturfølsomhet før Norgespris – {price_area}')
-    plt.grid(True, alpha=0.25)
-    plt.legend()
-
-    plt.tight_layout()
-    plt.show()'''
-
     return panel_df
 
 def plot_temp_all_zones(datasets):
@@ -359,20 +305,9 @@ def plot_temp_all_zones(datasets):
                 color=colors.get(zone_name, 'gray'),
                 linestyle=entity_linestyle[entity_name]
             )
-        #trend = df_plot.groupby('temp_bin')['rel_consumption'].mean().reset_index()
 
 
-        '''# --- Print data ---
-        print(f"\n===== Temperaturdata for {zone_name} =====")
-        print(trend)
 
-        # --- Plot ---
-        plt.plot(
-            trend['temp_bin'], trend['rel_consumption'],
-            label=zone_name,
-            linewidth=2,
-            color=colors.get(zone_name, 'gray')
-        )'''
 
     plt.axhline(1.0, linestyle='--', color='gray', alpha=0.7)
     plt.xlabel('Outdoor temperature [°C]', fontsize=25)
@@ -385,6 +320,7 @@ def plot_temp_all_zones(datasets):
     plt.tight_layout()
     plt.show()
 
+# ----------- SLÅ SAMMEN ALLE GRUPPER SOM VIL HA NORGESPRIS ILA HELE DATASETTET OG APRIL TIL RESTEN-----------------
 
 data_NO1_mNP = pd.concat( [data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec,data_NO1_NPjan,data_NO1_NPfeb,data_NO1_NPmars], ignore_index=True)
 data_NO2_mNP = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec,data_NO2_NPjan,data_NO2_NPfeb,data_NO2_NPmars], ignore_index=True)
@@ -395,15 +331,6 @@ data_NO2_rest = pd.concat([data_NO2_NPapril] , ignore_index=True)
 data_NO5_rest = pd.concat([data_NO5_NPapril], ignore_index=True)
 
 # ----------------------------------------- STOPP AV ENDRING HER, DONT TOUCH -----------------------------------
-
-#results_NO1, results_NO1_temp = Difference_in_Difference_Flex(data_NO1_mNP, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
-#results_NO1_1, results_NO1_temp_1 = Difference_in_Difference_Flex(data_NO1_NPapril, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
-#results_NO2, results_NO2_temp = Difference_in_Difference_Flex(data_NO1_mNP_1, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
-#results_NO5, results_NO5_temp = Difference_in_Difference_Flex(data_NO1_mNP_2, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
-
-
-# --------------------------ENDRE HER IGJEN --------------------------
-
 
 data_NO1 = Difference_in_Difference_temp(data_NO1_mNP,data_NO1_uNP,data_NO1_rest,'NO1',Temp_Oslo)
 data_NO2 = Difference_in_Difference_temp(data_NO2_mNP,data_NO2_uNP,data_NO2_rest,'NO2',Temp_Stavanger)

@@ -1,8 +1,6 @@
-
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from networkx.algorithms.bipartite.basic import color
 
 
 dates = pd.date_range(
@@ -10,34 +8,23 @@ dates = pd.date_range(
     end="2026-03-31",
     freq="MS"
 )
-
-# -------- NO1 -------- #
-#did_z1 = [-1,-0.04,-0.55,0.15,0.45,0.71,-0.65,2.18,0.9,-0.04,1.33,1.5,2.74,2.47,3.24,4.63
-    # okt24, nov24, des24, ..., sep25 + okt25, nov25, des25, jan26
-#]
-
+#NO1
 did_z1_temp = [0.36,0.87,1.18,1.47,0.60,1.11,0.78,0.55,0.96,1.20,1.12,0.93,1.70,2.28,2.79,3.39, 3.48, 3.59
     # okt24, nov24, des24, ..., sep25 + okt25, nov25, des25, jan26, feb26, mars26
 ]
 
-# -------- NO2 -------- #
-#did_z2 = [-0.05,0.44,0.24,0.64,0.42,0.87,0.86,0.74,0.92,1.28,1.8,1.89, 3.3,3.76,4.79,4.97
-    # okt24, nov24, des24, ..., sep25 + okt25, nov25, des25, jan26, feb26, mars26
-#]
-
+#NO2
 did_z2_temp = [0.59,0.71,1.04,1.79,0.97,0.98,1.03,1.05,1.10,0.89,1.15,1.10,1.94,2.50,3.44,3.53, 3.92, 4.56
     # okt24, nov24, des24, ..., sep25 + okt25, nov25, des25, jan26, feb26, mars26
 ]
 
-# -------- NO5 -------- #
-#did_z5 = [-0.24,0.62,0.28,0.56,0.03,1.31,0.08,1.19,0.57,0.92,1.09,1.37, 2.06,2.32,2.76,3.4
-    # okt24, nov24, des24, ..., sep25 + okt25, nov25, des25, jan26, feb26, mars26
-#]
-
+#NO5
 did_z5_temp = [0.39,0.91,1.02,1.07,0.45,1.46,0.82,0.93,0.87,1.43,1.18,1.34,1.77,1.92,2.37,2.67, 2.97, 3.45
     # okt24, nov24, des24, ..., sep25 + okt25, nov25, des25, jan26, feb26, mars26
 ]
- # ----------- PLOT ----------- #
+
+
+ # ----------- PLOTTING -----------
 
 fig, axes = plt.subplots(
     nrows=3,
