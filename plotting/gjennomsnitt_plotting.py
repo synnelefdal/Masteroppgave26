@@ -4,18 +4,35 @@ import matplotlib.pyplot as plt
 
 
 
-data_mNP_NO1 = pd.read_csv('../All_Demand_Data/NO1_mNP.csv', sep=';')
-data_uNP_NO1 = pd.read_csv('../All_Demand_Data/NO1_uNP.csv', sep=';')
-data_rest_NO1 = pd.read_csv('../All_Demand_Data/NO1_resten.csv', sep=';')
 
-data_mNP_NO2 = pd.read_csv('../All_Demand_Data/NO2_mNP.csv', sep=';')
-data_uNP_NO2 = pd.read_csv('../All_Demand_Data/NO2_uNP.csv', sep=';')
-data_rest_NO2 = pd.read_csv('../All_Demand_Data/NO2_resten.csv', sep=';')
+data_NO1_uNP = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO1_uNP.csv', sep= ';')
+data_NO1_NPoct = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO1_NP_oct.csv', sep= ';')
+data_NO1_NPnov = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO1_NP_nov.csv', sep= ';')
+data_NO1_NPdec = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO1_NP_dec.csv', sep= ';')
+data_NO1_NPjan = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO1_NP_jan.csv', sep= ';')
+data_NO1_NPfeb = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO1_NP_feb.csv', sep= ';')
+data_NO1_NPmars = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO1_NP_mars.csv', sep= ';')
+data_NO1_NPapril = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO1_NP_april.csv', sep= ';')
 
-data_mNP_NO5 = pd.read_csv('../All_Demand_Data/NO5_mNP.csv', sep=';')
-data_uNP_NO5 = pd.read_csv('../All_Demand_Data/NO5_uNP.csv', sep=';')
-data_rest_NO5 = pd.read_csv('../All_Demand_Data/NO5_resten.csv', sep=';')
 
+data_NO2_uNP = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO2_uNP.csv', sep= ';')
+data_NO2_NPoct = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO2_NP_oct.csv', sep= ';')
+data_NO2_NPnov = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO2_NP_nov.csv', sep= ';')
+data_NO2_NPdec = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO2_NP_dec.csv', sep= ';')
+data_NO2_NPjan = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO2_NP_jan.csv', sep= ';')
+data_NO2_NPfeb = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO2_NP_feb.csv', sep= ';')
+data_NO2_NPmars = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO2_NP_mars.csv', sep= ';')
+data_NO2_NPapril = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO2_NP_april.csv', sep= ';')
+
+
+data_NO5_uNP = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO5_uNP.csv', sep= ';')
+data_NO5_NPoct = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO5_NP_oct.csv', sep= ';')
+data_NO5_NPnov = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO5_NP_nov.csv', sep= ';')
+data_NO5_NPdec = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO5_NP_dec.csv', sep= ';')
+data_NO5_NPjan = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO5_NP_jan.csv', sep= ';')
+data_NO5_NPfeb = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO5_NP_feb.csv', sep= ';')
+data_NO5_NPmars = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO5_NP_mars.csv', sep= ';')
+data_NO5_NPapril = pd.read_csv('/Users/synnelefdal/Desktop/<3/5.klasse/Master/NY_All_Demand_Data/NO5_NP_april.csv', sep= ';')
 
 
 def plot_daglig_gjennomsnitt(data_mNP, data_uNP, data_resten, price_area):
@@ -274,11 +291,19 @@ def plot_normalisert_abs(data_mNP, data_uNP):
     plt.show()
 
 
+data_NO1_mNP = pd.concat( [data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec,data_NO1_NPjan,data_NO1_NPfeb,data_NO1_NPmars], ignore_index=True)
+data_NO2_mNP = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec,data_NO2_NPjan,data_NO2_NPfeb,data_NO2_NPmars], ignore_index=True)
+data_NO5_mNP = pd.concat( [data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec,data_NO5_NPjan,data_NO5_NPfeb,data_NO5_NPmars], ignore_index=True)
 
-plot_full_analysis(data_mNP_NO1, data_uNP_NO1, data_rest_NO1,'NO1')
-plot_full_analysis(data_mNP_NO2, data_uNP_NO2, data_rest_NO2, 'NO2')
-plot_full_analysis(data_mNP_NO5, data_uNP_NO5, data_rest_NO5, 'NO5')
+data_NO1_rest = pd.concat([data_NO1_NPapril], ignore_index=True)
+data_NO2_rest = pd.concat([data_NO2_NPapril] , ignore_index=True)
+data_NO5_rest = pd.concat([data_NO5_NPapril], ignore_index=True)
 
-plot_normalisert_abs(data_mNP_NO1, data_uNP_NO1)
-plot_normalisert_abs(data_mNP_NO2, data_uNP_NO2)
-plot_normalisert_abs(data_mNP_NO5, data_uNP_NO5)
+
+plot_full_analysis(data_NO1_mNP, data_NO1_uNP, data_NO1_rest,'NO1')
+plot_full_analysis(data_NO2_mNP, data_NO2_uNP, data_NO2_rest, 'NO2')
+plot_full_analysis(data_NO5_mNP, data_NO5_uNP, data_NO5_rest, 'NO5')
+
+plot_normalisert_abs(data_NO1_mNP, data_NO1_uNP)
+plot_normalisert_abs(data_NO2_mNP, data_NO2_uNP)
+plot_normalisert_abs(data_NO5_mNP, data_NO5_uNP)

@@ -462,6 +462,50 @@ def plot_dognprofil(results_df_NO1, results_df_NO1_temp,
     plt.show()
 
 
+
+def plot_dognprofil_flex(results_list):
+    """
+    results_list = liste av dicts med struktur:
+    [
+        {
+            "name": "NO1",
+            "df": results_df_NO1,
+            "df_temp": results_df_NO1_temp,
+            "color": "royalblue"
+        },
+        ...
+    ]
+    """
+
+    plt.figure(figsize=(12, 6))
+
+    for res in results_list:
+        name = res["name"]
+        df = res["df"]
+        df_temp = res["df_temp"]
+        color = res["color"]
+
+        hours = df['Hour']
+        DiD = df['DiD']
+
+        DiD_temp = df_temp['DiD_temp']
+        ci_low_temp = df_temp['CI_low_temp']
+        ci_high_temp = df_temp['CI_high_temp']
+
+        plt.plot(hours, DiD, label=f'DiD - {name}', color=color, linewidth=2, linestyle='dotted')
+        plt.plot(hours, DiD_temp, label=f'DiD w/Temp - {name}', color=color, linewidth=2)
+        plt.fill_between(hours, ci_low_temp, ci_high_temp, color=color, alpha=0.1)
+
+    plt.xticks(range(0, 24))
+    plt.xlabel("Hour", fontsize=25)
+    plt.ylabel("Difference in Difference of Consumption Changes [%]", fontsize=20)
+    plt.grid(alpha=0.3)
+    plt.xticks(fontsize=25)
+    plt.yticks(fontsize=25)
+    plt.legend(fontsize=20)
+    plt.tight_layout()
+    plt.show()
+
 #------------------------- BESTEMMELSE AV HVILKE MND SOM ER MED OG UTEN NORGESPRIS ------------------------------------
 
 
@@ -472,34 +516,30 @@ def plot_dognprofil(results_df_NO1, results_df_NO1_temp,
 
 # ------------------------- ENDRE PARAMETER MELLOM HER FOR Å ENDRE ANALYSE -----------------------------
 
-start_date_before = '2024-10-01'
-end_date_before = '2024-10-30'
+start_date_before = '2025-03-01'
+end_date_before = '2025-03-31'
 
-start_date_after = '2025-10-01'
-end_date_after = '2025-10-30'
+start_date_after = '2026-03-01'
+end_date_after = '2026-03-31'
 
 
-data_NO1_mNP = pd.concat( [data_NO2_NPoct], ignore_index=True)
-data_NO1_mNP_1 = pd.concat([data_NO2_NPjan], ignore_index=True)
-data_NO1_mNP_2 = pd.concat( [data_NO2_NPmars], ignore_index=True)
+data_NO1_mNP = pd.concat( [data_NO1_NPoct], ignore_index=True)
+data_NO1_mNP_1 = pd.concat([data_NO1_NPjan], ignore_index=True)
+data_NO1_mNP_2 = pd.concat( [data_NO1_NPmars], ignore_index=True)
 
-data_NO1_rest = pd.concat([data_NO2_NPapril], ignore_index=True)
+data_NO1_rest = pd.concat([data_NO1_NPapril], ignore_index=True)
 data_NO1_rest_1 = pd.concat([data_NO2_NPfeb,data_NO2_NPmars,data_NO2_NPapril] , ignore_index=True)
 data_NO1_rest_2 = pd.concat([data_NO5_NPapril], ignore_index=True)
 
-
 # ----------------------------------------- STOPP AV ENDRING HER, DONT TOUCH -----------------------------------
 
-results_NO1, results_NO1_temp = Difference_in_Difference_Flex(data_NO1_mNP, data_NO2_uNP, data_NO1_rest, Temp_Stavanger, 'NO2', start_date_before, end_date_before, start_date_after, end_date_after)
+results_NO1, results_NO1_temp = Difference_in_Difference_Flex(data_NO1_mNP, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
 #results_NO1_1, results_NO1_temp_1 = Difference_in_Difference_Flex(data_NO1_NPapril, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
-results_NO2, results_NO2_temp = Difference_in_Difference_Flex(data_NO1_mNP_1, data_NO2_uNP, data_NO1_rest, Temp_Stavanger, 'NO2', start_date_before, end_date_before, start_date_after, end_date_after)
-results_NO5, results_NO5_temp = Difference_in_Difference_Flex(data_NO1_mNP_2, data_NO2_uNP, data_NO1_rest, Temp_Stavanger, 'NO2', start_date_before, end_date_before, start_date_after, end_date_after)
+results_NO2, results_NO2_temp = Difference_in_Difference_Flex(data_NO1_mNP_1, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
+results_NO5, results_NO5_temp = Difference_in_Difference_Flex(data_NO1_mNP_2, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
 
 
-
-
-
-
+# --------------------------ENDRE HER IGJEN --------------------------
 for i in range(1_000_000):
     pass
 
@@ -507,6 +547,31 @@ end = time.time()
 
 print(f"Kjøretid: {end - start:.4f} sekunder")
 
-plot_dognprofil(results_NO1, results_NO1_temp,
+plot_dognprofil_flex([
+    {
+        "name": "Group October",
+        "df": results_NO1,
+        "df_temp": results_NO1_temp,
+        "color": "royalblue"
+    },
+    {
+        "name": "Group January",
+        "df": results_NO2,
+        "df_temp": results_NO2_temp,
+        "color": "red"
+    },
+    {
+        "name": "Group March",
+        "df": results_NO5,
+        "df_temp": results_NO5_temp,
+        "color": "green"
+    }
+])
+
+
+# -------------------------------STOPP AV ENDRE KA SOM SKA PLOTTES -------------------------------------
+
+
+'''plot_dognprofil(results_NO1, results_NO1_temp,
                results_NO2, results_NO2_temp,
-                results_NO5, results_NO5_temp)
+                results_NO5, results_NO5_temp)'''
