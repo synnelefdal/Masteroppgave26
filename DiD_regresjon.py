@@ -8,7 +8,7 @@ from linearmodels.panel.utility import AbsorbingEffectWarning
 from matplotlib.patches import FancyArrowPatch
 from linearmodels.panel import PanelOLS
 
-# ------------------ ALLE CSV FILER MED FORBRUKSDATA --------------------------------
+# -------------------------------- ALLE CSV FILER MED FORBRUKSDATA -------------------------------- #
 
 data_NO1_uNP = pd.read_csv('NY_All_Demand_Data/NO1_uNP.csv', sep= ';')
 data_NO1_NPoct = pd.read_csv('NY_All_Demand_Data/NO1_NP_oct.csv', sep= ';')
@@ -41,11 +41,11 @@ data_NO5_NPapril = pd.read_csv('NY_All_Demand_Data/NO5_NP_april.csv', sep= ';')
 
 
 
-# ------------------------------- MODELL 1 ------------------------------- #
+# -------------------------------- MODELL 1 -------------------------------- #
 
 def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_date_before, end_date_before, start_date_after, end_date_after):
 
-    # ----------- Norgespris gruppen -------------- #
+    # -------------- Norgespris gruppen -------------- #
     data_mNP['start_time_utc'] = pd.to_datetime(data_mNP['start_time_utc'],
                                                 format='%Y-%m-%d %H:%M:%S',
                                                 errors='coerce',
@@ -70,7 +70,7 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_
 
     #print(total_demand_NP)
 
-    # -------------- Ikke Norgespris gruppen ---------- #
+    # -------------- Ikke Norgespris gruppen -------------- #
     data_uNP['start_time_utc'] = pd.to_datetime(data_uNP['start_time_utc'],
                                                 format='%Y-%m-%d %H:%M:%S',
                                                 errors='coerce',
@@ -96,7 +96,7 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_
 
     #print(total_demand_uNP)
 
-    # ------------ Resten ------------- #
+    # -------------- Resten -------------- #
     data_resten['start_time_utc'] = pd.to_datetime(data_resten['start_time_utc'],
                                                 format='%Y-%m-%d %H:%M:%S',
                                                 errors='coerce',
@@ -121,19 +121,13 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_
 
     #print(total_demand_resten)
 
-    # ------------ Dataframe ----------- #
+    # -------------- Dataframe -------------- #
     df_NP = pd.DataFrame(total_demand_NP)
     df_uNP = pd.DataFrame(total_demand_uNP)
     df_resten = pd.DataFrame(total_demand_resten)
 
     df = pd.concat([df_NP,df_uNP,df_resten],ignore_index=True)
     df = df[df['kWh/Metering_point'] > 0].copy()
-
-    #start_date_before = pd.Timestamp('2025-01-01', tz=None)
-    #end_date_before = pd.Timestamp('2025-01-31', tz = None)
-
-    #start_date_after = pd.Timestamp('2026-01-01', tz = None)
-    #end_date_after = pd.Timestamp('2026-01-31', tz = None)
 
     reference = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
     treatment = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
@@ -148,7 +142,7 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_
                                              'July', 'August', 'September', 'October', 'November', 'December'],
                                  ordered=True)
 
-    # --------- Model ------------ #
+    # -------------- Model -------------- #
 
     df['entity'] = pd.Categorical(df['group_definition'],
                                   categories=['Uten Norgespris', 'Med Norgespris', 'Resten'],   # Referanse = Uten Norgespris
@@ -173,7 +167,7 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_
     #print(df.head(10))
 
 
-    # -------- Utregning --------- #
+    # -------------- Utregning -------------- #
     print('----------- PanelOLS -----------------')
     beta3 = res.params['C(entity)[T.Med Norgespris]:C(period)[T.Treatment]']
     DiD = (np.exp(beta3) - 1) * 100
@@ -191,7 +185,7 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_
 #Difference_in_Difference(data_mNP_NO5,data_uNP_NO5,data_rest_NO5, 'NO5')
 
 
-# ------------------------- ENDRE PARAMETER MELLOM HER FOR Å ENDRE ANALYSE -----------------------------
+# ----------------------------- ENDRE PARAMETER MELLOM HER FOR Å ENDRE ANALYSE ----------------------------- #
 
 
 #BACKUP N01: data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec,data_NO1_NPjan,data_NO1_NPfeb,data_NO1_NPmars,data_NO1_NPapril
@@ -201,7 +195,6 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_
 
 start_date_before = '2024-10-01'
 end_date_before = '2024-10-31'
-
 
 start_date_after = '2025-10-01'
 end_date_after = '2025-10-31'
@@ -216,7 +209,7 @@ data_NO2_rest = pd.concat([data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan, data_
 data_NO5_rest = pd.concat([data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan, data_NO5_NPfeb, data_NO5_NPmars, data_NO5_NPapril], ignore_index=True)
 
 
-# ----------------------------------------- STOPP AV ENDRING HER, DONT TOUCH -----------------------------------
+# ----------------------------- STOPP AV ENDRING HER, DONT TOUCH ----------------------------- #
 
 Difference_in_Difference(data_NO1_mNP, data_NO1_uNP, data_NO1_rest, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
 Difference_in_Difference(data_NO2_mNP, data_NO2_uNP, data_NO2_rest, 'NO2', start_date_before, end_date_before, start_date_after, end_date_after)

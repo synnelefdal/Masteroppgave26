@@ -1,19 +1,14 @@
-from cProfile import label
-
 import numpy as np
 import pandas as pd
-import statsmodels.api as sm
-import patsy
 from linearmodels.panel import PanelOLS
 import matplotlib.pyplot as plt
 import time
 
 start = time.time()
 
-# Koden du vil måle
 
 
-# ------------------ ALLE CSV FILER MED FORBRUKSDATA --------------------------------
+# -------------------------------- ALLE CSV FILER MED FORBRUKSDATA -------------------------------- #
 
 data_NO1_uNP = pd.read_csv('NY_All_Demand_Data/NO1_uNP.csv', sep= ';')
 data_NO1_NPoct = pd.read_csv('NY_All_Demand_Data/NO1_NP_oct.csv', sep= ';')
@@ -45,123 +40,17 @@ data_NO5_NPmars = pd.read_csv('NY_All_Demand_Data/NO5_NP_mars.csv', sep= ';')
 data_NO5_NPapril = pd.read_csv('NY_All_Demand_Data/NO5_NP_april.csv', sep= ';')
 
 
-# -------------Temperatur data for alle prissoner ----------------------------
+# -------------------------------- Temperatur data for alle prissoner -------------------------------- #
 
 Temp_Bergen = pd.read_csv('Temperature_Files/bergen_converted.csv')
 Temp_Oslo = pd.read_csv('Temperature_Files/oslo_converted.csv')
 Temp_Stavanger = pd.read_csv('Temperature_Files/stavanger_converted.csv')
 
-# ------------------------ START PÅ KODE, DONT TOUCH --------------------------------
+# -------------------------------- START PÅ KODE, DONT TOUCH -------------------------------- #
 
-def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_area,start_date_before, end_date_before, start_date_after, end_date_after):
+def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_area, start_date_before, end_date_before, start_date_after, end_date_after):
 
-    # ----------- Norgespris gruppen -------------- #
-    '''data_mNP['start_time_utc'] = pd.to_datetime(data_mNP['start_time_utc'],
-                                                format='%Y-%m-%d %H:%M:%S',
-                                                errors='coerce',
-                                                utc=True)
-
-    data_mNP['Date'] = data_mNP['start_time_utc'].dt.date
-    data_mNP['Hour'] = data_mNP['start_time_utc'].dt.hour.astype(int)
-    data_demand_NP = data_mNP[data_mNP['price_area'] == price_area].copy()
-
-    data_demand_NP['kWh/Metering_point'] = data_demand_NP['consumption_kwh'] / data_demand_NP['metering_point_count']
-    total_demand_NP= data_demand_NP.groupby(['Date', 'Hour', 'group_definition'])[ 'kWh/Metering_point'].sum().reset_index()
-
-    total_demand_NP['Date'] = pd.to_datetime(total_demand_NP['Date'], errors='coerce')
-
-    total_demand_NP['time'] = (
-            total_demand_NP['Date'] +
-            pd.to_timedelta(total_demand_NP['Hour'], unit='h')
-    )
-
-    total_demand_NP['time'] = total_demand_NP['time'].dt.tz_localize('UTC')
-
-    #print(total_demand_NP)
-
-    # -------------- Ikke Norgespris gruppen ---------- #
-    data_uNP['start_time_utc'] = pd.to_datetime(data_uNP['start_time_utc'],
-                                                format='%Y-%m-%d %H:%M:%S',
-                                                errors='coerce',
-                                                utc=True)
-
-    data_uNP['Date'] = data_uNP['start_time_utc'].dt.date
-    data_uNP['Hour'] = data_uNP['start_time_utc'].dt.hour.astype(int)
-    data_demand_uNP = data_uNP[data_uNP['price_area'] == price_area].copy()
-
-    data_demand_uNP['kWh/Metering_point'] = data_demand_uNP['consumption_kwh'] / data_demand_uNP['metering_point_count']
-    total_demand_uNP = data_demand_uNP.groupby(['Date', 'Hour', 'group_definition'])[
-        'kWh/Metering_point'].sum().reset_index()
-
-    total_demand_uNP['Date'] = pd.to_datetime(total_demand_uNP['Date'], errors='coerce')
-
-    total_demand_uNP['time'] = (
-            total_demand_uNP['Date'] +
-            pd.to_timedelta(total_demand_uNP['Hour'], unit='h')
-    )
-
-    total_demand_uNP['time'] = total_demand_uNP['time'].dt.tz_localize('UTC')
-
-    #print(total_demand_uNP)
-
-    # ------------ Resten ------------- #
-    data_resten['start_time_utc'] = pd.to_datetime(data_resten['start_time_utc'],
-                                                format='%Y-%m-%d %H:%M:%S',
-                                                errors='coerce',
-                                                utc=True)
-
-    data_resten['Date'] = data_resten['start_time_utc'].dt.date
-    data_resten['Hour'] = data_resten['start_time_utc'].dt.hour.astype(int)
-    data_demand_resten = data_resten[data_resten['price_area'] == price_area].copy()
-
-    data_demand_resten['kWh/Metering_point'] = data_demand_resten['consumption_kwh'] / data_demand_resten['metering_point_count']
-    total_demand_resten = data_demand_resten.groupby(['Date', 'Hour', 'group_definition'])['kWh/Metering_point'].sum().reset_index()
-
-    total_demand_resten['Date'] = pd.to_datetime(total_demand_resten['Date'], errors='coerce')
-
-    total_demand_resten['time'] = (
-            total_demand_resten['Date'] +
-            pd.to_timedelta(total_demand_resten['Hour'], unit='h')
-    )
-
-    total_demand_resten['time'] = total_demand_resten['time'].dt.tz_localize('UTC')
-
-    #print(total_demand_resten)
-
-    # ------------ Dataframe ----------- #
-    df_NP = pd.DataFrame(total_demand_NP)
-    df_uNP = pd.DataFrame(total_demand_uNP)
-    df_resten = pd.DataFrame(total_demand_resten)
-
-    df = pd.concat([df_NP,df_uNP,df_resten],ignore_index=True)
-    df = df[df['kWh/Metering_point'] > 0].copy()
-
-    start_date_before = pd.Timestamp('2024-11-01', tz=None)
-    end_date_before = pd.Timestamp('2025-01-31', tz = None)
-
-    start_date_after = pd.Timestamp('2025-11-01', tz = None)
-    end_date_after = pd.Timestamp('2026-01-31', tz = None)
-
-    reference = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
-    treatment = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
-
-    df['Period'] = np.select([reference, treatment],
-                              ['Reference', 'Treatment'],
-                              default = 'Rest')
-
-    # --------- Model ------------ #
-
-    df['entity'] = pd.Categorical(df['group_definition'],
-                                  categories=['Uten Norgespris', 'Med Norgespris', 'Resten'],   # Referanse = Uten Norgespris
-                                  ordered = True)
-    df['period'] = pd.Categorical(df['Period'],
-                                  categories = ['Reference', 'Treatment', 'Rest'],     # Reference = Reference
-                                  ordered = True)
-
-    df['log_y'] = np.log(df['kWh/Metering_point'])'''
-
-
-    # ----------- Norgespris gruppen -------------- #
+    # -------------- Norgespris gruppen -------------- #
     data_mNP['start_time_utc'] = pd.to_datetime(data_mNP['start_time_utc'],
                                                 format='%Y-%m-%d %H:%M:%S',
                                                 errors='coerce',
@@ -174,7 +63,6 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
     #print(data_mNP)
 
-
     data_demand_NP['kWh/Metering_point'] = data_demand_NP['consumption_kwh'] / data_demand_NP['metering_point_count']
 
 
@@ -183,7 +71,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
 
     #print(total_demand_NP)
-    #print('kommer hit ')
+
     total_demand_NP['Date'] = pd.to_datetime(total_demand_NP['Date'], errors='coerce')
 
     total_demand_NP['time'] = (
@@ -195,9 +83,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
     # print(total_demand_NP)
 
-
-
-    # -------------- Ikke Norgespris gruppen ---------- #
+    # -------------- Ikke Norgespris gruppen -------------- #
     data_uNP['start_time_utc'] = pd.to_datetime(data_uNP['start_time_utc'],
                                                 format='%Y-%m-%d %H:%M:%S',
                                                 errors='coerce',
@@ -223,7 +109,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
     # print(total_demand_uNP)
 
-    # ------------ Resten ------------- #
+    # -------------- Resten -------------- #
     data_resten['start_time_utc'] = pd.to_datetime(data_resten['start_time_utc'],
                                                    format='%Y-%m-%d %H:%M:%S',
                                                    errors='coerce',
@@ -250,7 +136,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
     # print(total_demand_resten)
 
-    # ------------ Temperatur -------------- #
+    # -------------- Temperatur -------------- #
     Temp['Date'] = pd.to_datetime(Temp['Date'])
     Temp['Hour'] = Temp['Hour'].astype(float)
     Temp['Temp24'] = Temp['Lufttemperatur'].rolling(window=24, min_periods=1).mean()
@@ -260,24 +146,18 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
     df_temp = Temp[['Date', 'Hour', 'Temp24']]
     #print(df_temp)
 
-    # ------------ Dataframe ----------- #
+    # -------------- Dataframe -------------- #
     df_NP = pd.DataFrame(total_demand_NP)
     df_uNP = pd.DataFrame(total_demand_uNP)
     df_resten = pd.DataFrame(total_demand_resten)
 
-    print(df_uNP)
+    #print(df_uNP)
 
     df = pd.concat([df_NP, df_uNP, df_resten], ignore_index=True)
     df = pd.merge(df, df_temp, on = ['Date', 'Hour'], how = 'left')
 
     df = df[df['kWh/Metering_point'] > 0].copy()
     #print(df)
-
-    #start_date_before = '2024-11-01'
-    #end_date_before = '2024-11-30'
-
-    #start_date_after = '2025-11-01'
-    #end_date_after = '2025-11-30'
 
     before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
     after_ref = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
@@ -292,7 +172,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
                                              'July', 'August', 'September', 'October', 'November', 'December'],
                                  ordered=True)
 
-    # --------- Model ------------ #
+    # -------------- Model -------------- #
     df['entity'] = pd.Categorical(df['group_definition'],
                                   categories = ['Uten Norgespris','Med Norgespris', 'Resten'],
                                   # Referanse = Uten Norgespris
@@ -300,7 +180,7 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
     df['period'] = pd.Categorical(df['Period'],
                                   categories=['Reference', 'Treatment', 'Rest'],  # Reference = Reference
                                   ordered=True)
-    df['log_y'] = df['kWh/Metering_point']    # ------- HER MÅ NP.LOG LEGGES TIL FOR Å FÅ PROSENT IGJEN ----------
+    df['log_y'] = df['kWh/Metering_point']    # -------------- HER MÅ NP.LOG LEGGES TIL FOR Å FÅ PROSENT IGJEN -------------- #
 
     results = []
     results_temp = []
@@ -357,8 +237,8 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
         beta3 = res.params[key]
         ci_low, ci_high = res.conf_int().loc[key]
         DiD = (np.exp(beta3)-1)*100
-        CI_low = (np.exp(ci_low)-1)*100
-        CI_high = (np.exp(ci_high)-1)*100      #--------- DISSE MÅ TILBAKE NÅR PROSENT SKA TEBAKE ----------
+        CI_low = (np.exp(ci_low)-1)*100        # -------------- DISSE MÅ TILBAKE NÅR PROSENT SKA TEBAKE -------------- #
+        CI_high = (np.exp(ci_high)-1)*100      # -------------- DISSE MÅ TILBAKE NÅR PROSENT SKA TEBAKE -------------- #
 
         results.append({
             'Hour': h,
@@ -379,8 +259,8 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
         beta3_temp = res_temp.params[key]
         ci_low_temp, ci_high_temp = res_temp.conf_int().loc[key]
         DiD_temp = (np.exp(beta3_temp)-1)*100
-        CI_low_temp = (np.exp(ci_low_temp)-1)*100 #------- disse må tilbake når prosent ska tebake -------
-        CI_high_temp = (np.exp(ci_high_temp)-1)*100
+        CI_low_temp = (np.exp(ci_low_temp)-1)*100   # -------------- DISSE MÅ TILBAKE NÅR PROSENT SKA TEBAKE -------------- #
+        CI_high_temp = (np.exp(ci_high_temp)-1)*100 # -------------- DISSE MÅ TILBAKE NÅR PROSENT SKA TEBAKE -------------- #
 
         results_temp.append({
             'Hour': h,
@@ -412,10 +292,11 @@ def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_a
 
 
 
-    # --------- PLOTT DØGNPROFIL ---------- #
+    # ---------- PLOTT DØGNPROFIL ---------- #
 def plot_dognprofil(results_df_NO1, results_df_NO1_temp,
                     results_df_NO2, results_df_NO2_temp,
                     results_df_NO5, results_df_NO5_temp):
+
     # ---------- NO1 ---------- #
     hours_NO1 = results_df_NO1['Hour']
     DiD_NO1 = results_df_NO1['DiD']
@@ -430,7 +311,7 @@ def plot_dognprofil(results_df_NO1, results_df_NO1_temp,
     ci_low_temp_NO2 = results_df_NO2_temp['CI_low_temp']
     ci_high_temp_NO2 = results_df_NO2_temp['CI_high_temp']
 
-    # ---------- NO1 ---------- #
+    # ---------- NO5 ---------- #
     hours_NO5 = results_df_NO5['Hour']
     DiD_NO5 = results_df_NO5['DiD']
     DiD_NO5_temp = results_df_NO5_temp['DiD_temp']
@@ -464,18 +345,6 @@ def plot_dognprofil(results_df_NO1, results_df_NO1_temp,
 
 
 def plot_dognprofil_flex(results_list):
-    """
-    results_list = liste av dicts med struktur:
-    [
-        {
-            "name": "NO1",
-            "df": results_df_NO1,
-            "df_temp": results_df_NO1_temp,
-            "color": "royalblue"
-        },
-        ...
-    ]
-    """
 
     plt.figure(figsize=(12, 6))
 
@@ -506,7 +375,7 @@ def plot_dognprofil_flex(results_list):
     plt.tight_layout()
     plt.show()
 
-#------------------------- BESTEMMELSE AV HVILKE MND SOM ER MED OG UTEN NORGESPRIS ------------------------------------
+# ------------------------------------ BESTEMMELSE AV HVILKE MND SOM ER MED OG UTEN NORGESPRIS ------------------------------------ #
 
 
 #BACKUP N01: data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec,data_NO1_NPjan,data_NO1_NPfeb,data_NO1_NPmars,data_NO1_NPapril
@@ -514,7 +383,7 @@ def plot_dognprofil_flex(results_list):
 #BACKUP N05: data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec,data_NO5_NPjan,data_NO5_NPfeb,data_NO5_NPmars,data_NO5_NPapril
 
 
-# ------------------------- ENDRE PARAMETER MELLOM HER FOR Å ENDRE ANALYSE -----------------------------
+# ------------------------------------ ENDRE PARAMETER MELLOM HER FOR Å ENDRE ANALYSEN ------------------------------------ #
 
 start_date_before = '2025-03-01'
 end_date_before = '2025-03-31'
@@ -531,7 +400,7 @@ data_NO1_rest = pd.concat([data_NO1_NPapril], ignore_index=True)
 data_NO1_rest_1 = pd.concat([data_NO2_NPfeb,data_NO2_NPmars,data_NO2_NPapril] , ignore_index=True)
 data_NO1_rest_2 = pd.concat([data_NO5_NPapril], ignore_index=True)
 
-# ----------------------------------------- STOPP AV ENDRING HER, DONT TOUCH -----------------------------------
+# ------------------------------------ STOPP AV ENDRING HER, DONT TOUCH ------------------------------------ #
 
 results_NO1, results_NO1_temp = Difference_in_Difference_Flex(data_NO1_mNP, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
 #results_NO1_1, results_NO1_temp_1 = Difference_in_Difference_Flex(data_NO1_NPapril, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
@@ -539,7 +408,7 @@ results_NO2, results_NO2_temp = Difference_in_Difference_Flex(data_NO1_mNP_1, da
 results_NO5, results_NO5_temp = Difference_in_Difference_Flex(data_NO1_mNP_2, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
 
 
-# --------------------------ENDRE HER IGJEN --------------------------
+# ------------------------------------ ENDRE HER IGJEN ------------------------------------ #
 for i in range(1_000_000):
     pass
 
@@ -569,7 +438,7 @@ plot_dognprofil_flex([
 ])
 
 
-# -------------------------------STOPP AV ENDRE KA SOM SKA PLOTTES -------------------------------------
+# ------------------------------------ STOPP AV ENDRE KA SOM SKA PLOTTES ------------------------------------ #
 
 
 '''plot_dognprofil(results_NO1, results_NO1_temp,
