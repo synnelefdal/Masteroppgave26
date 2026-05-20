@@ -416,6 +416,27 @@ end = time.time()
 
 print(f"Kjøretid: {end - start:.4f} sekunder")
 
+'''plot_dognprofil_flex([
+    {
+        "name": "Group October",
+        "df": results_NO1,
+        "df_temp": results_NO1_temp,
+        "color": "royalblue"
+    },
+    {
+        "name": "Group January",
+        "df": results_NO2,
+        "df_temp": results_NO2_temp,
+        "color": "red"
+    },
+    {
+        "name": "Group March",
+        "df": results_NO5,
+        "df_temp": results_NO5_temp,
+        "color": "green"
+    }
+])'''
+
 plot_dognprofil_flex([
     {
         "name": "Group October",
