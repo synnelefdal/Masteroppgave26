@@ -75,7 +75,7 @@ labels = ['Group October', 'Group November', 'Group December', 'Group January', 
 
 def plot_all(NO1, NO2, NO5):
 
-    fig, axes = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
+    fig, axes = plt.subplots(3, 1, figsize=(10, 14), sharex=True)
 
     datasets = [NO1, NO2, NO5]
     titles = ["NO1", "NO2", "NO5"]
@@ -101,7 +101,8 @@ def plot_all(NO1, NO2, NO5):
                 liste,
                 color=colors[i],
                 s=80,
-                label=labels[i]
+                label=labels[i],
+                zorder=2
             )
 
             if len(x_valid) > 1:
@@ -115,7 +116,8 @@ def plot_all(NO1, NO2, NO5):
                     trend(x_smooth),
                     color=colors[i],
                     linestyle="--",
-                    linewidth=2
+                    linewidth=2,
+                    zorder=1
                 )
 
 
@@ -124,7 +126,7 @@ def plot_all(NO1, NO2, NO5):
         ax.axhline(0, color="gray", linestyle="--")
         ax.grid(axis="y", linestyle="--", alpha=0.4)
         #ax.set_ylabel("Change [%]", fontsize=20)
-        ax.set_ylim(1.5, 5.5)
+        ax.set_ylim(0, 5.5)
         #ax.set_xticklabels(months, fontsize=20)
         #ax.set_xlabel("Month", fontsize=20)
         plt.yticks(fontsize=20)
@@ -150,12 +152,13 @@ def plot_all(NO1, NO2, NO5):
         labels_legend,
         fontsize=14,
         loc="center",
-        bbox_to_anchor=(0.4, 0.44),  # (x, y)
+        bbox_to_anchor=(0.48 , 0.405),  # (x, y)
         ncol=3
     )
 
     plt.tight_layout()
     plt.show()
+    fig.savefig("my_plot_ny_ny_ny2.png", dpi=300, bbox_inches="tight")
 
 
 plot_all(data_NO1, data_NO2, data_NO5)
