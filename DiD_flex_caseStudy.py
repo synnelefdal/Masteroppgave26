@@ -403,47 +403,47 @@ end_date_after_mars = '2026-03-31'
 
 # ------------- Oktober ------------- #
 
-data_NO1_mNP = pd.concat( [data_NO1_NPoct], ignore_index=True)
-data_NO1_mNP_1 = pd.concat([data_NO1_NPoct], ignore_index=True)
-data_NO1_mNP_2 = pd.concat( [data_NO1_NPoct], ignore_index=True)
+data_NO1_mNP = pd.concat( [data_NO2_NPoct], ignore_index=True)
+data_NO1_mNP_1 = pd.concat([data_NO2_NPoct], ignore_index=True)
+data_NO1_mNP_2 = pd.concat( [data_NO2_NPoct], ignore_index=True)
 
-data_NO1_rest = pd.concat([data_NO1_NPnov,data_NO1_NPdec,data_NO1_NPjan,data_NO1_NPfeb,data_NO1_NPmars,data_NO1_NPapril], ignore_index=True)
-data_NO1_rest_1 = pd.concat([data_NO1_NPfeb, data_NO1_NPmars,data_NO1_NPapril] , ignore_index=True)
-data_NO1_rest_2 = pd.concat([data_NO1_NPapril], ignore_index=True)
+data_NO1_rest = pd.concat([data_NO2_NPnov,data_NO2_NPdec,data_NO2_NPjan,data_NO2_NPfeb,data_NO2_NPmars,data_NO2_NPapril], ignore_index=True)
+data_NO1_rest_1 = pd.concat([data_NO2_NPfeb, data_NO2_NPmars,data_NO2_NPapril] , ignore_index=True)
+data_NO1_rest_2 = pd.concat([data_NO2_NPapril], ignore_index=True)
 
 # ------------- Januar ------------- #
 
-data_NO1_mNP_3 = pd.concat( [data_NO1_NPjan], ignore_index=True)
-data_NO1_mNP_4 = pd.concat([data_NO1_NPjan], ignore_index=True)
-data_NO1_mNP_5 = pd.concat( [data_NO1_NPjan], ignore_index=True)
+data_NO1_mNP_3 = pd.concat( [data_NO2_NPjan], ignore_index=True)
+data_NO1_mNP_4 = pd.concat([data_NO2_NPjan], ignore_index=True)
+data_NO1_mNP_5 = pd.concat( [data_NO2_NPjan], ignore_index=True)
 
-data_NO1_rest_3 = pd.concat([data_NO1_NPnov,data_NO1_NPdec,data_NO1_NPfeb,data_NO1_NPmars,data_NO1_NPapril], ignore_index=True)
-data_NO1_rest_4 = pd.concat([data_NO1_NPfeb, data_NO1_NPmars,data_NO1_NPapril] , ignore_index=True)
-data_NO1_rest_5 = pd.concat([data_NO1_NPapril], ignore_index=True)
+data_NO1_rest_3 = pd.concat([data_NO2_NPnov,data_NO2_NPdec,data_NO2_NPfeb,data_NO2_NPmars,data_NO2_NPapril], ignore_index=True)
+data_NO1_rest_4 = pd.concat([data_NO2_NPfeb, data_NO2_NPmars,data_NO2_NPapril] , ignore_index=True)
+data_NO1_rest_5 = pd.concat([data_NO2_NPapril], ignore_index=True)
 
 # ------------- Mars ------------- #
 
-data_NO1_mNP_6 = pd.concat( [data_NO1_NPmars], ignore_index=True)
-data_NO1_mNP_7 = pd.concat([data_NO1_NPmars], ignore_index=True)
-data_NO1_mNP_8 = pd.concat( [data_NO1_NPmars], ignore_index=True)
+data_NO1_mNP_6 = pd.concat( [data_NO2_NPmars], ignore_index=True)
+data_NO1_mNP_7 = pd.concat([data_NO2_NPmars], ignore_index=True)
+data_NO1_mNP_8 = pd.concat( [data_NO2_NPmars], ignore_index=True)
 
-data_NO1_rest_6 = pd.concat([data_NO1_NPnov,data_NO1_NPdec,data_NO1_NPjan,data_NO1_NPfeb,data_NO1_NPapril], ignore_index=True)
-data_NO1_rest_7 = pd.concat([data_NO1_NPfeb, data_NO1_NPapril] , ignore_index=True)
-data_NO1_rest_8 = pd.concat([data_NO1_NPapril], ignore_index=True)
+data_NO1_rest_6 = pd.concat([data_NO2_NPnov,data_NO2_NPdec,data_NO2_NPjan,data_NO2_NPfeb,data_NO2_NPapril], ignore_index=True)
+data_NO1_rest_7 = pd.concat([data_NO2_NPfeb, data_NO2_NPapril] , ignore_index=True)
+data_NO1_rest_8 = pd.concat([data_NO2_NPapril], ignore_index=True)
 
 # ------------------------------------ STOPP AV ENDRING HER, DONT TOUCH ------------------------------------ #
 
-results_NO1_okt, results_NO1_temp_okt = Difference_in_Difference_Flex(data_NO1_mNP, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before_okt, end_date_before_okt, start_date_after_okt, end_date_after_okt)
-results_NO1_jan, results_NO1_temp_jan = Difference_in_Difference_Flex(data_NO1_mNP_1, data_NO1_uNP, data_NO1_rest_1, Temp_Oslo, 'NO1', start_date_before_jan, end_date_before_jan, start_date_after_jan, end_date_after_jan)
-results_NO1_mars, results_NO1_temp_mars = Difference_in_Difference_Flex(data_NO1_mNP_2, data_NO1_uNP, data_NO1_rest_2, Temp_Oslo, 'NO1', start_date_before_mars, end_date_before_mars, start_date_after_mars, end_date_after_mars)
+results_NO1_okt, results_NO1_temp_okt = Difference_in_Difference_Flex(data_NO1_mNP, data_NO2_uNP, data_NO1_rest, Temp_Stavanger, 'NO2', start_date_before_okt, end_date_before_okt, start_date_after_okt, end_date_after_okt)
+results_NO1_jan, results_NO1_temp_jan = Difference_in_Difference_Flex(data_NO1_mNP_1, data_NO2_uNP, data_NO1_rest_1, Temp_Stavanger, 'NO2', start_date_before_jan, end_date_before_jan, start_date_after_jan, end_date_after_jan)
+results_NO1_mars, results_NO1_temp_mars = Difference_in_Difference_Flex(data_NO1_mNP_2, data_NO2_uNP, data_NO1_rest_2, Temp_Stavanger, 'NO2', start_date_before_mars, end_date_before_mars, start_date_after_mars, end_date_after_mars)
 
-results_NO1_okt_1, results_NO1_temp_okt_1 = Difference_in_Difference_Flex(data_NO1_mNP_3, data_NO1_uNP, data_NO1_rest_3, Temp_Oslo, 'NO1', start_date_before_okt, end_date_before_okt, start_date_after_okt, end_date_after_okt)
-results_NO1_jan_1, results_NO1_temp_jan_1 = Difference_in_Difference_Flex(data_NO1_mNP_4, data_NO1_uNP, data_NO1_rest_4, Temp_Oslo, 'NO1', start_date_before_jan, end_date_before_jan, start_date_after_jan, end_date_after_jan)
-results_NO1_mars_1, results_NO1_temp_mars_1 = Difference_in_Difference_Flex(data_NO1_mNP_5, data_NO1_uNP, data_NO1_rest_5, Temp_Oslo, 'NO1', start_date_before_mars, end_date_before_mars, start_date_after_mars, end_date_after_mars)
+results_NO1_okt_1, results_NO1_temp_okt_1 = Difference_in_Difference_Flex(data_NO1_mNP_3, data_NO2_uNP, data_NO1_rest_3, Temp_Stavanger, 'NO2', start_date_before_okt, end_date_before_okt, start_date_after_okt, end_date_after_okt)
+results_NO1_jan_1, results_NO1_temp_jan_1 = Difference_in_Difference_Flex(data_NO1_mNP_4, data_NO2_uNP, data_NO1_rest_4, Temp_Stavanger, 'NO2', start_date_before_jan, end_date_before_jan, start_date_after_jan, end_date_after_jan)
+results_NO1_mars_1, results_NO1_temp_mars_1 = Difference_in_Difference_Flex(data_NO1_mNP_5, data_NO2_uNP, data_NO1_rest_5, Temp_Stavanger, 'NO2', start_date_before_mars, end_date_before_mars, start_date_after_mars, end_date_after_mars)
 
-results_NO1_okt_2, results_NO1_temp_okt_2 = Difference_in_Difference_Flex(data_NO1_mNP_6, data_NO1_uNP, data_NO1_rest_6, Temp_Oslo, 'NO1', start_date_before_okt, end_date_before_okt, start_date_after_okt, end_date_after_okt)
-results_NO1_jan_2, results_NO1_temp_jan_2 = Difference_in_Difference_Flex(data_NO1_mNP_7, data_NO1_uNP, data_NO1_rest_7, Temp_Oslo, 'NO1', start_date_before_jan, end_date_before_jan, start_date_after_jan, end_date_after_jan)
-results_NO1_mars_2, results_NO1_temp_mars_2 = Difference_in_Difference_Flex(data_NO1_mNP_8, data_NO1_uNP, data_NO1_rest_8, Temp_Oslo, 'NO1', start_date_before_mars, end_date_before_mars, start_date_after_mars, end_date_after_mars)
+results_NO1_okt_2, results_NO1_temp_okt_2 = Difference_in_Difference_Flex(data_NO1_mNP_6, data_NO2_uNP, data_NO1_rest_6, Temp_Stavanger, 'NO2', start_date_before_okt, end_date_before_okt, start_date_after_okt, end_date_after_okt)
+results_NO1_jan_2, results_NO1_temp_jan_2 = Difference_in_Difference_Flex(data_NO1_mNP_7, data_NO2_uNP, data_NO1_rest_7, Temp_Stavanger, 'NO2', start_date_before_jan, end_date_before_jan, start_date_after_jan, end_date_after_jan)
+results_NO1_mars_2, results_NO1_temp_mars_2 = Difference_in_Difference_Flex(data_NO1_mNP_8, data_NO2_uNP, data_NO1_rest_8, Temp_Stavanger, 'NO2', start_date_before_mars, end_date_before_mars, start_date_after_mars, end_date_after_mars)
 
 
 # ------------------------------------ ENDRE HER IGJEN ------------------------------------ #
@@ -609,7 +609,7 @@ axes[2].legend(loc = 'upper left', fontsize = 14)
 # Legend
 handles, labels = axes[0].get_legend_handles_labels()
 #fig.legend(handles, labels, loc='lower center', ncol=3)
-fig.savefig("plot_casestudyNO1.png", dpi=300, bbox_inches = "tight")
+fig.savefig("plot_casestudyNO2.png", dpi=300, bbox_inches = "tight")
 
 plt.tight_layout()
 plt.show()
