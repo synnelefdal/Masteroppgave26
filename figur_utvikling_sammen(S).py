@@ -161,4 +161,4 @@ def plot_all(NO1, NO2, NO5):
     fig.savefig("my_plot_ny_ny_ny2.png", dpi=300, bbox_inches="tight")
 
 
-plot_all(data_NO1, data_NO2, data_NO5)
+plot_all(data_NO1, data_NO2, data_NO5) 
