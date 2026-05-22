@@ -572,35 +572,35 @@ fig, axes = plt.subplots(3, 1, figsize=(10, 14), sharex=True)
 
 # Første rad
 plot_dognprofil_flex_subplot(axes[0], [
-    {"name": "October", "df": results_NO1_okt, "df_temp": results_NO1_temp_okt, "color": "royalblue"},
-    {"name": "January", "df": results_NO1_jan, "df_temp": results_NO1_temp_jan, "color": "red"},
-    {"name": "March", "df": results_NO1_mars, "df_temp": results_NO1_temp_mars, "color": "green"}
+    {"name": "Month October", "df": results_NO1_okt, "df_temp": results_NO1_temp_okt, "color": "royalblue"},
+    {"name": "Month January", "df": results_NO1_jan, "df_temp": results_NO1_temp_jan, "color": "red"},
+    {"name": "Month March", "df": results_NO1_mars, "df_temp": results_NO1_temp_mars, "color": "green"}
 ])
 
-axes[0].set_title("October", fontsize = 20)
+axes[0].set_title("Group October", fontsize = 20)
 axes[0].tick_params(labelsize = 17)
 axes[0].set_ylim(0,7)
 
 # Andre rad
 plot_dognprofil_flex_subplot(axes[1], [
-    {"name": "October", "df": results_NO1_okt_1, "df_temp": results_NO1_temp_okt_1, "color": "royalblue"},
-    {"name": "January", "df": results_NO1_jan_1, "df_temp": results_NO1_temp_jan_1, "color": "red"},
-    {"name": "March", "df": results_NO1_mars_1, "df_temp": results_NO1_temp_mars_1, "color": "green"}
+    {"name": "Month October", "df": results_NO1_okt_1, "df_temp": results_NO1_temp_okt_1, "color": "royalblue"},
+    {"name": "Month January", "df": results_NO1_jan_1, "df_temp": results_NO1_temp_jan_1, "color": "red"},
+    {"name": "Month March", "df": results_NO1_mars_1, "df_temp": results_NO1_temp_mars_1, "color": "green"}
 ])
 
-axes[1].set_title("January", fontsize = 20)
+axes[1].set_title("Group January", fontsize = 20)
 axes[1].set_ylabel("Change in Consumption [%]", fontsize = 20)
 axes[1].tick_params(labelsize = 17)
 axes[1].set_ylim(0,7)
 
 # Tredje rad
 plot_dognprofil_flex_subplot(axes[2], [
-    {"name": "October", "df": results_NO1_okt_2, "df_temp": results_NO1_temp_okt_2, "color": "royalblue"},
-    {"name": "January", "df": results_NO1_jan_2, "df_temp": results_NO1_temp_jan_2, "color": "red"},
-    {"name": "March", "df": results_NO1_mars_2, "df_temp": results_NO1_temp_mars_2, "color": "green"}
+    {"name": "Month October", "df": results_NO1_okt_2, "df_temp": results_NO1_temp_okt_2, "color": "royalblue"},
+    {"name": "Month January", "df": results_NO1_jan_2, "df_temp": results_NO1_temp_jan_2, "color": "red"},
+    {"name": "Month March", "df": results_NO1_mars_2, "df_temp": results_NO1_temp_mars_2, "color": "green"}
 ])
 
-axes[2].set_title("March", fontsize = 20)
+axes[2].set_title("Group March", fontsize = 20)
 axes[2].set_xlabel("Hour", fontsize = 20)
 axes[2].tick_params(labelsize = 17)
 axes[2].set_ylim(0,7)
