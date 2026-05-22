@@ -347,25 +347,29 @@ def plot_dognprofil(results_df_NO1, results_df_NO1_temp,
 def plot_dognprofil_flex(results_list):
 
     plt.figure(figsize=(12, 6))
+    plt.ylim(0,6)
+
 
     for res in results_list:
         name = res["name"]
-        df = res["df"]
+        #df = res["df"]
         df_temp = res["df_temp"]
         color = res["color"]
 
-        hours = df['Hour']
-        DiD = df['DiD']
+        hours = df_temp['Hour']
+        #DiD = df_temp['DiD']
 
         DiD_temp = df_temp['DiD_temp']
         ci_low_temp = df_temp['CI_low_temp']
         ci_high_temp = df_temp['CI_high_temp']
 
-        plt.plot(hours, DiD, label=f'DiD - {name}', color=color, linewidth=2, linestyle='dotted')
+        #plt.plot(hours, DiD, label=f'DiD - {name}', color=color, linewidth=2, linestyle='dotted')
         plt.plot(hours, DiD_temp, label=f'DiD w/Temp - {name}', color=color, linewidth=2)
-        plt.fill_between(hours, ci_low_temp, ci_high_temp, color=color, alpha=0.1)
+
+        #plt.fill_between(hours, ci_low_temp, ci_high_temp, color=color, alpha=0.1)
 
     plt.xticks(range(0, 24))
+
     plt.xlabel("Hour", fontsize=25)
     plt.ylabel("Difference in Difference of Consumption Changes [%]", fontsize=20)
     plt.grid(alpha=0.3)
@@ -373,6 +377,7 @@ def plot_dognprofil_flex(results_list):
     plt.yticks(fontsize=25)
     plt.legend(fontsize=20)
     plt.tight_layout()
+    plt.savefig("Flex_Alle.png", dpi=300, bbox_inches="tight")
     plt.show()
 
 # ------------------------------------ BESTEMMELSE AV HVILKE MND SOM ER MED OG UTEN NORGESPRIS ------------------------------------ #
@@ -385,27 +390,90 @@ def plot_dognprofil_flex(results_list):
 
 # ------------------------------------ ENDRE PARAMETER MELLOM HER FOR Å ENDRE ANALYSEN ------------------------------------ #
 
-start_date_before = '2025-03-01'
-end_date_before = '2025-03-31'
+#start_date_before = '2025-03-01'
+#end_date_before = '2025-03-31'
 
-start_date_after = '2026-03-01'
-end_date_after = '2026-03-31'
+#start_date_after = '2026-03-01'
+#end_date_after = '2026-03-31'
 
 
-data_NO1_mNP = pd.concat( [data_NO1_NPoct], ignore_index=True)
-data_NO1_mNP_1 = pd.concat([data_NO1_NPjan], ignore_index=True)
-data_NO1_mNP_2 = pd.concat( [data_NO1_NPmars], ignore_index=True)
+'''data_NO1_mNP_oct = pd.concat( [data_NO5_NPoct], ignore_index=True)
+data_NO1_mNP_nov = pd.concat( [data_NO5_NPoct, data_NO5_NPnov], ignore_index=True)
+data_NO1_mNP_dec = pd.concat( [data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec], ignore_index=True)
+data_NO1_mNP_jan = pd.concat( [data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan], ignore_index=True)
+data_NO1_mNP_feb = pd.concat( [data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan, data_NO5_NPfeb], ignore_index=True)
+data_NO1_mNP_mar = pd.concat( [data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan, data_NO5_NPfeb, data_NO5_NPmars], ignore_index=True)'''
 
-data_NO1_rest = pd.concat([data_NO1_NPapril], ignore_index=True)
-data_NO1_rest_1 = pd.concat([data_NO2_NPfeb,data_NO2_NPmars,data_NO2_NPapril] , ignore_index=True)
-data_NO1_rest_2 = pd.concat([data_NO5_NPapril], ignore_index=True)
+data_NO1_mNP_oct = pd.concat([data_NO1_NPoct], ignore_index=True)
+data_NO1_mNP_nov = pd.concat([data_NO1_NPoct, data_NO1_NPnov], ignore_index=True)
+data_NO1_mNP_dec = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec], ignore_index=True)
+data_NO1_mNP_jan = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec, data_NO1_NPjan], ignore_index=True)
+data_NO1_mNP_feb = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec, data_NO1_NPjan, data_NO1_NPfeb], ignore_index=True)
+data_NO1_mNP_mar = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec, data_NO1_NPjan, data_NO1_NPfeb, data_NO1_NPmars], ignore_index=True)
+
+data_NO2_mNP_oct = pd.concat([data_NO2_NPoct], ignore_index=True)
+data_NO2_mNP_nov = pd.concat([data_NO2_NPoct, data_NO2_NPnov], ignore_index=True)
+data_NO2_mNP_dec = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec], ignore_index=True)
+data_NO2_mNP_jan = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan], ignore_index=True)
+data_NO2_mNP_feb = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan, data_NO2_NPfeb], ignore_index=True)
+data_NO2_mNP_mar = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan, data_NO2_NPfeb, data_NO2_NPmars], ignore_index=True)
+
+data_NO5_mNP_oct = pd.concat([data_NO5_NPoct], ignore_index=True)
+data_NO5_mNP_nov = pd.concat([data_NO5_NPoct, data_NO5_NPnov], ignore_index=True)
+data_NO5_mNP_dec = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec], ignore_index=True)
+data_NO5_mNP_jan = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan], ignore_index=True)
+data_NO5_mNP_feb = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan, data_NO5_NPfeb], ignore_index=True)
+data_NO5_mNP_mar = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan, data_NO5_NPfeb, data_NO5_NPmars], ignore_index=True)
+
+data_NO1_rest_oct = pd.concat([data_NO1_NPnov, data_NO1_NPdec, data_NO1_NPjan, data_NO1_NPfeb, data_NO1_NPmars, data_NO1_NPapril], ignore_index=True)
+data_NO1_rest_nov = pd.concat([data_NO1_NPdec, data_NO1_NPjan, data_NO1_NPfeb, data_NO1_NPmars, data_NO1_NPapril], ignore_index=True)
+data_NO1_rest_dec = pd.concat([data_NO1_NPjan, data_NO1_NPfeb, data_NO1_NPmars, data_NO1_NPapril], ignore_index=True)
+data_NO1_rest_jan = pd.concat([data_NO1_NPfeb, data_NO1_NPmars, data_NO1_NPapril], ignore_index=True)
+data_NO1_rest_feb = pd.concat([data_NO1_NPmars, data_NO1_NPapril], ignore_index=True)
+data_NO1_rest_mar = pd.concat([data_NO1_NPapril], ignore_index=True)
+
+data_NO2_rest_oct = pd.concat([data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan, data_NO2_NPfeb, data_NO2_NPmars, data_NO2_NPapril], ignore_index=True)
+data_NO2_rest_nov = pd.concat([data_NO2_NPdec, data_NO2_NPjan, data_NO2_NPfeb, data_NO2_NPmars, data_NO2_NPapril], ignore_index=True)
+data_NO2_rest_dec = pd.concat([data_NO2_NPjan, data_NO2_NPfeb, data_NO2_NPmars, data_NO2_NPapril], ignore_index=True)
+data_NO2_rest_jan = pd.concat([data_NO2_NPfeb, data_NO2_NPmars, data_NO2_NPapril], ignore_index=True)
+data_NO2_rest_feb = pd.concat([data_NO2_NPmars, data_NO2_NPapril], ignore_index=True)
+data_NO2_rest_mar = pd.concat([data_NO2_NPapril], ignore_index=True)
+
+data_NO5_rest_oct = pd.concat([data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan, data_NO5_NPfeb, data_NO5_NPmars, data_NO5_NPapril], ignore_index=True)
+data_NO5_rest_nov = pd.concat([data_NO5_NPdec, data_NO5_NPjan, data_NO5_NPfeb, data_NO5_NPmars, data_NO5_NPapril], ignore_index=True)
+data_NO5_rest_dec = pd.concat([data_NO5_NPjan, data_NO5_NPfeb, data_NO5_NPmars, data_NO5_NPapril], ignore_index=True)
+data_NO5_rest_jan = pd.concat([data_NO5_NPfeb, data_NO5_NPmars, data_NO5_NPapril], ignore_index=True)
+data_NO5_rest_feb = pd.concat([data_NO5_NPmars, data_NO5_NPapril], ignore_index=True)
+data_NO5_rest_mar = pd.concat([data_NO5_NPapril], ignore_index=True)
+
+
 
 # ------------------------------------ STOPP AV ENDRING HER, DONT TOUCH ------------------------------------ #
 
-results_NO1, results_NO1_temp = Difference_in_Difference_Flex(data_NO1_mNP, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
+results_NO1_oct, results_NO1_temp_oct = Difference_in_Difference_Flex(data_NO1_mNP_oct, data_NO1_uNP, data_NO1_rest_oct, Temp_Oslo, 'NO1', '2024-10-01', '2024-10-31', '2025-10-01', '2025-10-31')
+results_NO1_nov, results_NO1_temp_nov = Difference_in_Difference_Flex(data_NO1_mNP_nov, data_NO1_uNP, data_NO1_rest_nov, Temp_Oslo, 'NO1', '2024-11-01', '2024-11-30', '2025-11-01', '2025-11-30')
+results_NO1_dec, results_NO1_temp_dec = Difference_in_Difference_Flex(data_NO1_mNP_dec, data_NO1_uNP, data_NO1_rest_dec, Temp_Oslo, 'NO1', '2024-12-01', '2024-12-31', '2025-12-01', '2025-12-31')
+results_NO1_jan, results_NO1_temp_jan = Difference_in_Difference_Flex(data_NO1_mNP_jan, data_NO1_uNP, data_NO1_rest_jan, Temp_Oslo, 'NO1', '2025-01-01', '2025-01-31', '2026-01-01', '2026-01-31')
+results_NO1_feb, results_NO1_temp_feb = Difference_in_Difference_Flex(data_NO1_mNP_feb, data_NO1_uNP, data_NO1_rest_feb, Temp_Oslo, 'NO1', '2025-02-01', '2025-02-28', '2026-02-01', '2026-02-28')
+results_NO1_mar, results_NO1_temp_mar = Difference_in_Difference_Flex(data_NO1_mNP_mar, data_NO1_uNP, data_NO1_rest_mar, Temp_Oslo, 'NO1', '2025-03-01', '2025-03-31', '2026-03-01', '2026-03-31')
+
+results_NO2_oct, results_NO2_temp_oct = Difference_in_Difference_Flex(data_NO2_mNP_oct, data_NO2_uNP, data_NO2_rest_oct, Temp_Stavanger, 'NO2', '2024-10-01', '2024-10-31', '2025-10-01', '2025-10-31')
+results_NO2_nov, results_NO2_temp_nov = Difference_in_Difference_Flex(data_NO2_mNP_nov, data_NO2_uNP, data_NO2_rest_nov, Temp_Stavanger, 'NO2', '2024-11-01', '2024-11-30', '2025-11-01', '2025-11-30')
+results_NO2_dec, results_NO2_temp_dec = Difference_in_Difference_Flex(data_NO2_mNP_dec, data_NO2_uNP, data_NO2_rest_dec, Temp_Stavanger, 'NO2', '2024-12-01', '2024-12-31', '2025-12-01', '2025-12-31')
+results_NO2_jan, results_NO2_temp_jan = Difference_in_Difference_Flex(data_NO2_mNP_jan, data_NO2_uNP, data_NO2_rest_jan, Temp_Stavanger, 'NO2', '2025-01-01', '2025-01-31', '2026-01-01', '2026-01-31')
+results_NO2_feb, results_NO2_temp_feb = Difference_in_Difference_Flex(data_NO2_mNP_feb, data_NO2_uNP, data_NO2_rest_feb, Temp_Stavanger, 'NO2', '2025-02-01', '2025-02-28', '2026-02-01', '2026-02-28')
+results_NO2_mar, results_NO2_temp_mar = Difference_in_Difference_Flex(data_NO2_mNP_mar, data_NO2_uNP, data_NO2_rest_mar, Temp_Stavanger, 'NO2', '2025-03-01', '2025-03-31', '2026-03-01', '2026-03-31')
+
+results_NO5_oct, results_NO5_temp_oct = Difference_in_Difference_Flex(data_NO5_mNP_oct, data_NO5_uNP, data_NO5_rest_oct, Temp_Bergen, 'NO5', '2024-10-01', '2024-10-31', '2025-10-01', '2025-10-31')
+results_NO5_nov, results_NO5_temp_nov = Difference_in_Difference_Flex(data_NO5_mNP_nov, data_NO5_uNP, data_NO5_rest_nov, Temp_Bergen, 'NO5', '2024-11-01', '2024-11-30', '2025-11-01', '2025-11-30')
+results_NO5_dec, results_NO5_temp_dec = Difference_in_Difference_Flex(data_NO5_mNP_dec, data_NO5_uNP, data_NO5_rest_dec, Temp_Bergen, 'NO5', '2024-12-01', '2024-12-31', '2025-12-01', '2025-12-31')
+results_NO5_jan, results_NO5_temp_jan = Difference_in_Difference_Flex(data_NO5_mNP_jan, data_NO5_uNP, data_NO5_rest_jan, Temp_Bergen, 'NO5', '2025-01-01', '2025-01-31', '2026-01-01', '2026-01-31')
+results_NO5_feb, results_NO5_temp_feb = Difference_in_Difference_Flex(data_NO5_mNP_feb, data_NO5_uNP, data_NO5_rest_feb, Temp_Bergen, 'NO5', '2025-02-01', '2025-02-28', '2026-02-01', '2026-02-28')
+results_NO5_mar, results_NO5_temp_mar = Difference_in_Difference_Flex(data_NO5_mNP_mar, data_NO5_uNP, data_NO5_rest_mar, Temp_Bergen, 'NO5', '2025-03-01', '2025-03-31', '2026-03-01', '2026-03-31')
+
 #results_NO1_1, results_NO1_temp_1 = Difference_in_Difference_Flex(data_NO1_NPapril, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
-results_NO2, results_NO2_temp = Difference_in_Difference_Flex(data_NO1_mNP_1, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
-results_NO5, results_NO5_temp = Difference_in_Difference_Flex(data_NO1_mNP_2, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
+#results_NO2, results_NO2_temp = Difference_in_Difference_Flex(data_NO1_mNP_1, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
+#results_NO5, results_NO5_temp = Difference_in_Difference_Flex(data_NO1_mNP_2, data_NO1_uNP, data_NO1_rest, Temp_Oslo, 'NO1', start_date_before, end_date_before, start_date_after, end_date_after)
 
 
 # ------------------------------------ ENDRE HER IGJEN ------------------------------------ #
@@ -437,26 +505,44 @@ print(f"Kjøretid: {end - start:.4f} sekunder")
     }
 ])'''
 
-plot_dognprofil_flex([
+'''plot_dognprofil_flex([
     {
-        "name": "Group October",
-        "df": results_NO1,
-        "df_temp": results_NO1_temp,
-        "color": "royalblue"
+        "name": "October",
+        #"df": results_NO2,
+        "df_temp": results_NO1_temp_oct,
+        "color": "goldenrod"
     },
     {
-        "name": "Group January",
-        "df": results_NO2,
-        "df_temp": results_NO2_temp,
-        "color": "red"
+        "name": "November",
+        #"df": results_NO2,
+        "df_temp": results_NO1_temp_nov,
+        "color": "steelblue"
     },
     {
-        "name": "Group March",
-        "df": results_NO5,
-        "df_temp": results_NO5_temp,
-        "color": "green"
+        "name": "December",
+        #"df": results_NO5,
+        "df_temp": results_NO1_temp_dec,
+        "color": "indianred"
+    },
+    {
+        "name": "January",
+        #"df": results_NO5,
+        "df_temp": results_NO1_temp_jan,
+        "color": "seagreen"
+    },
+    {
+        "name": "February",
+        #"df": results_NO5,
+        "df_temp": results_NO1_temp_feb,
+        "color": "darkorange"
+    },
+    {
+        "name": "March",
+        #"df": results_NO5,
+        "df_temp": results_NO1_temp_mar,
+        "color": "mediumpurple"
     }
-])
+])'''
 
 
 # ------------------------------------ STOPP AV ENDRE KA SOM SKA PLOTTES ------------------------------------ #
@@ -465,3 +551,105 @@ plot_dognprofil_flex([
 '''plot_dognprofil(results_NO1, results_NO1_temp,
                results_NO2, results_NO2_temp,
                 results_NO5, results_NO5_temp)'''
+
+
+
+# ------------------------------- KODE FOR Å FÅ ALLE UT I SAMME VINDU --------------------------
+
+def plot_dognprofil_flex_all(NO1, NO2, NO5):
+
+    fig, axes = plt.subplots(3, 1, figsize=(12, 16), sharex=True)
+
+    datasets = [NO1, NO2, NO5]
+    titles = ["NO1", "NO2", "NO5"]
+
+    for j, results_list in enumerate(datasets):
+
+        ax = axes[j]
+
+        for res in results_list:
+            name = res["name"]
+            df_temp = res["df_temp"]
+            color = res["color"]
+
+            hours = df_temp['Hour']
+            DiD_temp = df_temp['DiD_temp']
+            ci_low_temp = df_temp['CI_low_temp']
+            ci_high_temp = df_temp['CI_high_temp']
+
+            ax.plot(
+                hours,
+                DiD_temp,
+                label=name,
+                color=color,
+                linewidth=2
+            )
+
+            # (valgfritt) konfidensintervall
+            # ax.fill_between(hours, ci_low_temp, ci_high_temp, color=color, alpha=0.1)
+
+        ax.set_title(titles[j], fontsize=20)
+        ax.set_ylim(0, 6)
+
+        ax.grid(alpha=0.3)
+        ax.axhline(0, color="gray", linestyle="--")
+
+        ax.tick_params(axis='y', labelsize=18)
+
+    # Felles labels
+    axes[1].set_ylabel(
+        "Difference in Difference of Consumption Changes [%]",
+        fontsize=18
+    )
+
+    axes[-1].set_xticks(range(0, 24))
+    axes[-1].set_xlabel("Hour", fontsize=20)
+    axes[-1].tick_params(axis='x', labelsize=18)
+
+    # Legend (samlet)
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(
+        handles,
+        labels,
+        loc="center",
+        bbox_to_anchor=(0.5, 0.4),
+        ncol=3,
+        fontsize=14
+    )
+
+    plt.tight_layout()
+    plt.show()
+
+    fig.savefig("Flex_Alle.png", dpi=300, bbox_inches="tight")
+
+
+NO1_list = [
+    {"name": "October", "df_temp": results_NO1_temp_oct, "color": "goldenrod"},
+    {"name": "November", "df_temp": results_NO1_temp_nov, "color": "steelblue"},
+    {"name": "December", "df_temp": results_NO1_temp_dec, "color": "indianred"},
+    {"name": "January", "df_temp": results_NO1_temp_jan, "color": "seagreen"},
+    {"name": "February", "df_temp": results_NO1_temp_feb, "color": "darkorange"},
+    {"name": "March", "df_temp": results_NO1_temp_mar, "color": "mediumpurple"},
+]
+
+# gjør tilsvarende for NO2 og NO5:
+NO2_list = [
+    {"name": "October", "df_temp": results_NO2_temp_oct, "color": "goldenrod"},
+    {"name": "November", "df_temp": results_NO2_temp_nov, "color": "steelblue"},
+    {"name": "December", "df_temp": results_NO2_temp_dec, "color": "indianred"},
+    {"name": "January", "df_temp": results_NO2_temp_jan, "color": "seagreen"},
+    {"name": "February", "df_temp": results_NO2_temp_feb, "color": "darkorange"},
+    {"name": "March", "df_temp": results_NO2_temp_mar, "color": "mediumpurple"},
+]
+
+
+NO5_list = [
+    {"name": "October", "df_temp": results_NO5_temp_oct, "color": "goldenrod"},
+    {"name": "November", "df_temp": results_NO5_temp_nov, "color": "steelblue"},
+    {"name": "December", "df_temp": results_NO5_temp_dec, "color": "indianred"},
+    {"name": "January", "df_temp": results_NO5_temp_jan, "color": "seagreen"},
+    {"name": "February", "df_temp": results_NO5_temp_feb, "color": "darkorange"},
+    {"name": "March", "df_temp": results_NO5_temp_mar, "color": "mediumpurple"},
+]
+
+plot_dognprofil_flex_all(NO1_list, NO2_list, NO5_list)
