@@ -72,18 +72,18 @@ temp_forskjeller = [
 
 # ✅ NY: Dynamic group data
 dynamic_values = [
-    [2.4, 3.2, 2.0], #okt
-    [2.6, 3.5, 2.2],  #okt m temp
-    [2.3, 3.6, 2.4], #nov
-    [2.7, 3.4, 2.4],  #nov m temp
-    [3.0, 4.2, 2.6], #des
-    [3.2, 4.3, 2.7],  #des m temp
-    [4.2, 4.6, 3.4], #jan
-    [3.7, 4.0, 2.8],  #jan m temp
-    [4.3, 4.6, 3.5], #feb
-    [3.6, 4.1, 3.1],  #feb m temp
-    [3.5, 4.3, 3.3], #mars
-    [3.4, 4.4, 3.3]   #mars m temp
+    [1.37, 2.51, 1.07], #okt
+    [1.37, 2.51, 1.07],  #okt m temp
+    [1.49, 2.63, 1.64], #nov
+    [1.49, 2.63, 1.64],  #nov m temp
+    [2.32, 3.59, 2.04], #des
+    [2.32, 3.59, 2.04],  #des m temp
+    [2.70, 3.31, 2.31], #jan
+    [2.70, 3.31, 2.31],  #jan m temp
+    [3.24, 3.80, 3.12], #feb
+    [3.24, 3.80, 3.12],  #feb m temp
+    [3.59, 4.56, 3.45], #mars
+    [3.59, 4.56, 3.45]   #mars m temp
 ]
 
 # -------- REORGANISER --------
@@ -233,7 +233,7 @@ def plot(df):
      "DiD without temp",
      "DiD with temp",
      "DiD w/Dynamic group"],
-    loc="upper right", fontsize=14, framealpha=0.3)
+    loc="center", bbox_to_anchor = (0.85,0.89) ,fontsize=14, framealpha=0.3)
 
     plt.show()
 
