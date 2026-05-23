@@ -598,7 +598,7 @@ def plot_dognprofil_flex_all(NO1, NO2, NO5):
 
     # Felles labels
     axes[1].set_ylabel(
-        "Difference in Difference of Consumption Changes [%]",
+        "Change in consumption [%]",
         fontsize=18
     )
 

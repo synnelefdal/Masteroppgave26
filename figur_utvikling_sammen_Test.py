@@ -47,55 +47,58 @@ data_NO5 = copy.deepcopy(orig_NO5)
 # Fyll inn manglende verdier
 
 #data_NO1[1][0] er Group november i mnd oktober
-#data_NO1[2][1] er Group Decemver i mnd november
+#data_NO1[2][1] er Group December i mnd november
+#data_NO1[3][1] er Group January i mnd november
+#data_NO1[4][1] er Group February i mnd november
+#data_NO1[5][1] er Group March i mnd november
 
-data_NO1[1][0] = 1
-data_NO1[2][0] = 1
-data_NO1[2][1] = 1
-data_NO1[3][0] = 1
-data_NO1[3][1] = 1
-data_NO1[3][2] = 1
-data_NO1[4][0] = 1
-data_NO1[4][1] = 1
-data_NO1[4][2] = 1
-data_NO1[4][3] = 1
-data_NO1[5][0] = 1
-data_NO1[5][1] = 1
-data_NO1[5][2] = 1
-data_NO1[5][3] = 1
-data_NO1[5][4] = 1
+data_NO1[1][0] = 2.18
+data_NO1[2][0] = 1.63
+data_NO1[2][1] = 2.46
+data_NO1[3][0] = 1.76
+data_NO1[3][1] = 2.66
+data_NO1[3][2] = 3.0
+data_NO1[4][0] = 0.9
+data_NO1[4][1] = 1.43
+data_NO1[4][2] = 1.88
+data_NO1[4][3] = 2.54
+data_NO1[5][0] = 1.18
+data_NO1[5][1] = 1.43
+data_NO1[5][2] = 1.55
+data_NO1[5][3] = 2.21
+data_NO1[5][4] = 2.11
 
-data_NO2[1][0] = 1
-data_NO2[2][0] = 1
-data_NO2[2][1] = 1
-data_NO2[3][0] = 1
-data_NO2[3][1] = 1
-data_NO2[3][2] = 1
-data_NO2[4][0] = 1
-data_NO2[4][1] = 1
-data_NO2[4][2] = 1
-data_NO2[4][3] = 1
-data_NO2[5][0] = 1
-data_NO2[5][1] = 1
-data_NO2[5][2] = 1
-data_NO2[5][3] = 1
-data_NO2[5][4] = 1
+data_NO2[1][0] = 2.77
+data_NO2[2][0] = 1.81
+data_NO2[2][1] = 2.79
+data_NO2[3][0] = 1.90
+data_NO2[3][1] = 2.66
+data_NO2[3][2] = 3.52
+data_NO2[4][0] = 1.10
+data_NO2[4][1] = 1.35
+data_NO2[4][2] = 2.04
+data_NO2[4][3] = 2.41
+data_NO2[5][0] = 0.54
+data_NO2[5][1] = 0.85
+data_NO2[5][2] = 1.43
+data_NO2[5][3] = 1.9
+data_NO2[5][4] = 1.84
 
-data_NO5[1][0] = 1
-data_NO5[2][0] = 1
-data_NO5[2][1] = 1
-data_NO5[3][0] = 1
-data_NO5[3][1] = 1
-data_NO5[3][2] = 1
-data_NO5[4][0] = 1
-data_NO5[4][1] = 1
-data_NO5[4][2] = 1
-data_NO5[4][3] = 1
-data_NO5[5][0] = 1
-data_NO5[5][1] = 1
-data_NO5[5][2] = 1
-data_NO5[5][3] = 1
-data_NO5[5][4] = 1
+data_NO5[1][0] = 2.24
+data_NO5[2][0] = 1.26
+data_NO5[2][1] = 1.63
+data_NO5[3][0] = 1.94
+data_NO5[3][1] = 2.25
+data_NO5[3][2] = 2.70
+data_NO5[4][0] = 1.61
+data_NO5[4][1] = 1.27
+data_NO5[4][2] = 1.57
+data_NO5[4][3] = 2.15
+data_NO5[5][0] = 1.47
+data_NO5[5][1] = 1.36
+data_NO5[5][2] = 1.57
+data_NO5[5][3] = 1.93
+data_NO5[5][4] = 1.43
 
 # --------- LAG MASKER (FRA ORIGINALDATA) --------- #
 
@@ -231,12 +234,13 @@ def plot_all(NO1, NO2, NO5, masks1, masks2, masks5):
     fig.legend(
         handles=custom_handles,
         loc="center",
-        bbox_to_anchor=(0.48, 0.4),
+        bbox_to_anchor=(0.46, 0.3),
         ncol=3,
         fontsize=14
     )
 
     plt.tight_layout()
+    fig.savefig("utvikling_test2.png", dpi=300, bbox_inches="tight")
     plt.show()
 
 
