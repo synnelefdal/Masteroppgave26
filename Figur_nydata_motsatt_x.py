@@ -190,12 +190,12 @@ def plot(df):
             fontweight="bold"
         )
 
-    ax.set_ylabel("Change in Electricity Consumption [%]", fontsize=20)
+    ax.set_ylabel("Change in consumption [%]", fontsize=20)
 
     # ---- Temperatur ----
     ax2 = ax.twinx()
     ax2.set_ylim(ax.get_ylim())
-    ax2.set_ylabel("Temperature Difference [°C]", fontsize=20)
+    ax2.set_ylabel("Temperature difference [°C]", fontsize=20)
     plt.yticks(fontsize=20)
 
     for i, region in enumerate(regions):
