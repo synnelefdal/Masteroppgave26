@@ -69,6 +69,8 @@ df["Spotpris_NOK_MWh"] = clean_number_series(df["Spotpris_NOK_MWh"])
 # Lag datetime
 df["Datetime"] = parse_datetime(df["Dato"], df["Time"])
 
+
+
 # Normaliser prissonenavn
 df["Prissone"] = df["Prissone"].astype(str).str.strip()
 
@@ -129,6 +131,31 @@ for i, zone in enumerate(selected):
 ax.set_xlabel("Year")
 ax.set_ylabel("NOK/kWh")
 ax.legend(title="Price Zone", ncols=5)
+
+
+# ===================== MÅNEDLIG GJENNOMSNITT FEB & MAR 2026 ==================
+
+# Lag kolonner for år og måned
+df["Year"] = df["Datetime"].dt.year
+df["Month"] = df["Datetime"].dt.month
+
+# Filtrer for februar og mars 2026
+df_2026 = df[(df["Year"] == 2026) & (df["Month"].isin([2, 3]))]
+
+# Beregn gjennomsnitt per prissone og måned
+monthly_avg = (
+    df_2026.groupby(["Prissone", "Year", "Month"], as_index=False)
+    .agg({"Spotpris_NOK_kWh": "mean"})
+)
+
+# Sorter for pen utskrift
+monthly_avg = monthly_avg.sort_values(["Month", "Prissone"])
+
+# Print resultat
+print("\n--- Gjennomsnittlig spotpris per måned (NOK/kWh) ---")
+for _, row in monthly_avg.iterrows():
+    month_name = "February" if row["Month"] == 2 else "March"
+    print(f"{row['Prissone']} | {month_name} 2026: {row['Spotpris_NOK_kWh']:.4f} NOK/kWh")
 
 fig.autofmt_xdate()
 plt.tight_layout()

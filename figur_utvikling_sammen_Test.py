@@ -146,16 +146,17 @@ def plot_all(NO1, NO2, NO5, masks1, masks2, masks5):
                             marker='o',
                             color=colors[i],
                             s=80,
-                            alpha=0.25,
+                            alpha=0.3,
                             zorder=2
                             #label=labels[i]
                         )
 
                         ax.scatter(
                             xi[k], y[k],
-                            marker='x',
+                            marker='o',
                             color=colors[i],
                             s=120,
+                            alpha=0.25,
                             linewidths=2,
                             zorder=3
                         #label=label_i
@@ -166,9 +167,10 @@ def plot_all(NO1, NO2, NO5, masks1, masks2, masks5):
 
                         ax.scatter(
                             xi[k], y[k],
-                            marker='x',
+                            marker='o',
                             color=colors[i],
                             s=120,
+                            alpha=0.3,
                             linewidths=2,
                             zorder=3
                             #label=labels[i]
@@ -222,6 +224,7 @@ def plot_all(NO1, NO2, NO5, masks1, masks2, masks5):
     colors = sns.color_palette("tab10", len(labels))
 
     custom_handles = [
+
         Line2D([0], [0],
                marker='o',
                color='none',
@@ -236,6 +239,21 @@ def plot_all(NO1, NO2, NO5, masks1, masks2, masks5):
         loc="center",
         bbox_to_anchor=(0.46, 0.3),
         ncol=3,
+        fontsize=14
+    )
+
+    custom_handles = [
+        Line2D([0], [0], linestyle='--', color='black', label='Trend line'),
+        Line2D([0], [0], marker='o', color='black', linestyle='None', label='Results after Norway Price'),
+        Line2D([0], [0], marker='o', color='gray', markerfacecolor='none',
+               linestyle='None', label='Results before Norway Price')
+    ]
+
+    fig.legend(
+        handles=custom_handles,
+        loc="center",
+        bbox_to_anchor=(0.8, 0.41),
+        ncol=1,
         fontsize=14
     )
 
