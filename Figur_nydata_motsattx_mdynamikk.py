@@ -70,7 +70,7 @@ temp_forskjeller = [
     [-0.466297, -0.195126, -0.154375]
 ]
 
-# ✅ NY: Dynamic group data
+# NY - Dynamic group data:
 dynamic_values = [
     [1.37, 2.51, 1.07], #okt
     [1.37, 2.51, 1.07],  #okt m temp
@@ -164,7 +164,7 @@ def plot(df):
                            edgecolor="white",
                            zorder=3)
 
-                # ✅ Dynamic group (X)
+                # Dynamic group (X)
                 ax.scatter(xi, y_dyn,
                            color=color_map[region],
                            marker="x",
