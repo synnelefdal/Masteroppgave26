@@ -138,7 +138,7 @@ def plot(df):
             lo = sub["ci_low"].values
             hi = sub["ci_high"].values
 
-            marker = "^" if temp_flag else "o"
+            marker = "o" if temp_flag else "^"
 
             ax.errorbar(xi, y,
                         yerr=[np.maximum(y-lo,0), np.maximum(hi-y,0)],
@@ -216,11 +216,11 @@ def plot(df):
     # ---- LEGEND ----
     from matplotlib.lines import Line2D
     ax2.legend([
-        Line2D([0],[0],marker='s',color='black',linestyle='None',markersize=10),
-        Line2D([0],[0],marker='o',color='black',linestyle='None',markersize=10),
-        Line2D([0],[0],marker='^',color='black',linestyle='None',markersize=10)
+        Line2D([0], [0], marker='o', color='black', linestyle='None', markersize=10),
+        Line2D([0],[0],marker='^',color='black',linestyle='None',markersize=10),
+        Line2D([0], [0], marker='s', color='black', linestyle='None', markersize=10)
     ],
-    ["Temperature difference", "DiD without temp", "DiD with temp"],
+    ["DiD w/Temp control", "DiD" , "Temperature difference"],
     loc="upper right", fontsize=16, framealpha=0.3)
 
     plt.show()

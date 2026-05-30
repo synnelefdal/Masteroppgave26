@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from matplotlib.lines import Line2D
 
 # --------- MÅNEDER --------- #
 months = ["October", "November", "December", "January", "February", "March"]
@@ -154,6 +155,19 @@ def plot_all(NO1, NO2, NO5):
         loc="center",
         bbox_to_anchor=(0.48 , 0.405),  # (x, y)
         ncol=3
+    )
+
+    custom_handles = [
+        Line2D([0], [0], linestyle='--', color='black', label='Trend line'),
+        Line2D([0], [0], marker='o', color='black', linestyle='None', label='Results after opting into Norway Price')
+    ]
+
+    fig.legend(
+        handles=custom_handles,
+        loc="center",
+        bbox_to_anchor=(0.4, 0.3),
+        ncol=1,
+        fontsize=14
     )
 
     plt.tight_layout()

@@ -126,7 +126,7 @@ def plot(df):
     x_idx = np.arange(n_m)
 
     fig, ax = plt.subplots(figsize=(12,6))
-    ax.set_ylim(-4, 6)
+    ax.set_ylim(0, 6)
 
     color_map = {
         "NO1": "#2C7FB8",
@@ -148,28 +148,29 @@ def plot(df):
             hi = sub["ci_high"].values
             y_dyn = sub["dynamic"].values
 
-            marker = "^" if temp_flag else "o"
+            if temp_flag:
+                marker = "o" #if temp_flag else None
 
-            ax.errorbar(xi, y,
-                        yerr=[np.maximum(y-lo,0), np.maximum(hi-y,0)],
-                        fmt="none",
-                        color=color_map[region],
-                        capsize=5)
+                ax.errorbar(xi, y,
+                            yerr=[np.maximum(y-lo,0), np.maximum(hi-y,0)],
+                            fmt="none",
+                            color=color_map[region],
+                            capsize=5)
 
-            ax.scatter(xi, y,
-                       color=color_map[region],
-                       marker=marker,
-                       s=150,
-                       edgecolor="white",
-                       zorder=3)
+                ax.scatter(xi, y,
+                           color=color_map[region],
+                           marker=marker,
+                           s=150,
+                           edgecolor="white",
+                           zorder=3)
 
-            # ✅ Dynamic group (X)
-            ax.scatter(xi, y_dyn,
-                       color=color_map[region],
-                       marker="x",
-                       s=120,
-                       linewidths=2.5,
-                       zorder=4)
+                # ✅ Dynamic group (X)
+                ax.scatter(xi, y_dyn,
+                           color=color_map[region],
+                           marker="x",
+                           s=120,
+                           linewidths=2.5,
+                           zorder=4)
 
     # ---- X-akse ----
     xticks = []
@@ -203,18 +204,18 @@ def plot(df):
     ax.set_ylabel("Change in consumption [%]", fontsize=20)
 
     # ---- Temperatur ----
-    ax2 = ax.twinx()
+    '''ax2 = ax.twinx()
     ax2.set_ylim(ax.get_ylim())
     ax2.set_ylabel("Temperature difference [°C]", fontsize=20)
-    plt.yticks(fontsize=20)
+    plt.yticks(fontsize=20)'''
 
-    for i, region in enumerate(regions):
+    '''for i, region in enumerate(regions):
         for j in range(n_m):
             ax2.scatter(i * n_m + j,
                         temp_forskjeller[i][j],
                         marker="s",
                         color=color_map[region],
-                        s=80)
+                        s=80)'''
 
     ax.axhline(0, color="gray", linestyle="--")
     ax.grid(axis="y", linestyle="--", linewidth=0.8, alpha=0.4)
@@ -223,15 +224,11 @@ def plot(df):
 
     # ---- LEGEND ----
     from matplotlib.lines import Line2D
-    ax2.legend([
-        Line2D([0],[0],marker='s',color='black',linestyle='None',markersize=10),
+    ax.legend([
         Line2D([0],[0],marker='o',color='black',linestyle='None',markersize=10),
-        Line2D([0],[0],marker='^',color='black',linestyle='None',markersize=10),
         Line2D([0],[0],marker='x',color='black',linestyle='None',markersize=10)
     ],
-    ["Temperature difference",
-     "DiD without temp",
-     "DiD with temp",
+    [ "DiD w/Temp",
      "DiD w/Dynamic group"],
     loc="center", bbox_to_anchor = (0.85,0.89) ,fontsize=14, framealpha=0.3)
 
