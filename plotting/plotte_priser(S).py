@@ -9,7 +9,7 @@ CSV_PATH = Path('/Users/synnelefdal/Desktop/spotpriser(in).csv')
 # Sett til None for automatisk valg av alle 5 prissoner
 selected_zones = None
 
-# ===================== HJELPEFUNKSJONER ======================================
+# --------------- HJELPEFUNKSJONER ---------------
 def clean_number_series(s: pd.Series) -> pd.Series:
 
     s = s.astype(str).str.strip()
@@ -45,7 +45,7 @@ def week_monday(dt: pd.Series) -> pd.Series:
     dt = pd.to_datetime(dt, errors="coerce")
     return dt.dt.normalize() - pd.to_timedelta(dt.dt.weekday, unit="D")
 
-# ===================== LES DATA ==============================================
+# --------------- LES DATA ---------------
 try:
     df = pd.read_csv(CSV_PATH)
 except Exception:
@@ -74,7 +74,7 @@ df["Datetime"] = parse_datetime(df["Dato"], df["Time"])
 # Normaliser prissonenavn
 df["Prissone"] = df["Prissone"].astype(str).str.strip()
 
-# ===================== UKESAGGREGERING =======================================
+# --------------- UKESAGGREGERING ---------------
 df["UkeStart"] = week_monday(df["Datetime"])
 
 weekly = (
@@ -90,7 +90,7 @@ weekly = weekly[
     ["Prissone", "Date", "Hour", "Spotpris_NOK_MWh", "Spotpris_NOK_kWh"]
 ]
 
-# ===================== VELG FEM PRISSONER ====================================
+# --------------- VELG PRISSONER ---------------
 if selected_zones is None:
     selected = weekly["Prissone"].value_counts().index.tolist()[:5]
 else:
@@ -99,7 +99,7 @@ else:
 weekly_sel = weekly[weekly["Prissone"].isin(selected)].copy()
 weekly_sel = weekly_sel.sort_values(["Date", "Prissone"])
 
-# ===================== PLOTT =================================================
+# --------------- PLOT ---------------
 plt.style.use("seaborn-v0_8-whitegrid")
 fig, ax = plt.subplots(figsize=(12, 6))
 
@@ -133,14 +133,13 @@ ax.set_ylabel("NOK/kWh")
 ax.legend(title="Price Zone", ncols=5)
 
 
-# ===================== MÅNEDLIG GJENNOMSNITT FEB & MAR 2026 ==================
+# --------------- MÅNEDLIG GJENNOMSNITT ---------------
 
 # Lag kolonner for år og måned
 df["Year"] = df["Datetime"].dt.year
 df["Month"] = df["Datetime"].dt.month
 
-# Filtrer for februar og mars 2026
-df_2026 = df[(df["Year"] == 2026) & (df["Month"].isin([2, 3]))]
+df_2026 = df[(df["Year"] == 2026) & (df["Month"].isin([2, 3]))]         # Filtrer for februar og mars 2026
 
 # Beregn gjennomsnitt per prissone og måned
 monthly_avg = (
@@ -148,10 +147,8 @@ monthly_avg = (
     .agg({"Spotpris_NOK_kWh": "mean"})
 )
 
-# Sorter for pen utskrift
 monthly_avg = monthly_avg.sort_values(["Month", "Prissone"])
 
-# Print resultat
 print("\n--- Gjennomsnittlig spotpris per måned (NOK/kWh) ---")
 for _, row in monthly_avg.iterrows():
     month_name = "February" if row["Month"] == 2 else "March"
