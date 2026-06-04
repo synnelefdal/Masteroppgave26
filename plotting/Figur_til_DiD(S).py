@@ -201,8 +201,8 @@ def plot_errorbars_by_group(
 
 
         xi = x_idx + offsets[i] #+ i*1.25*step     # X-posisjonene er IDENTISKE til DiD for denne perioden
-
         temp_points = temp_array[temp_i]    # Temperaturverdier for NO1, NO2, NO5
+
 
         base = str(s)
         temp_color = base_color_map[base]
