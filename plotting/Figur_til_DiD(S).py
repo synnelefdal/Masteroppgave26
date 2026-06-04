@@ -139,20 +139,54 @@ def plot_errorbars_by_group(
         base = str(s).replace(" w/Temp", "")
         color = base_color_map[base]
 
-        ax.errorbar(
+        '''ax.errorbar(
             xi, yval, yerr=yerr,
             fmt="none", ecolor=color, elinewidth=1.6, capsize=6
+        )'''
+
+        if "Temp" in str(s):
+            alpha_line = 1.0  # tydelig
+        else:
+            alpha_line = 0.3  # dus
+
+        ax.errorbar(
+            xi, yval, yerr=yerr,
+            fmt="none",
+            ecolor=color,
+            elinewidth=1.6,
+            capsize=6,
+            alpha=alpha_line
         )
 
         marker_style = "^" if "Temp" in str(s) else "o"
-        size = point_size * 1.4 if "Temp" in str(s) else point_size
-        edge_w = 1.5 if "Temp" in str(s) else 0.8
+        #size = point_size * 1.4 if "Temp" in str(s) else point_size
+        #edge_w = 1.5 if "Temp" in str(s) else 0.8
 
-        ax.scatter(
+        '''ax.scatter(
             xi, yval, s=size,
             color=color, edgecolor="white", linewidth=edge_w,
             marker= marker_style,
             zorder=3, label=str(s), alpha = 1
+        )'''
+
+        if "Temp" in str(s):
+            alpha_val = 1.0  # behold tydelig for trekant
+            size = point_size * 1.4
+            edge_w = 1.5
+        else:
+            alpha_val = 0.35  # ↓ gjør rund prikk dus
+            size = point_size
+            edge_w = 0.8
+
+        ax.scatter(
+            xi, yval, s=size,
+            color=color,
+            edgecolor="white",
+            linewidth=edge_w,
+            marker=marker_style,
+            zorder=3,
+            label=str(s),
+            alpha=alpha_val
         )
 
     ax.set_xticks(x_idx)
