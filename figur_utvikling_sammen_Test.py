@@ -188,7 +188,7 @@ def plot_all(NO1, NO2, NO5, masks1, masks2, masks5):
                     )
 
             # ----------- TRENDLINJE (KUN ORIGINALDATA) ----------- #
-            mask_original = np.array([not m for m in mask_none])
+            '''mask_original = np.array([not m for m in mask_none])
 
             x_valid = x[mask_original]
             y_valid = y[mask_original]
@@ -205,7 +205,7 @@ def plot_all(NO1, NO2, NO5, masks1, masks2, masks5):
                     color=colors[i],
                     linestyle="--",
                     linewidth=2
-                )
+                )'''
 
         ax.set_title(titles[j], fontsize=20)
         ax.grid(axis="y", linestyle="--", alpha=0.4)
@@ -243,7 +243,7 @@ def plot_all(NO1, NO2, NO5, masks1, masks2, masks5):
     )
 
     custom_handles = [
-        Line2D([0], [0], linestyle='--', color='black', label='Trend line'),
+        #Line2D([0], [0], linestyle='--', color='black', label='Trend line'),
         Line2D([0], [0], marker='o', color='black', linestyle='None', label='Results after Norway Price'),
         Line2D([0], [0], marker='o', color='gray', markerfacecolor='none',
                linestyle='None', label='Results before Norway Price')
