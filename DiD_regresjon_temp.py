@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from linearmodels.panel import PanelOLS
+import matplotlib.pyplot as plt
 
 
 # ------------------ ALLE CSV FILER MED FORBRUKSDATA, DONT TOUCH --------------------------------
@@ -142,7 +143,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     df = pd.merge(df, df_temp, on = ['Date', 'Hour'], how = 'left')
 
     df = df[df['kWh/Metering_point'] > 0].copy()
-    print(df.columns)
+    #print(df.columns)
 
 
 
@@ -186,21 +187,21 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     print(res)
 
-    import matplotlib.pyplot as plt
+
 
     # ---- Residualplot ----
-    residuals = res.resids
+    '''residuals = res.resids
     fitted = res.fitted_values
 
     plt.scatter(fitted, residuals, alpha=0.5)
     plt.axhline(0, color='red')
     plt.xlabel("Predicted values")
     plt.ylabel("Residuals")
-    plt.show()
+    plt.show()'''
 
     # ---- Finne differansen i temp mellom reference og treatment perioder --- #
 
-    df_temp_analysis = df.dropna(subset=['Temp24']).copy()
+    '''df_temp_analysis = df.dropna(subset=['Temp24']).copy()
 
     temp_summary = (
         df_temp_analysis
@@ -220,19 +221,20 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     temp_pivot['Delta_Temp'] = temp_pivot['Treatment'] - temp_pivot['Reference']
 
     print("\n--- Average temperature by month and period ---")
-    print(temp_pivot)
+    print(temp_pivot)'''
 
     # -------- Utregning --------- #
     print('----------- PanelOLS -----------------')
     beta3 = res.params["C(entity, Treatment(reference='Uten Norgespris'))[T.Med Norgespris]:C(period)[T.Treatment]"]
-    DiD = (np.exp(beta3) - 1) * 100
+    print(beta3)
+    '''DiD = (np.exp(beta3) - 1) * 100
 
     ci_low, ci_high = res.conf_int().loc["C(entity, Treatment(reference='Uten Norgespris'))[T.Med Norgespris]:C(period)[T.Treatment]"]
     DiD_low = (np.exp(ci_low) - 1) * 100
     DiD_high = (np.exp(ci_high) - 1) * 100
 
     print(f'DiD prosent for {price_area}: {DiD:.2f}%')
-    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')
+    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')'''
 
 
     return panel_df
@@ -248,21 +250,21 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
 #------------- VELG DATOER -----------------------
 
-start_date_before = '2025-01-07'
-end_date_before = '2025-01-08'
+start_date_before = '2025-03-01'
+end_date_before = '2025-03-31'
 
-start_date_after = '2026-01-07'
-end_date_after = '2026-01-08'
+start_date_after = '2026-03-01'
+end_date_after = '2026-03-31'
 
 # -------------- VELG KA SOM E MED OG UTEN NORGESPRIS -----------------------------------
 
-data_NO1_mNP = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec, data_NO1_NPjan], ignore_index=True)
-data_NO2_mNP = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan], ignore_index=True)
-data_NO5_mNP = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan], ignore_index=True)
+data_NO1_mNP = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec, data_NO1_NPjan, data_NO1_NPfeb, data_NO1_NPmars], ignore_index=True)
+data_NO2_mNP = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan, data_NO2_NPfeb, data_NO2_NPmars], ignore_index=True)
+data_NO5_mNP = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan, data_NO5_NPfeb, data_NO5_NPmars], ignore_index=True)
 
-data_NO1_rest = pd.concat([data_NO1_NPfeb, data_NO1_NPmars, data_NO1_NPapril], ignore_index=True)
-data_NO2_rest = pd.concat([data_NO2_NPfeb, data_NO2_NPmars, data_NO2_NPapril], ignore_index=True)
-data_NO5_rest = pd.concat([data_NO5_NPfeb, data_NO5_NPmars, data_NO5_NPapril], ignore_index=True)
+data_NO1_rest = pd.concat([data_NO1_NPapril], ignore_index=True)
+data_NO2_rest = pd.concat([data_NO2_NPapril], ignore_index=True)
+data_NO5_rest = pd.concat([data_NO5_NPapril], ignore_index=True)
 
 data_NO1_uNP_gr = pd.concat([data_NO1_uNP], ignore_index=True)
 data_NO2_uNP_gr = pd.concat([data_NO2_uNP], ignore_index=True)
