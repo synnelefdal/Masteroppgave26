@@ -194,9 +194,8 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     plt.scatter(fitted, residuals, alpha=0.5)
     plt.axhline(0, color='red')
-    plt.xlabel("Predikerte verdier")
-    plt.ylabel("Residualer")
-    plt.title("Residualplot")
+    plt.xlabel("Predicted values")
+    plt.ylabel("Residuals")
     plt.show()
 
     # ---- Finne differansen i temp mellom reference og treatment perioder --- #

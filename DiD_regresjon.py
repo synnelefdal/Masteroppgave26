@@ -170,9 +170,8 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_
 
     plt.scatter(fitted, residuals, alpha=0.5)
     plt.axhline(0, color='red')
-    plt.xlabel("Predikerte verdier")
-    plt.ylabel("Residualer")
-    plt.title("Residualplot")
+    plt.xlabel("Predicted values")
+    plt.ylabel("Residuals")
     plt.show()
 
     #print(df.head(10))
