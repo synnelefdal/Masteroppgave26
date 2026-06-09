@@ -186,6 +186,19 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     print(res)
 
+    import matplotlib.pyplot as plt
+
+    # ---- Residualplot ----
+    residuals = res.resids
+    fitted = res.fitted_values
+
+    plt.scatter(fitted, residuals, alpha=0.5)
+    plt.axhline(0, color='red')
+    plt.xlabel("Predikerte verdier")
+    plt.ylabel("Residualer")
+    plt.title("Residualplot")
+    plt.show()
+
     # ---- Finne differansen i temp mellom reference og treatment perioder --- #
 
     df_temp_analysis = df.dropna(subset=['Temp24']).copy()
@@ -236,10 +249,10 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
 #------------- VELG DATOER -----------------------
 
-start_date_before = '2025-03-01'
+start_date_before = '2024-10-01'
 end_date_before = '2025-03-31'
 
-start_date_after = '2026-03-01'
+start_date_after = '2025-10-01'
 end_date_after = '2026-03-31'
 
 # -------------- VELG KA SOM E MED OG UTEN NORGESPRIS -----------------------------------

@@ -164,6 +164,17 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_
     res = model.fit(cov_type='clustered', cluster_time=True)
     print(res.summary)
 
+    # ---- Residualplot ----
+    residuals = res.resids
+    fitted = res.fitted_values
+
+    plt.scatter(fitted, residuals, alpha=0.5)
+    plt.axhline(0, color='red')
+    plt.xlabel("Predikerte verdier")
+    plt.ylabel("Residualer")
+    plt.title("Residualplot")
+    plt.show()
+
     #print(df.head(10))
 
 
@@ -193,10 +204,10 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_
 #BACKUP N05: data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec,data_NO5_NPjan,data_NO5_NPfeb,data_NO5_NPmars,data_NO5_NPapril
 
 
-start_date_before = '2025-03-01'
+start_date_before = '2024-10-01'
 end_date_before = '2025-03-31'
 
-start_date_after = '2026-03-01'
+start_date_after = '2025-10-01'
 end_date_after = '2026-03-31'
 
 
