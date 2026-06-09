@@ -228,7 +228,7 @@ def plot(df):
         Line2D([0],[0],marker='o',color='black',linestyle='None',markersize=10),
         Line2D([0],[0],marker='x',color='black',linestyle='None',markersize=10)
     ],
-    [ "DiD w/Temp",
+    [ "DiD w/Constant group",
      "DiD w/Dynamic group"],
     loc="center", bbox_to_anchor = (0.85,0.89) ,fontsize=14, framealpha=0.3)
 
