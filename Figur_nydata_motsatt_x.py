@@ -113,15 +113,15 @@ def plot(df):
     n_m = len(months)
     x_idx = np.arange(n_m)
 
-    fig, ax = plt.subplots(figsize=(12,6))
-    ax.set_ylim(-4, 6)
+    fig, ax = plt.subplots(figsize=(20,10))
+    ax.set_ylim(-5, 7)
 
     colors = sns.color_palette("tab10", len(regions))
     #color_map = dict(zip(regions, colors))
     color_map = {
         "NO1": "#2C7FB8",
-        "NO2": "#1A9641",
-        "NO5": "tomato"
+        "NO2": "tomato" ,
+        "NO5": "#1A9641"
     }
 
 
@@ -200,11 +200,23 @@ def plot(df):
 
     for i, region in enumerate(regions):
         for j in range(n_m):
+            ax2.vlines(
+                i * n_m + j,
+                0,
+                temp_forskjeller[i][j],
+                colors = color_map[region],
+                linewidth = 1,
+                alpha = 0.7
+            )
+
             ax2.scatter(
                 i * n_m + j,
                 temp_forskjeller[i][j],
                 marker="s",
-                color=color_map[region],
+                edgecolors = color_map[region],
+                #color=color_map[region],
+                facecolors = 'none',
+                linewidths = 1.5,
                 s=80
             )
 
@@ -218,7 +230,7 @@ def plot(df):
     ax2.legend([
         Line2D([0], [0], marker='o', color='black', linestyle='None', markersize=10),
         Line2D([0],[0],marker='^',color='black',linestyle='None',markersize=10),
-        Line2D([0], [0], marker='s', color='black', linestyle='None', markersize=10)
+        Line2D([0], [0], marker='s', markerfacecolor='none', markeredgecolor='black', linestyle='None', markersize=10)
     ],
     ["DiD w/Temp control", "DiD" , "Temperature difference"],
     loc="upper right", fontsize=16, framealpha=0.3)
