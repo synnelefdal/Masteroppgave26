@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 df_raw = pd.read_csv(
-    '/Users/kristinemoen/Desktop/Norge_forbruk_2026-06-04 09_17_37.619667.csv')
+    '/Users/kristinemoen/Documents/5-klasse/Master/EEM26/Norge_forbruk_2026-06-04 09_17_37.619667.csv')
 
 #print(df.head())
 #print(df.columns)
