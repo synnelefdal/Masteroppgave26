@@ -132,7 +132,10 @@ def plot(df):
             sub = df[(df["region"] == region) & (df["temp"] == temp_flag)]
             sub = sub.set_index("month").reindex(months)
 
-            xi = i * n_m + x_idx
+            #xi = i * n_m + x_idx
+
+            offset = -0.15 if temp_flag else 0.15
+            xi = i * n_m + x_idx + offset
 
             y = sub["value"].values
             lo = sub["ci_low"].values
@@ -232,7 +235,7 @@ def plot(df):
         Line2D([0],[0],marker='^',color='black',linestyle='None',markersize=10),
         Line2D([0], [0], marker='s', markerfacecolor='none', markeredgecolor='black', linestyle='None', markersize=10)
     ],
-    ["DiD w/Temp control", "DiD" , "Temperature difference"],
+    ["DiD w/Temp", "DiD" , "Temperature difference"],
     loc="upper right", fontsize=16, framealpha=0.3)
 
     plt.show()
