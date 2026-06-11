@@ -189,7 +189,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     # ---- Histogram ----
 
-    '''plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(8, 5))
     plt.hist(df['log_y'], bins=50)
 
     plt.title('Histogram av log(kWh per målepunkt)')
@@ -197,42 +197,33 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     plt.ylabel('Antall observasjoner')
 
     plt.grid(True)
-    plt.show()'''
+    plt.show()
 
     # ---- Residualplot ----
 
-    # 1. Hent komponenter
     fitted = res.fitted_values.squeeze()
     residuals = res.resids.squeeze()
 
-    # 2. Hent fixed effects
     effects = res.estimated_effects.squeeze()
 
-    # 3. FULL fitted = Xβ + FE
     fitted_full = fitted + effects
 
-    # 4. Sørg for samme lengde
     n = len(residuals)
 
     y_true = panel_df['log_y'].iloc[:n].values
     fitted_full = fitted_full.values
     residuals = residuals.values
 
-    # 5. Test
     reconstructed = fitted_full + residuals
 
     print("Stemmer reconstructed y med log_y?")
     print(np.allclose(y_true, reconstructed))
 
     plt.figure(figsize=(8, 5))
-
     plt.scatter(fitted_full, residuals, alpha=0.3)
-
     plt.axhline(0, color='red', linestyle='--')
-
     plt.xlabel("Predicted values (log_y)")
     plt.ylabel("Residuals")
-    plt.title("Residual plot (korrekt med FE)")
 
     plt.grid(True)
     plt.show()
