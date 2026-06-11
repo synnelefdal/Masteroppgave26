@@ -189,7 +189,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     # ---- Histogram ----
 
-    plt.figure(figsize=(8, 5))
+    '''plt.figure(figsize=(8, 5))
     plt.hist(df['log_y'], bins=50)
 
     plt.title('Histogram av log(kWh per målepunkt)')
@@ -197,17 +197,45 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     plt.ylabel('Antall observasjoner')
 
     plt.grid(True)
-    plt.show()
+    plt.show()'''
 
     # ---- Residualplot ----
-    '''residuals = res.resids
-    fitted = res.fitted_values
 
-    plt.scatter(fitted, residuals, alpha=0.5)
-    plt.axhline(0, color='red')
-    plt.xlabel("Predicted values")
+    # 1. Hent komponenter
+    fitted = res.fitted_values.squeeze()
+    residuals = res.resids.squeeze()
+
+    # 2. Hent fixed effects
+    effects = res.estimated_effects.squeeze()
+
+    # 3. FULL fitted = Xβ + FE
+    fitted_full = fitted + effects
+
+    # 4. Sørg for samme lengde
+    n = len(residuals)
+
+    y_true = panel_df['log_y'].iloc[:n].values
+    fitted_full = fitted_full.values
+    residuals = residuals.values
+
+    # 5. Test
+    reconstructed = fitted_full + residuals
+
+    print("Stemmer reconstructed y med log_y?")
+    print(np.allclose(y_true, reconstructed))
+
+    plt.figure(figsize=(8, 5))
+
+    plt.scatter(fitted_full, residuals, alpha=0.3)
+
+    plt.axhline(0, color='red', linestyle='--')
+
+    plt.xlabel("Predicted values (log_y)")
     plt.ylabel("Residuals")
-    plt.show()'''
+    plt.title("Residual plot (korrekt med FE)")
+
+    plt.grid(True)
+    plt.show()
 
     # ---- Finne differansen i temp mellom reference og treatment perioder --- #
 
@@ -234,10 +262,10 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     print(temp_pivot)'''
 
     # -------- Utregning --------- #
-    print('----------- PanelOLS -----------------')
+    '''print('----------- PanelOLS -----------------')
     beta3 = res.params["C(entity, Treatment(reference='Uten Norgespris'))[T.Med Norgespris]:C(period)[T.Treatment]"]
     print(beta3)
-    '''DiD = (np.exp(beta3) - 1) * 100
+    DiD = (np.exp(beta3) - 1) * 100
 
     ci_low, ci_high = res.conf_int().loc["C(entity, Treatment(reference='Uten Norgespris'))[T.Med Norgespris]:C(period)[T.Treatment]"]
     DiD_low = (np.exp(ci_low) - 1) * 100
