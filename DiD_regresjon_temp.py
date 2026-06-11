@@ -187,7 +187,17 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     print(res)
 
+    # ---- Histogram ----
 
+    plt.figure(figsize=(8, 5))
+    plt.hist(df['log_y'], bins=50)
+
+    plt.title('Histogram av log(kWh per målepunkt)')
+    plt.xlabel('log(kWh/Metering_point)')
+    plt.ylabel('Antall observasjoner')
+
+    plt.grid(True)
+    plt.show()
 
     # ---- Residualplot ----
     '''residuals = res.resids
