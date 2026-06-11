@@ -31,7 +31,7 @@ values = [
     [3.59, 4.56, 3.45]
 ]
 
-ci_high = [
+'''ci_high = [
     [3.23, 3.98, 2.53],
     [3.14, 4.01, 2.46],
     [2.93, 4.16, 2.78],
@@ -44,11 +44,11 @@ ci_high = [
     [4.10, 4.61, 3.53],
     [4.15, 4.81, 3.68],
     [3.97, 4.83, 3.68]
-]
+]'''
 
-ci_low = [
-    [2.08, 3.00, 1.79],
-    [2.01, 3.03, 1.72],
+'''ci_low = [
+    [2.08, 3.00, 1.79], 
+    [2.01, 3.03, 1.72], 
     [2.08, 3.42, 2.21],
     [2.46, 3.34, 2.23],
     [2.81, 4.30, 2.64],
@@ -59,7 +59,7 @@ ci_low = [
     [3.41, 4.07, 3.03],
     [3.38, 4.27, 3.21],
     [3.21, 4.29, 3.21]
-]
+]'''
 
 temp_forskjeller = [
     [-0.296808, -0.177694, -0.411089],
@@ -72,7 +72,7 @@ temp_forskjeller = [
 
 # NY - Dynamic group data:
 dynamic_values = [
-    [1.37, 2.51, 1.07], #okt
+    [1.38, 2.51, 1.07], #okt
     [1.37, 2.51, 1.07],  #okt m temp
     [1.49, 2.63, 1.64], #nov
     [1.49, 2.63, 1.64],  #nov m temp
@@ -85,6 +85,39 @@ dynamic_values = [
     [3.59, 4.56, 3.45], #mars
     [3.59, 4.56, 3.45]   #mars m temp
 ]
+
+ci_high = [
+    [1.64, 2.78, 1.30], #okt
+    [1.63, 2.83, 1.26], #okt med temp
+    [1.70, 3.01, 1.81], #nov
+    [1.69, 2.87, 1.79], #nov med temp
+    [2.47, 3.85, 2.19], #des
+    [2.49, 3.78, 2.18], #des med temp
+    [3.07, 3.89, 2.83], #jan
+    [2.86, 3.49, 2.46], #jan med temp
+    [4.01, 4.43, 3.60], #feb
+    [3.48, 4.02, 3.32], #feb med temp
+    [4.15, 4.81, 3.68], #mars
+    [3.97, 4.83, 3.68]  #mars med temp
+
+]
+
+ci_low = [
+    [1.12, 2.15, 0.91], #okt
+    [1.11, 2.20, 0.88], #okt med temp
+    [1.31, 2.53, 1.51], #nov
+    [1.29, 2.39, 1.50], #nov med temp
+    [2.15, 3.48, 1.91], #des
+    [2.16, 3.40, 1.90], #des med temp
+    [2.73, 3.53, 2.52], #jan
+    [2.54, 3.13, 2.16], #jan med temp
+    [3.53, 3.98, 3.20], #feb
+    [3.00, 3.57, 2.93], #feb med temp
+    [3.38, 4.27, 3.21], #mars
+    [3.21, 4.29, 3.21]  #mars med temp
+]
+
+
 
 # -------- REORGANISER --------
 values = np.array(values).T
@@ -151,7 +184,8 @@ def plot(df):
             if temp_flag:
                 marker = "o" #if temp_flag else None
 
-                ax.errorbar(xi, y,
+                # KI for prikkene, og ikke kryssene
+                '''ax.errorbar(xi, y,
                             yerr=[np.maximum(y-lo,0), np.maximum(hi-y,0)],
                             fmt="none",
                             color=color_map[region],
@@ -165,6 +199,28 @@ def plot(df):
                            zorder=3)
 
                 # Dynamic group (X)
+                ax.scatter(xi, y_dyn,
+                           color=color_map[region],
+                           marker="x",
+                           s=120,
+                           linewidths=2.5,
+                           zorder=4)'''
+
+                # KI for kryssene, og ikke prikkene
+                ax.scatter(xi, y,
+                           color=color_map[region],
+                           marker=marker,
+                           s=150,
+                           edgecolor="white",
+                           zorder=3)
+
+                ax.errorbar(xi, y_dyn,
+                            yerr=[np.maximum(y_dyn - lo, 0), np.maximum(hi - y_dyn, 0)],
+                            fmt="none",
+                            color=color_map[region],
+                            capsize=5,
+                            zorder=2)
+
                 ax.scatter(xi, y_dyn,
                            color=color_map[region],
                            marker="x",
