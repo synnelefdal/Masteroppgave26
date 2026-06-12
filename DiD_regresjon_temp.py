@@ -286,21 +286,21 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
 #------------- VELG DATOER -----------------------
 
-start_date_before = '2025-03-01'
-end_date_before = '2025-03-31'
+start_date_before = '2024-10-01'
+end_date_before = '2024-10-02'
 
-start_date_after = '2026-03-01'
-end_date_after = '2026-03-31'
+start_date_after = '2025-10-01'
+end_date_after = '2025-10-02'
 
 # -------------- VELG KA SOM E MED OG UTEN NORGESPRIS -----------------------------------
 
-data_NO1_mNP = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec, data_NO1_NPjan, data_NO1_NPfeb, data_NO1_NPmars], ignore_index=True)
-data_NO2_mNP = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan, data_NO2_NPfeb, data_NO2_NPmars], ignore_index=True)
-data_NO5_mNP = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan, data_NO5_NPfeb, data_NO5_NPmars], ignore_index=True)
+data_NO1_mNP = pd.concat([data_NO1_NPoct], ignore_index=True)
+data_NO2_mNP = pd.concat([data_NO2_NPoct], ignore_index=True)
+data_NO5_mNP = pd.concat([data_NO5_NPoct], ignore_index=True)
 
-data_NO1_rest = pd.concat([data_NO1_NPapril], ignore_index=True)
-data_NO2_rest = pd.concat([data_NO2_NPapril], ignore_index=True)
-data_NO5_rest = pd.concat([data_NO5_NPapril], ignore_index=True)
+data_NO1_rest = pd.concat([data_NO1_NPnov, data_NO1_NPdec, data_NO1_NPjan, data_NO1_NPfeb, data_NO1_NPmars, data_NO1_NPapril], ignore_index=True)
+data_NO2_rest = pd.concat([data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan, data_NO2_NPfeb, data_NO2_NPmars, data_NO2_NPapril], ignore_index=True)
+data_NO5_rest = pd.concat([data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan, data_NO5_NPfeb, data_NO5_NPmars, data_NO5_NPapril], ignore_index=True)
 
 data_NO1_uNP_gr = pd.concat([data_NO1_uNP], ignore_index=True)
 data_NO2_uNP_gr = pd.concat([data_NO2_uNP], ignore_index=True)
