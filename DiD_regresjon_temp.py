@@ -189,7 +189,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     # ---- Histogram ----
 
-    plt.figure(figsize=(8, 5))
+    '''plt.figure(figsize=(8, 5))
     plt.hist(df['log_y'], bins=50)
 
     plt.title('Histogram av log(kWh per målepunkt)')
@@ -197,22 +197,27 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     plt.ylabel('Antall observasjoner')
 
     plt.grid(True)
-    plt.show()
+    plt.show()'''
 
     # ---- Residualplot ----
 
     fitted = res.fitted_values.squeeze()
     residuals = res.resids.squeeze()
-
     effects = res.estimated_effects.squeeze()
 
     fitted_full = fitted + effects
 
-    n = len(residuals)
-
+    # Gammel versjon:
+    '''n = len(residuals)
     y_true = panel_df['log_y'].iloc[:n].values
     fitted_full = fitted_full.values
-    residuals = residuals.values
+    residuals = residuals.values'''
+
+    # NY versjon:
+    idx = res.resids.index
+    y_true = panel_df.loc[idx, 'log_y'].values
+    fitted_full = fitted_full.loc[idx].values
+    residuals = residuals.loc[idx].values
 
     reconstructed = fitted_full + residuals
 
@@ -222,8 +227,10 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     plt.figure(figsize=(8, 5))
     plt.scatter(fitted_full, residuals, alpha=0.3)
     plt.axhline(0, color='red', linestyle='--')
-    plt.xlabel("Predicted values (log_y)")
-    plt.ylabel("Residuals")
+    plt.xlabel("Predicted values", fontsize = 25)
+    plt.ylabel("Residuals", fontsize = 25)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
 
     plt.grid(True)
     plt.show()
