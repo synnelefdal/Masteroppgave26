@@ -2,9 +2,13 @@ import numpy as np
 import pandas as pd
 from linearmodels.panel import PanelOLS
 import matplotlib.pyplot as plt
+import time
+
+start = time.time()
 
 
-# ------------------ ALLE CSV FILER MED FORBRUKSDATA, DONT TOUCH --------------------------------
+
+# -------------------------------- ALLE CSV FILER MED FORBRUKSDATA -------------------------------- #
 
 data_NO1_uNP = pd.read_csv('NY_All_Demand_Data/NO1_uNP.csv', sep= ';')
 data_NO1_NPoct = pd.read_csv('NY_All_Demand_Data/NO1_NP_oct.csv', sep= ';')
@@ -36,16 +40,17 @@ data_NO5_NPmars = pd.read_csv('NY_All_Demand_Data/NO5_NP_mars.csv', sep= ';')
 data_NO5_NPapril = pd.read_csv('NY_All_Demand_Data/NO5_NP_april.csv', sep= ';')
 
 
+# -------------------------------- Temperatur data for alle prissoner -------------------------------- #
+
 Temp_Bergen = pd.read_csv('Temperature_Files/bergen_converted.csv')
 Temp_Oslo = pd.read_csv('Temperature_Files/oslo_converted.csv')
 Temp_Stavanger = pd.read_csv('Temperature_Files/stavanger_converted.csv')
 
-# ------------------------------- MODELL 2 M/TEMP ------------------------------- #
+# -------------------------------- START PÅ KODE, DONT TOUCH -------------------------------- #
 
+def Difference_in_Difference_Flex(data_mNP, data_uNP, data_resten, Temp, price_area, start_date_before, end_date_before, start_date_after, end_date_after):
 
-def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, Temp, start_date_before, end_date_before, start_date_after, end_date_after):
-
-    # ----------- Norgespris gruppen -------------- #
+    # -------------- Norgespris gruppen -------------- #
     data_mNP['start_time_utc'] = pd.to_datetime(data_mNP['start_time_utc'],
                                                 format='%Y-%m-%d %H:%M:%S',
                                                 errors='coerce',
@@ -56,9 +61,16 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
     data_mNP['group_definition'] = "Med Norgespris"
     data_demand_NP = data_mNP[data_mNP['price_area'] == price_area].copy()
 
+    #print(data_mNP)
+
     data_demand_NP['kWh/Metering_point'] = data_demand_NP['consumption_kwh'] / data_demand_NP['metering_point_count']
-    total_demand_NP = data_demand_NP.groupby(['Date', 'Hour', 'norgespris_group' , 'group_definition'])[
+
+
+    total_demand_NP = data_demand_NP.groupby(['Date', 'Hour', 'norgespris_group', 'group_definition'])[
         'kWh/Metering_point'].sum().reset_index()
+
+
+    #print(total_demand_NP)
 
     total_demand_NP['Date'] = pd.to_datetime(total_demand_NP['Date'], errors='coerce')
 
@@ -71,7 +83,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     # print(total_demand_NP)
 
-    # -------------- Ikke Norgespris gruppen ---------- #
+    # -------------- Ikke Norgespris gruppen -------------- #
     data_uNP['start_time_utc'] = pd.to_datetime(data_uNP['start_time_utc'],
                                                 format='%Y-%m-%d %H:%M:%S',
                                                 errors='coerce',
@@ -97,7 +109,7 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     # print(total_demand_uNP)
 
-    # ------------ Resten ------------- #
+    # -------------- Resten -------------- #
     data_resten['start_time_utc'] = pd.to_datetime(data_resten['start_time_utc'],
                                                    format='%Y-%m-%d %H:%M:%S',
                                                    errors='coerce',
@@ -124,28 +136,28 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
 
     # print(total_demand_resten)
 
-    # ------------ Temperatur -------------- #
+    # -------------- Temperatur -------------- #
     Temp['Date'] = pd.to_datetime(Temp['Date'])
     Temp['Hour'] = Temp['Hour'].astype(float)
     Temp['Temp24'] = Temp['Lufttemperatur'].rolling(window=24, min_periods=1).mean()
     #Temp['Temp24^2'] = Temp['Temp24'] **2
     #Temp['Temp24^3'] = Temp['Temp24'] ** 3
 
-    df_temp = Temp[['Date', 'Hour', 'Lufttemperatur','Temp24']]
+    df_temp = Temp[['Date', 'Hour', 'Temp24']]
     #print(df_temp)
 
-    # ------------ Dataframe ----------- #
+    # -------------- Dataframe -------------- #
     df_NP = pd.DataFrame(total_demand_NP)
     df_uNP = pd.DataFrame(total_demand_uNP)
     df_resten = pd.DataFrame(total_demand_resten)
+
+    #print(df_uNP)
 
     df = pd.concat([df_NP, df_uNP, df_resten], ignore_index=True)
     df = pd.merge(df, df_temp, on = ['Date', 'Hour'], how = 'left')
 
     df = df[df['kWh/Metering_point'] > 0].copy()
-    #print(df.columns)
-
-
+    #print(df)
 
     before_ref = (df['Date'] >= start_date_before) & (df['Date'] <= end_date_before)
     after_ref = (df['Date'] >= start_date_after) & (df['Date'] <= end_date_after)
@@ -160,131 +172,137 @@ def Difference_in_Difference_temp(data_mNP, data_uNP, data_resten, price_area, T
                                              'July', 'August', 'September', 'October', 'November', 'December'],
                                  ordered=True)
 
-    # --------- Model ------------ #
+    # -------------- Model -------------- #
     df['entity'] = pd.Categorical(df['group_definition'],
-                                  categories=['Uten Norgespris', 'Med Norgespris', 'Resten'],
+                                  categories = ['Uten Norgespris','Med Norgespris', 'Resten'],
                                   # Referanse = Uten Norgespris
                                   ordered=True)
     df['period'] = pd.Categorical(df['Period'],
                                   categories=['Reference', 'Treatment', 'Rest'],  # Reference = Reference
                                   ordered=True)
-    df['log_y'] = np.log(df['kWh/Metering_point'])
-    panel_df = df.set_index(['entity', 'time'], drop=False).sort_index()
+    df['log_y'] = df['kWh/Metering_point']    # -------------- HER MÅ NP.LOG LEGGES TIL FOR Å FÅ PROSENT IGJEN -------------- #
 
-    model = PanelOLS.from_formula(
-        'log_y ~ 1 + C(entity, Treatment(reference="Uten Norgespris"))*C(period) '
+    results = []
+    results_temp = []
+    all_fitted = []
+    all_residuals = []
+
+    all_fitted_temp = []
+    all_residuals_temp = []
+    for h in range(24):
+        sub = df[df['Hour'] == h].copy()
+
+        if sub.empty:
+            results.append({
+                'Hour': h,
+                'DiD': np.nan,
+                'CI_low': np.nan,
+                'CI_high': np.nan
+            })
+            continue
+
+        panel_df = sub.set_index(['entity', 'time'], drop = False)
+
+        model = PanelOLS.from_formula(
+        'np.log(log_y) ~ 1 + C(entity)*C(period) + TimeEffects',
+            data = panel_df,
+            drop_absorbed=True
+            #check_rank=False
+
+        )
+
+        model_temp = PanelOLS.from_formula(
+        'np.log(log_y) ~ 1 + C(entity)*C(period) '
                 '+  Temp24 + I(Temp24**2) + I(Temp24**3)'
-                '+ C(entity, Treatment(reference="Uten Norgespris")):Temp24 '
-                '+ C(entity, Treatment(reference="Uten Norgespris")):I(Temp24**2) '
-                '+ C(entity, Treatment(reference="Uten Norgespris")):I(Temp24**3) '
+                '+ C(entity):Temp24 '
+                '+ C(entity):I(Temp24**2)'
+                '+ C(entity):I(Temp24**3)'
                 '+ TimeEffects',
-        data=panel_df,
-        drop_absorbed=True,
-        check_rank = False
-    )
+            data = panel_df,
+            drop_absorbed=True
+            #check_rank=False
+        )
 
-    res = model.fit(cov_type='clustered', cluster_time=True)
+        res = model.fit(cov_type='clustered', cluster_time=True)
+        #print(res)
+        res_temp = model_temp.fit(cov_type='clustered', cluster_time=True)
 
-    print(res)
+        # ---- Residualplot ----
 
-    # ---- Histogram ----
+        # --- Uten temp ---
 
-    '''plt.figure(figsize=(8, 5))
-    plt.hist(df['log_y'], bins=50)
+        fitted = res.fitted_values.squeeze()
+        residuals = res.resids.squeeze()
+        effects = res.estimated_effects.squeeze()
 
-    plt.title('Histogram av log(kWh per målepunkt)')
-    plt.xlabel('log(kWh/Metering_point)')
-    plt.ylabel('Antall observasjoner')
+        fitted_full = fitted + effects
+        idx = res.resids.index
 
-    plt.grid(True)
-    plt.show()'''
+        fitted_full = fitted_full.loc[idx].values
+        residuals = residuals.loc[idx].values
+        y_true = np.log(panel_df.loc[idx, 'log_y'].values)
 
-    # ---- Residualplot ----
+        reconstructed = fitted_full + residuals
 
-    fitted = res.fitted_values.squeeze()
-    residuals = res.resids.squeeze()
-    effects = res.estimated_effects.squeeze()
+        print(f"Time {h}: Stemmer reconstructed y med log_y?")
+        print(np.allclose(y_true, reconstructed, atol=1e-6))
 
-    fitted_full = fitted + effects
+        all_fitted.extend(fitted_full)
+        all_residuals.extend(residuals)
 
-    # Gammel versjon:
-    '''n = len(residuals)
-    y_true = panel_df['log_y'].iloc[:n].values
-    fitted_full = fitted_full.values
-    residuals = residuals.values'''
+        # --- Med temp ---
 
-    # NY versjon:
-    idx = res.resids.index
-    y_true = panel_df.loc[idx, 'log_y'].values
-    fitted_full = fitted_full.loc[idx].values
-    residuals = residuals.loc[idx].values
+        fitted_t = res_temp.fitted_values.squeeze()
+        residuals_t = res_temp.resids.squeeze()
+        effects_t = res_temp.estimated_effects.squeeze()
 
-    reconstructed = fitted_full + residuals
+        fitted_full_t = fitted_t + effects_t
+        idx_t = res_temp.resids.index
 
-    print("Stemmer reconstructed y med log_y?")
-    print(np.allclose(y_true, reconstructed))
+        fitted_full_t = fitted_full_t.loc[idx_t].values
+        residuals_t = residuals_t.loc[idx_t].values
+        y_true_t = np.log(panel_df.loc[idx_t, 'log_y'].values)
+
+        reconstructed_t = fitted_full_t + residuals_t
+
+        print(f"Time {h} (temp): Stemmer reconstructed y med log_y?")
+        print(np.allclose(y_true_t, reconstructed_t, atol=1e-6))
+
+        all_fitted_temp.extend(fitted_full_t)
+        all_residuals_temp.extend(residuals_t)
+
+    # ---- Residualplot U/Temp ----
 
     plt.figure(figsize=(8, 5))
-    plt.scatter(fitted_full, residuals, alpha=0.3)
+    plt.scatter(all_fitted, all_residuals, alpha=0.3)
     plt.axhline(0, color='red', linestyle='--')
-    plt.xlabel("Predicted values", fontsize = 25)
-    plt.ylabel("Residuals", fontsize = 25)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-
+    plt.xlabel("Predicted values", fontsize=25)
+    plt.ylabel("Residuals", fontsize=25)
+    plt.title("Residualplot without temp")
     plt.grid(True)
     plt.show()
 
-    # ---- Finne differansen i temp mellom reference og treatment perioder --- #
+    # ---- Residualplot M/Temp ----
 
-    '''df_temp_analysis = df.dropna(subset=['Temp24']).copy()
-
-    temp_summary = (
-        df_temp_analysis
-        .groupby(['Period', 'Month'])['Temp24']
-        .mean()
-        .reset_index()
-    )
-
-    temp_summary = temp_summary[temp_summary['Period'].isin(['Reference', 'Treatment'])]
-
-    temp_pivot = (
-        temp_summary
-        .pivot(index='Month', columns='Period', values='Temp24')
-        .reset_index()
-    )
-
-    temp_pivot['Delta_Temp'] = temp_pivot['Treatment'] - temp_pivot['Reference']
-
-    print("\n--- Average temperature by month and period ---")
-    print(temp_pivot)'''
-
-    # -------- Utregning --------- #
-    '''print('----------- PanelOLS -----------------')
-    beta3 = res.params["C(entity, Treatment(reference='Uten Norgespris'))[T.Med Norgespris]:C(period)[T.Treatment]"]
-    print(beta3)
-    DiD = (np.exp(beta3) - 1) * 100
-
-    ci_low, ci_high = res.conf_int().loc["C(entity, Treatment(reference='Uten Norgespris'))[T.Med Norgespris]:C(period)[T.Treatment]"]
-    DiD_low = (np.exp(ci_low) - 1) * 100
-    DiD_high = (np.exp(ci_high) - 1) * 100
-
-    print(f'DiD prosent for {price_area}: {DiD:.2f}%')
-    print(f'KI: [{DiD_low:.2f}%, {DiD_high:.2f}%]')'''
+    plt.figure(figsize=(8, 5))
+    plt.scatter(all_fitted_temp, all_residuals_temp, alpha=0.3)
+    plt.axhline(0, color='red', linestyle='--')
+    plt.xlabel("Predicted values", fontsize=25)
+    plt.ylabel("Residuals", fontsize=25)
+    plt.title("Residualplot with temp)")
+    plt.grid(True)
+    plt.show()
 
 
-    return panel_df
+# ------------------------------------ BESTEMMELSE AV HVILKE MND SOM ER MED OG UTEN NORGESPRIS ------------------------------------ #
 
 
-
-# ------------------------- ENDRE PARAMETER MELLOM HER FOR Å ENDRE ANALYSE -----------------------------
-
-#BACKUP FOR Å IKKJE MÅTTE SKRIVE ALLTID
 #BACKUP N01: data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec,data_NO1_NPjan,data_NO1_NPfeb,data_NO1_NPmars,data_NO1_NPapril
 #BACKUP N02: data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec,data_NO2_NPjan,data_NO2_NPfeb,data_NO2_NPmars,data_NO2_NPapril
 #BACKUP N05: data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec,data_NO5_NPjan,data_NO5_NPfeb,data_NO5_NPmars,data_NO5_NPapril
 
-#------------- VELG DATOER -----------------------
+
+# ------------------------------------ ENDRE PARAMETER MELLOM HER FOR Å ENDRE ANALYSEN ------------------------------------ #
 
 start_date_before = '2025-01-01'
 end_date_before = '2025-01-31'
@@ -292,25 +310,12 @@ end_date_before = '2025-01-31'
 start_date_after = '2026-01-01'
 end_date_after = '2026-01-31'
 
-# -------------- VELG KA SOM E MED OG UTEN NORGESPRIS -----------------------------------
-
-data_NO1_mNP = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec, data_NO1_NPjan], ignore_index=True)
 data_NO2_mNP = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan], ignore_index=True)
-data_NO5_mNP = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan], ignore_index=True)
 
-data_NO1_rest = pd.concat([data_NO1_NPfeb, data_NO1_NPmars, data_NO1_NPapril], ignore_index=True)
 data_NO2_rest = pd.concat([data_NO2_NPfeb, data_NO2_NPmars, data_NO2_NPapril], ignore_index=True)
-data_NO5_rest = pd.concat([data_NO5_NPfeb, data_NO5_NPmars, data_NO5_NPapril], ignore_index=True)
 
-data_NO1_uNP_gr = pd.concat([data_NO1_uNP], ignore_index=True)
 data_NO2_uNP_gr = pd.concat([data_NO2_uNP], ignore_index=True)
-data_NO5_uNP_gr = pd.concat([data_NO5_uNP], ignore_index=True)
 
+# ------------------------------------ STOPP AV ENDRING HER, DONT TOUCH ------------------------------------ #
 
-# ----------------------------------------- STOPP AV ENDRING HER, DONT TOUCH -----------------------------------
-
-Difference_in_Difference_temp(data_NO1_mNP, data_NO1_uNP_gr, data_NO1_rest, 'NO1', Temp_Oslo,  start_date_before, end_date_before, start_date_after, end_date_after)
-Difference_in_Difference_temp(data_NO2_mNP, data_NO2_uNP_gr, data_NO2_rest, 'NO2', Temp_Stavanger,  start_date_before, end_date_before, start_date_after, end_date_after)
-Difference_in_Difference_temp(data_NO5_mNP, data_NO5_uNP_gr, data_NO5_rest, 'NO5', Temp_Bergen, start_date_before, end_date_before, start_date_after, end_date_after)
-
-
+Difference_in_Difference_Flex(data_NO2_mNP, data_NO2_uNP_gr, data_NO2_rest, Temp_Stavanger, 'NO2', start_date_before, end_date_before, start_date_after, end_date_after)

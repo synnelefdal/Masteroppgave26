@@ -165,13 +165,39 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_
     print(res.summary)
 
     # ---- Residualplot ----
-    residuals = res.resids
-    fitted = res.fitted_values
 
-    plt.scatter(fitted, residuals, alpha=0.5)
-    plt.axhline(0, color='red')
-    plt.xlabel("Predicted values")
-    plt.ylabel("Residuals")
+    fitted = res.fitted_values.squeeze()
+    residuals = res.resids.squeeze()
+    effects = res.estimated_effects.squeeze()
+
+    fitted_full = fitted + effects
+
+    # Gammel versjon:
+    '''n = len(residuals)
+    y_true = panel_df['log_y'].iloc[:n].values
+    fitted_full = fitted_full.values
+    residuals = residuals.values'''
+
+    # NY versjon:
+    idx = res.resids.index
+    y_true = panel_df.loc[idx, 'log_y'].values
+    fitted_full = fitted_full.loc[idx].values
+    residuals = residuals.loc[idx].values
+
+    reconstructed = fitted_full + residuals
+
+    print("Stemmer reconstructed y med log_y?")
+    print(np.allclose(y_true, reconstructed))
+
+    plt.figure(figsize=(8, 5))
+    plt.scatter(fitted_full, residuals, alpha=0.3)
+    plt.axhline(0, color='red', linestyle='--')
+    plt.xlabel("Predicted values", fontsize=25)
+    plt.ylabel("Residuals", fontsize=25)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+
+    plt.grid(True)
     plt.show()
 
     #print(df.head(10))
@@ -203,20 +229,20 @@ def Difference_in_Difference(data_mNP, data_uNP, data_resten, price_area, start_
 #BACKUP N05: data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec,data_NO5_NPjan,data_NO5_NPfeb,data_NO5_NPmars,data_NO5_NPapril
 
 
-start_date_before = '2024-10-01'
-end_date_before = '2025-03-31'
+start_date_before = '2025-01-01'
+end_date_before = '2025-01-31'
 
-start_date_after = '2025-10-01'
-end_date_after = '2026-03-31'
+start_date_after = '2026-01-01'
+end_date_after = '2026-01-31'
 
 
-data_NO1_mNP = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec, data_NO1_NPjan, data_NO1_NPfeb, data_NO1_NPmars], ignore_index=True)
-data_NO2_mNP = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan, data_NO2_NPfeb, data_NO2_NPmars], ignore_index=True)
-data_NO5_mNP = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan, data_NO5_NPfeb, data_NO5_NPmars], ignore_index=True)
+data_NO1_mNP = pd.concat([data_NO1_NPoct, data_NO1_NPnov, data_NO1_NPdec, data_NO1_NPjan], ignore_index=True)
+data_NO2_mNP = pd.concat([data_NO2_NPoct, data_NO2_NPnov, data_NO2_NPdec, data_NO2_NPjan], ignore_index=True)
+data_NO5_mNP = pd.concat([data_NO5_NPoct, data_NO5_NPnov, data_NO5_NPdec, data_NO5_NPjan], ignore_index=True)
 
-data_NO1_rest = pd.concat([data_NO1_NPapril], ignore_index=True)
-data_NO2_rest = pd.concat([data_NO2_NPapril], ignore_index=True)
-data_NO5_rest = pd.concat([data_NO5_NPapril], ignore_index=True)
+data_NO1_rest = pd.concat([data_NO1_NPfeb, data_NO1_NPmars, data_NO1_NPapril], ignore_index=True)
+data_NO2_rest = pd.concat([data_NO2_NPfeb, data_NO2_NPmars, data_NO2_NPapril], ignore_index=True)
+data_NO5_rest = pd.concat([data_NO5_NPfeb, data_NO5_NPmars, data_NO5_NPapril], ignore_index=True)
 
 data_NO1_uNP_gr = pd.concat([data_NO1_uNP], ignore_index=True)
 data_NO2_uNP_gr = pd.concat([data_NO2_uNP], ignore_index=True)
