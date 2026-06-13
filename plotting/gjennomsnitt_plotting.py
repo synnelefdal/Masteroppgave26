@@ -142,7 +142,7 @@ def plot_full_analysis(data_mNP, data_uNP, data_resten, price_area):
 
         # ---- KUTT DATA TIL ØNSKET PERIODE ---- #
         start_cutoff = pd.Timestamp("2023-09-30", tz="UTC")
-        end_cutoff = pd.Timestamp("2025-10-01", tz="UTC")
+        end_cutoff = pd.Timestamp("2026-03-31", tz="UTC")
 
         df = df[
             (df['start_time_utc'] >= start_cutoff) &
@@ -213,7 +213,7 @@ def plot_normalisert_abs(data_mNP, data_uNP):
         df["start_time_utc"] = pd.to_datetime(df["start_time_utc"], utc=True)
 
         start_cutoff = pd.Timestamp("2023-09-30", tz="UTC")
-        end_cutoff = pd.Timestamp("2025-10-01", tz="UTC")
+        end_cutoff = pd.Timestamp("2026-03-31", tz="UTC")
 
         df = df[
             (df["start_time_utc"] >= start_cutoff) &
